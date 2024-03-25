@@ -1,0 +1,47 @@
+name: Staging Behavioral Test
+
+on:
+  #  schedule:
+  #    - cron: '0 1 * * *' # Run daily at 3 AM
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  staging-behavioral-test:
+    runs-on: ubuntu-latest
+    env:
+      PASSPORT_SECRET: ${{ secrets.PASSPORT_SECRET }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.16.0
+
+      - name: Install backend dependencies
+        working-directory: './backend'
+        run: npm install
+
+      - name: Run Blackbox Tests (Staging)
+        working-directory: './backend'
+        run: npm run test:staging
+
+      - name: Install frontend dependencies
+        working-directory: './frontend'
+        run: npm install
+
+      - name: Install playwright
+        working-directory: './frontend'
+        run: npx playwright install
+
+      - name: Run Playwright Tests (Staging)
+        working-directory: './frontend'
+        run: npm run test:staging

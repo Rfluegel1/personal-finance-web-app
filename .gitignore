@@ -1,0 +1,7 @@
+*.idea
+*/node_modules
+*/coverage
+*/dist
+*.log
+*/build
+*.mp4

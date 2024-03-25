@@ -1,0 +1,89 @@
+name: Update NPM Dependencies and Test
+
+on:
+    schedule:
+      - cron: '0 3 * * *' # Run daily at 3 AM
+    workflow_dispatch: # Manual trigger
+
+jobs:
+  update-and-test:
+    runs-on: ubuntu-latest
+    env:
+      PASSPORT_SECRET: ${{ secrets.PASSPORT_SECRET }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: 'postgres'
+          POSTGRES_PASSWORD: 'password'
+          POSTGRES_DB: 'postgres'
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.16.0
+
+      - name: Update frontend NPM packages
+        working-directory: './frontend'
+        run: npm update
+
+      - name: Build Frontend
+        working-directory: './frontend'
+        run: npm run build
+
+      - name: Update backend NPM packages
+        working-directory: './backend'
+        run: npm update
+
+      - name: Build Backend
+        working-directory: './backend'
+        run: npm run build
+
+      - name: Run Backend Tests
+        working-directory: './backend'
+        run: npm run test
+
+      - name: Install playwright
+        working-directory: './frontend'
+        run: npx playwright install
+
+      - name: Run Frontend Tests
+        working-directory: './frontend'
+        run: npm run test
+
+      - name: Merge Changes if Tests Pass
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          branch_name="automated/update-dependencies-$(date +%s)"
+          git checkout -b $branch_name
+          git add frontend/package-lock.json backend/package-lock.json
+          if git diff --exit-code --cached --name-only | grep -q 'package-lock.json'; then
+            echo "Changes found in package-lock.json, committing and merging."
+            git commit -m "Update NPM dependencies"
+            git push origin $branch_name
+            git fetch origin
+            git checkout main
+            git merge --no-ff $branch_name -m "Merge updated NPM dependencies"
+            git push origin main
+          else
+            echo "No changes to package-lock.json, skipping update."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
