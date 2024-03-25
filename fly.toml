@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for express-web-app-template on 2023-11-07T10:18:45-06:00
+# fly.toml app configuration file generated for personal-finance-web-app on 2024-03-25T17:13:15-05:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "express-web-app-template"
-primary_region = "den"
+app = 'personal-finance-web-app'
+primary_region = 'den'
 
 [build]
 
@@ -14,4 +14,9 @@ primary_region = "den"
   auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 0
-  processes = ["app"]
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1

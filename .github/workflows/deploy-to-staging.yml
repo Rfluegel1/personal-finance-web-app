@@ -7,7 +7,7 @@ jobs:
   deploy-to-staging:
     runs-on: ubuntu-latest
     env:
-      APP_NAME: 'express-web-app-template'
+      APP_NAME: 'personal-finance-web-app'
     timeout-minutes: 10
 
     steps:

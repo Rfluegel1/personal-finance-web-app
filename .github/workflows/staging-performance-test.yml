@@ -19,4 +19,4 @@ jobs:
         uses: grafana/k6-action@v0.3.0
         with:
           filename: backend/tests/todoPerformance.ts
-          flags: --env BASE_URL=https://express-web-app-template.fly.dev --env PASSWORD=${{ secrets.TEST_USER_PASSWORD }} --env EMAIL='cypressdefault@gmail.com'
+          flags: --env BASE_URL=https://personal-finance-web-app.fly.dev --env PASSWORD=${{ secrets.TEST_USER_PASSWORD }} --env EMAIL='cypressdefault@gmail.com'

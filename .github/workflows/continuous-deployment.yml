@@ -14,7 +14,7 @@ jobs:
   continuous-deployment:
     runs-on: ubuntu-latest
     env:
-      APP_NAME: 'express-web-app-template'
+      APP_NAME: 'personal-finance-web-app'
       PASSPORT_SECRET: ${{ secrets.PASSPORT_SECRET }}
       TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}

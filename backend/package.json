@@ -1,5 +1,5 @@
 {
-  "name": "express-web-app-template",
+  "name": "personal-finance-web-app",
   "version": "1.0.0",
   "description": "This project is designed to be a starting point for a express web application",
   "main": "src/server.ts",
