@@ -13,6 +13,7 @@ jobs:
       TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      PLAID_SECRET: ${{ secrets.PLAID_SECRET }}
     timeout-minutes: 10
 
     services:
