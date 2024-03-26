@@ -5,10 +5,10 @@ import PlaidService from './PlaidService'
 
 export default class PlaidController {
     plaidService = new PlaidService()
-    createLinkToken(request: Request, response: Response): Response<string> {
+    async createLinkToken(request: Request, response: Response): Promise<Response<string>> {
         getLogger().info('Received create link token request')
-        this.plaidService.createLinkToken()
+        const linkToken = await this.plaidService.createLinkToken()
         getLogger().info('Sending create link token response')
-        return response.status(StatusCodes.CREATED).send({link_token: 'asd'})
+        return response.status(StatusCodes.CREATED).send({link_token: linkToken})
     }
 }

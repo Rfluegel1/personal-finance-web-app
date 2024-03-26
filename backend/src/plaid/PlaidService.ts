@@ -1,5 +1,5 @@
 export default class PlaidService {
-    createLinkToken(): string {
+π    async createLinkToken(): Promise<string> {
         return 'asd'
     }
 }
