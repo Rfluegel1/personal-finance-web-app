@@ -174,3 +174,11 @@ test('should have link to Password Reset Request', async ({ page }) => {
 	// then
 	await expect(page.locator('h1')).toHaveText('Password Reset Request');
 });
+
+test('should have button to add bank account', async ({ page }) => {
+	// given
+	await logInTestUser(page);
+
+	// then
+	await expect(page.locator('button[id="add-bank"]')).toBeVisible();
+})

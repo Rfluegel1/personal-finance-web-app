@@ -67,6 +67,7 @@
 	{:else}
 		<div class='error' role='alert'>Please verify your email address</div>
 	{/if}
+	<button id='add-bank'>Add Bank</button>
 </main>
 
 <style>
