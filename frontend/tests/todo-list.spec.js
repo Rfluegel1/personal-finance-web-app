@@ -175,10 +175,13 @@ test('should have link to Password Reset Request', async ({ page }) => {
 	await expect(page.locator('h1')).toHaveText('Password Reset Request');
 });
 
-test('should have button to add bank account', async ({ page }) => {
+test('should add default bank account when add bank pressed', async ({ page }) => {
 	// given
 	await logInTestUser(page);
 
+	// when
+	await page.click('button[id="add-bank"]');
+
 	// then
-	await expect(page.locator('button[id="add-bank"]')).toBeVisible();
+	await expect(page.locator('text="Default Bank Account"')).toBeVisible();
 })

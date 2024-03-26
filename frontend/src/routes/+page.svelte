@@ -6,6 +6,7 @@
 	let task = '';
 	let isEmailVerified = false;
 	let error = '';
+	let banks = [];
 
 
 	onMount(async () => {
@@ -32,6 +33,11 @@
 		await axios.delete(`/api/todos/${id}`);
 		const response = await axios.get('/api/todos');
 		todos = response.data.message;
+	}
+
+	async function createBank() {
+		banks.push({id: banks.length, name: 'Default Bank Account'})
+		banks = banks
 	}
 </script>
 
@@ -67,7 +73,16 @@
 	{:else}
 		<div class='error' role='alert'>Please verify your email address</div>
 	{/if}
-	<button id='add-bank'>Add Bank</button>
+	<button id='add-bank' on:click={createBank}>Add Bank</button>
+	<div class='bank-list'>
+		<ol>
+			{#each banks as bank (bank.id)}
+				<div class='bank-item'>
+					<li>{bank.name}</li>
+				</div>
+			{/each}
+		</ol>
+	</div>
 </main>
 
 <style>
