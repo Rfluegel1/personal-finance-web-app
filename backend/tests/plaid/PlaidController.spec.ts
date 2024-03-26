@@ -20,7 +20,7 @@ jest.mock('../../src/plaid/PlaidService', () => {
 describe('Plaid controller', () => {
     const plaidController = new PlaidController();
     describe('in regards to normal operation', () => {
-        test('should return a default link token', async () => {
+        test('should return response from service as link token', async () => {
             // given
             const request = { body: {} }
             const response = {
@@ -28,7 +28,7 @@ describe('Plaid controller', () => {
                 send: jest.fn()
             };
             let mockedLinkToken = randomUUID();
-            (plaidController.plaidService.createLinkToken as jest.Mock).mockResolvedValue(mockedLinkToken)
+            (plaidController.plaidService.createLinkToken as jest.Mock).mockResolvedValue({link_token: mockedLinkToken})
 
             // when
             await plaidController.createLinkToken(request as any, response as any)

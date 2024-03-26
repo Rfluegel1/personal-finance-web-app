@@ -9,6 +9,6 @@ export default class PlaidController {
         getLogger().info('Received create link token request')
         const linkToken = await this.plaidService.createLinkToken()
         getLogger().info('Sending create link token response')
-        return response.status(StatusCodes.CREATED).send({link_token: linkToken})
+        return response.status(StatusCodes.CREATED).send(linkToken)
     }
 }
