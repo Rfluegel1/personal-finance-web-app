@@ -1,4 +1,4 @@
-πexport default class PlaidService {
+export default class PlaidService {
     createLinkToken(): string {
         return 'asd'
     }
