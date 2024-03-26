@@ -193,16 +193,15 @@ Only manual triggers will run this job. This will deploy main code to staging.
 1. Do create with postgres (name it something other than app name)
 1. Setup new secrets ( ADMIN_EMAIL,ADMIN_PASSWORD,DB_PASSWORD,PASSPORT_SECRET,SMTP_PASSWORD,TEST_USER_PASSWORD) | ex. ```fly secrets set DB_PASSWORD="<password>" DB_USERNAME="<username>"```
 1. Add secrets to github settings (ADMIN_EMAIL,ADMIN_PASSWORD,FLY_API_TOKEN,PASSPORT_SECRET,TEST_USER_PASSWORD)
-1. Update db username and db name for staging if not postgres  ``****  PICKUP FROM HERE ****``
+1. Update db username and db name for staging if not postgres
 1. Update db to have test user and admin user (create users via ui, update role and isverified via staging db)
-1. Add application as source for log service
 
 # Access Staging DB
- 1. SSH into staging enviornment 
+ 1. SSH into staging environment 
 ```flyctl ssh console -a your-app-name```
  2. Install psql 
 ```apt-get update && apt-get install postgresql-client```
  3. Connect to db 
 ```psql -h your-db-host.fly.dev -p your-db-port -U your-db-user -d your-db-name```
 
-ex. ```psql -h personal-finance-web-app-db.internal -p 5432 -U postgres -d postgres```
+ex. ```psql -h personal-finance-web-app-db.internal -p 5432 -U personal_finance_web_app -d personal_finance_web_app```
