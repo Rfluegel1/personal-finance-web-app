@@ -2,6 +2,8 @@ FROM node:18.16.0-slim AS base
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+
 ENV NODE_ENV=staging
 
 COPY backend/build/ ./backend/build/
