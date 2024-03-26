@@ -14,6 +14,7 @@ import { v4 } from 'uuid';
 import { determineAndSendError } from './utils';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import plaidRoutes from './plaid/plaidRoutes'
 
 const app: Express = express();
 
@@ -77,6 +78,7 @@ passportService.deserializeUser();
 app.use(express.static(path.join(__dirname, '../build')));
 
 app.use('/api', passportRoutes);
+app.use('/api', plaidRoutes);
 app.use('/api', todoRoutes);
 app.use('/api', userRoutes);
 app.use('/api', verificationRoutes);

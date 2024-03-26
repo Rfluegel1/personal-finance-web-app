@@ -8,7 +8,7 @@ import { DatabaseException } from '../../src/exceptions/DatabaseException';
 import { UnauthorizedException } from '../../src/exceptions/UnauthorizedException';
 import * as constantsModule from '../../src/utils';
 import { validateRequest } from '../../src/utils';
-7
+
 // setup
 jest.mock('../../src/todos/TodoService', () => {
 	return jest.fn().mockImplementation(() => {
