@@ -69,6 +69,6 @@ describe('Health check service', () => {
             // then
             expect(actual.result).toEqual('failure')
             expect(actual.integrations.database.result).toEqual('failure')
-            expect(actual.integrations.database.details).toEqual('Plaid returned status code=500')
+            expect(actual.integrations.database.details).toEqual('Plaid returned status code=201')
         })
 })
