@@ -185,3 +185,18 @@ test('should add default bank account when add bank pressed', async ({ page }) =
 	// then
 	await expect(page.locator('text="Default Bank Account"')).toBeVisible();
 })
+
+test('should disable add bank button when link token is not set', async ({ page, context }) => {
+	// given
+	await context.route('**/create_link_token', (route) => {
+		route.fulfill({
+			status: 500
+		});
+	});
+
+	// when
+	await logInTestUser(page);
+
+	// then
+	await expect(page.locator('button[id="add-bank"]')).toBeDisabled();
+})

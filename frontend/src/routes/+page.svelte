@@ -7,6 +7,7 @@
 	let isEmailVerified = false;
 	let error = '';
 	let banks = [];
+	let linkToken = '';
 
 
 	onMount(async () => {
@@ -14,6 +15,8 @@
 			isEmailVerified = true;
 			const response = await axios.get('/api/todos');
 			todos = response.data.message;
+			const linkTokenResponse = await axios.post('/api/create_link_token')
+			linkToken = linkTokenResponse.data.link_token
 		}
 	});
 
@@ -73,7 +76,7 @@
 	{:else}
 		<div class='error' role='alert'>Please verify your email address</div>
 	{/if}
-	<button id='add-bank' on:click={createBank}>Add Bank</button>
+	<button id='add-bank' on:click={createBank} disabled={!linkToken}>Add Bank</button>
 	<div class='bank-list'>
 		<ol>
 			{#each banks as bank (bank.id)}
