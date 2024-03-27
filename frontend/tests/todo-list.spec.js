@@ -175,17 +175,6 @@ test('should have link to Password Reset Request', async ({ page }) => {
 	await expect(page.locator('h1')).toHaveText('Password Reset Request');
 });
 
-test('should add default bank account when add bank pressed', async ({ page }) => {
-	// given
-	await logInTestUser(page);
-
-	// when
-	await page.click('button[id="add-bank"]');
-
-	// then
-	await expect(page.locator('text="Default Bank Account"')).toBeVisible();
-})
-
 test('should disable add bank button when link token is not set', async ({ page, context }) => {
 	// given
 	await context.route('**/create_link_token', (route) => {
@@ -199,4 +188,27 @@ test('should disable add bank button when link token is not set', async ({ page,
 
 	// then
 	await expect(page.locator('button[id="add-bank"]')).toBeDisabled();
+})
+
+test('should use link token to create public token to exchange for access token', async ({ page }) => {
+	if (process.env.NODE_ENV === 'development') {
+		test.setTimeout(15000);
+		// given
+		await logInTestUser(page);
+
+		// when
+		await page.click('button[id="add-bank"]');
+
+		await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', { name: 'Continue' }).click();
+		await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Search for 11,000+').fill('huntington');
+		await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Huntington Bank').click()
+		await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Username').fill('user_good');
+		await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Password').fill('pass_good');
+		await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', { name: 'Submit' }).click();
+		await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', { name: 'Continue' }).click();
+		await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', { name: 'Continue' }).click();
+
+		// then
+		await expect(page.locator('text="Default Bank Account"')).toBeVisible();
+	}
 })
