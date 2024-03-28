@@ -3,6 +3,8 @@ import axios from 'axios'
 import {logInTestUser} from '../helpers'
 import {CookieJar} from 'tough-cookie'
 import {wrapper} from 'axios-cookiejar-support'
+import {plaidClient} from '../../src/plaid/PlaidConfiguration'
+import {Products, SandboxPublicTokenCreateRequest} from 'plaid'
 
 jest.setTimeout(30000 * 2)
 
@@ -24,14 +26,11 @@ describe('Plaid resource', () => {
             // given
             await logInTestUser(client)
             let huntingtonBank = 'ins_21'
-            const response = await axios.post('https://sandbox.plaid.com/sandbox/public_token/create', {
-                'client_id': '64fbc6e226a0f70017bcd313',
-                'secret': process.env.PLAID_SECRET,
-                'institution_id': huntingtonBank,
-                'initial_products': [
-                    'auth'
-                ]
-            })
+            let sandboxPublicTokenCreateRequest: SandboxPublicTokenCreateRequest = {
+                institution_id: huntingtonBank,
+                initial_products: [Products.Auth]
+            }
+            const response = await plaidClient.sandboxPublicTokenCreate(sandboxPublicTokenCreateRequest)
             const publicToken = response.data.public_token
 
             // when
