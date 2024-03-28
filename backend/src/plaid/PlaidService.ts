@@ -3,13 +3,13 @@ import {plaidClient} from './PlaidConfiguration'
 import {CountryCode, LinkTokenCreateRequest, Products} from 'plaid'
 
 export default class PlaidService {
-    async createLinkToken(): Promise<any> {
+    async createLinkToken(userId: string): Promise<any> {
         const plaidRequest: LinkTokenCreateRequest = {
             'client_name': 'personal-finance-web-app',
             'country_codes': [CountryCode.Us],
             'language': 'en',
             'user': {
-                'client_user_id': 'plaid-service'
+                'client_user_id': userId
             },
             'products': [Products.Transactions]
         }

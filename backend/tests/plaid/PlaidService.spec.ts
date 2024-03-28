@@ -17,9 +17,10 @@ describe('Plaid service', () => {
             // given
             let mockedLinkToken = randomUUID()
             plaidClient.linkTokenCreate = jest.fn().mockResolvedValue({data: {link_token: mockedLinkToken}})
+            let userId = 'user'
 
             // when
-            const result = await plaidService.createLinkToken()
+            const result = await plaidService.createLinkToken(userId)
 
             // then
             expect(plaidClient.linkTokenCreate).toHaveBeenCalledWith({
@@ -27,7 +28,7 @@ describe('Plaid service', () => {
                 'country_codes': ['US'],
                 'language': 'en',
                 'user': {
-                    'client_user_id': 'plaid-service'
+                    'client_user_id': userId
                 },
                 'products': ['transactions']
             })

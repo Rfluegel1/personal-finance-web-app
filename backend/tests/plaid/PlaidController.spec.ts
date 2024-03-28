@@ -27,19 +27,23 @@ describe('Plaid controller', () => {
             // given
             const request = {
                 isAuthenticated: () => true,
+                user: {id: 'user'}
             }
             const response = {
                 status: jest.fn().mockReturnThis(),
                 send: jest.fn()
             }
             let mockedLinkToken = randomUUID();
-            (plaidController.plaidService.createLinkToken as jest.Mock).mockResolvedValue({link_token: mockedLinkToken})
+            (plaidController.plaidService.createLinkToken as jest.Mock).mockImplementation((userId) => {
+                if (userId === 'user') {
+                    return {link_token: mockedLinkToken}
+                }
+            })
 
             // when
             await plaidController.createLinkToken(request as any, response as any, jest.fn())
 
             // then
-            expect(plaidController.plaidService.createLinkToken).toHaveBeenCalled()
             expect(response.status).toHaveBeenCalledWith(StatusCodes.CREATED)
             expect(response.send).toHaveBeenCalledWith({link_token: mockedLinkToken})
         })
