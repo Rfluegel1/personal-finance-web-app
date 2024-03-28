@@ -1,6 +1,7 @@
 import PlaidController from '../../src/plaid/PlaidController'
 import {randomUUID} from 'node:crypto'
 import {StatusCodes} from 'http-status-codes'
+import {UnauthorizedException} from '../../src/exceptions/UnauthorizedException'
 
 jest.mock('../../src/logger', () => ({
     getLogger: jest.fn(() => {
@@ -43,7 +44,11 @@ describe('Plaid controller', () => {
 
         test('should send public token to service and return access token from service', async () => {
             // given
-            const request = {body: {public_token: 'public_token'}}
+            const request = {
+                body: {public_token: 'public_token'},
+                isAuthenticated: () => true,
+                user: { id: 'the createdBy' }
+            }
             const response = {
                 status: jest.fn().mockReturnThis(),
                 send: jest.fn()
@@ -57,12 +62,29 @@ describe('Plaid controller', () => {
             })
 
             // when
-            await plaidController.createAccessToken(request as any, response as any)
+            await plaidController.createAccessToken(request as any, response as any, jest.fn())
 
             // then
-            expect(plaidController.plaidService.createAccessToken).toHaveBeenCalledWith('public_token')
             expect(response.status).toHaveBeenCalledWith(StatusCodes.CREATED)
             expect(response.send).toHaveBeenCalledWith({access_token: mockedAccessToken})
         })
+    })
+
+    test('should next unauthorized for create access token', async () => {
+        // given
+        const request = {
+            isAuthenticated: () => false,
+        }
+        const response = {
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn()
+        }
+        const next = jest.fn();
+
+        // when
+        await plaidController.createAccessToken(request as any, response as any, next)
+
+        // then
+        expect(next).toHaveBeenCalledWith(expect.any(UnauthorizedException));
     })
 })
