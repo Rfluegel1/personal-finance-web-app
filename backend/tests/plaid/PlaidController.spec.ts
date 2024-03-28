@@ -74,6 +74,51 @@ describe('Plaid controller', () => {
             expect(response.send).toHaveBeenCalledWith({access_token: mockedAccessToken})
         })
     })
+
+    describe('in regards to error handling', () => {
+        test('should call next with error when link token creation fails', async () => {
+            // given
+            const request = {
+                isAuthenticated: () => true,
+                user: {id: 'user'}
+            }
+            const response = {
+                status: jest.fn().mockReturnThis(),
+                send: jest.fn()
+            }
+            const next = jest.fn()
+            const error = new Error('error');
+            (plaidController.plaidService.createLinkToken as jest.Mock).mockRejectedValue(error)
+
+            // when
+            await plaidController.createLinkToken(request as any, response as any, next)
+
+            // then
+            expect(next).toHaveBeenCalledWith(error)
+        })
+
+        test('should call next with error when access token creation fails', async () => {
+            // given
+            const request = {
+                body: {public_token: 'public_token'},
+                isAuthenticated: () => true
+            }
+            const response = {
+                status: jest.fn().mockReturnThis(),
+                send: jest.fn()
+            }
+            const next = jest.fn()
+            const error = new Error('error');
+            (plaidController.plaidService.createAccessToken as jest.Mock).mockRejectedValue(error)
+
+            // when
+            await plaidController.createAccessToken(request as any, response as any, next)
+
+            // then
+            expect(next).toHaveBeenCalledWith(error)
+        })
+    })
+
     it.each`
     apiEndpoint            | controllerFunction
     ${'createAccessToken'} | ${plaidController.createAccessToken}

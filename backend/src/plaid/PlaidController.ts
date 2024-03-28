@@ -13,9 +13,13 @@ export default class PlaidController {
         if (!request.isAuthenticated()) {
             return next(new UnauthorizedException('create link token'))
         }
-        const linkToken = await this.plaidService.createLinkToken((request.user as User).id)
-        getLogger().info('Sending create link token response')
-        return response.status(StatusCodes.CREATED).send(linkToken)
+        try {
+            const linkToken = await this.plaidService.createLinkToken((request.user as User).id)
+            getLogger().info('Sending create link token response')
+            return response.status(StatusCodes.CREATED).send(linkToken)
+        } catch (error) {
+            next(error)
+        }
     }
 
     async createAccessToken(request: Request, response: Response, next: NextFunction) {
@@ -23,8 +27,12 @@ export default class PlaidController {
         if (!request.isAuthenticated()) {
             return next(new UnauthorizedException('create access token'))
         }
-        const accessToken = await this.plaidService.createAccessToken(request.body.public_token)
-        getLogger().info('Sending create access token response')
-        return response.status(StatusCodes.CREATED).send(accessToken)
+        try {
+            const accessToken = await this.plaidService.createAccessToken(request.body.public_token)
+            getLogger().info('Sending create access token response')
+            return response.status(StatusCodes.CREATED).send(accessToken)
+        } catch (error) {
+            next(error)
+        }
     }
 }
