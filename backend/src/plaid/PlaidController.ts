@@ -15,8 +15,8 @@ export default class PlaidController {
 
     async createAccessToken(request: Request, response: Response): Promise<Response<string>> {
         getLogger().info('Received create access token request')
-        // const accessToken = await this.plaidService.createAccessToken(request.body.public_token)
+        const accessToken = await this.plaidService.createAccessToken(request.body.public_token)
         getLogger().info('Sending create access token response')
-        return response.status(StatusCodes.CREATED).send({access_token: 'access_token'})
+        return response.status(StatusCodes.CREATED).send({access_token: accessToken})
     }
 }

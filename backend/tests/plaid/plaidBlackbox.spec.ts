@@ -15,12 +15,12 @@ describe('Plaid resource', () => {
 
     test('should exchange a public token', async () => {
         if (process.env.NODE_ENV === 'development') {
-
             // given
+            let huntingtonBank = 'ins_21'
             const response = await axios.post('https://sandbox.plaid.com/sandbox/public_token/create', {
                 'client_id': '64fbc6e226a0f70017bcd313',
                 'secret': process.env.PLAID_SECRET,
-                'institution_id': 'ins_21',
+                'institution_id': huntingtonBank,
                 'initial_products': [
                     'auth'
                 ]
