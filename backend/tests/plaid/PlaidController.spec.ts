@@ -52,7 +52,7 @@ describe('Plaid controller', () => {
             let mockedAccessToken = randomUUID();
             (plaidController.plaidService.createAccessToken as jest.Mock).mockImplementation((publicToken) => {
                 if (publicToken === 'public_token') {
-                    return mockedAccessToken
+                    return {access_token: mockedAccessToken}
                 }
             })
 

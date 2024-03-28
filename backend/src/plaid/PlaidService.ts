@@ -19,14 +19,13 @@ export default class PlaidService {
     }
 
     async createAccessToken(publicToken: string): Promise<any> {
-        // let response
-        //
-        // response = await axios.post(`${process.env.PLAID_URL}/item/public_token/exchange`, {
-        //     'client_id': '64fbc6e226a0f70017bcd313',
-        //     'secret': process.env.PLAID_SECRET,
-        //     'public_token': publicToken
-        // })
-        // return {access_token: response.data.access_token}
-        return 'asd'
+        let response
+
+        response = await axios.post(`${process.env.PLAID_URL}/item/public_token/exchange`, {
+            'client_id': '64fbc6e226a0f70017bcd313',
+            'secret': process.env.PLAID_SECRET,
+            'public_token': publicToken
+        })
+        return {access_token: response.data.access_token}
     }
 }
