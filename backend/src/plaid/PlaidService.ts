@@ -1,29 +1,24 @@
 import axios from 'axios'
+import {plaidClient} from './PlaidConfiguration'
+import {CountryCode, LinkTokenCreateRequest, Products} from 'plaid'
 
 export default class PlaidService {
     async createLinkToken(): Promise<any> {
-        let response
-
-        response = await axios.post(`${process.env.PLAID_URL}/link/token/create`, {
-            'client_id': '64fbc6e226a0f70017bcd313',
-            'secret': process.env.PLAID_SECRET,
+        const plaidRequest: LinkTokenCreateRequest = {
             'client_name': 'personal-finance-web-app',
-            'country_codes': ['US'],
+            'country_codes': [CountryCode.Us],
             'language': 'en',
             'user': {
-                'client_user_id': 'health-check'
+                'client_user_id': 'plaid-service'
             },
-            'products': ['transactions']
-        })
+            'products': [Products.Transactions]
+        }
+        let response = await plaidClient.linkTokenCreate(plaidRequest)
         return {link_token: response.data.link_token}
     }
 
     async createAccessToken(publicToken: string): Promise<any> {
-        let response
-
-        response = await axios.post(`${process.env.PLAID_URL}/item/public_token/exchange`, {
-            'client_id': '64fbc6e226a0f70017bcd313',
-            'secret': process.env.PLAID_SECRET,
+        let response = await plaidClient.itemPublicTokenExchange({
             'public_token': publicToken
         })
         return {access_token: response.data.access_token}
