@@ -1,6 +1,6 @@
 import {StatusCodes} from 'http-status-codes'
 import axios from 'axios'
-import {logInTestUser} from '../helpers'
+import {logInTestUser, logOutUser} from '../helpers'
 import {CookieJar} from 'tough-cookie'
 import {wrapper} from 'axios-cookiejar-support'
 import {plaidClient} from '../../src/plaid/PlaidConfiguration'
@@ -13,12 +13,18 @@ const client = wrapper(axios.create({jar, withCredentials: true}))
 
 describe('Plaid resource', () => {
     test('should create a link token', async () => {
+        // given
+        await logInTestUser(client)
+
         // when
-        const response = await axios.post(`${process.env.BASE_URL}/api/create_link_token`)
+        const response = await client.post(`${process.env.BASE_URL}/api/create_link_token`)
 
         // then
         expect(response.status).toBe(StatusCodes.CREATED)
         expect(response.data.link_token).toBeTruthy()
+
+        // cleanup
+        await logOutUser(client)
     })
 
     test('should exchange a public token', async () => {
@@ -39,6 +45,9 @@ describe('Plaid resource', () => {
             // then
             expect(exchangeResponse.status).toBe(StatusCodes.CREATED)
             expect(exchangeResponse.data.access_token).toBeTruthy()
+
+            // cleanup
+            await logOutUser(client)
         }
     })
 })

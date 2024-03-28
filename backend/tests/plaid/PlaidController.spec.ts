@@ -25,7 +25,9 @@ describe('Plaid controller', () => {
     describe('in regards to normal operation', () => {
         test('should return response from service as link token', async () => {
             // given
-            const request = {body: {}}
+            const request = {
+                isAuthenticated: () => true,
+            }
             const response = {
                 status: jest.fn().mockReturnThis(),
                 send: jest.fn()
@@ -34,7 +36,7 @@ describe('Plaid controller', () => {
             (plaidController.plaidService.createLinkToken as jest.Mock).mockResolvedValue({link_token: mockedLinkToken})
 
             // when
-            await plaidController.createLinkToken(request as any, response as any)
+            await plaidController.createLinkToken(request as any, response as any, jest.fn())
 
             // then
             expect(plaidController.plaidService.createLinkToken).toHaveBeenCalled()
@@ -46,8 +48,7 @@ describe('Plaid controller', () => {
             // given
             const request = {
                 body: {public_token: 'public_token'},
-                isAuthenticated: () => true,
-                user: { id: 'the createdBy' }
+                isAuthenticated: () => true
             }
             const response = {
                 status: jest.fn().mockReturnThis(),
@@ -69,22 +70,27 @@ describe('Plaid controller', () => {
             expect(response.send).toHaveBeenCalledWith({access_token: mockedAccessToken})
         })
     })
-
-    test('should next unauthorized for create access token', async () => {
-        // given
+    it.each`
+    apiEndpoint            | controllerFunction
+    ${'createAccessToken'} | ${plaidController.createAccessToken}
+    ${'createLinkToken'}   | ${plaidController.createLinkToken}
+    `('$apiEndpoint returns unauthorized when the request session is not authenticated', async (
+        {controllerFunction}
+    ) => {
         const request = {
             isAuthenticated: () => false,
         }
         const response = {
-            status: jest.fn().mockReturnThis(),
-            send: jest.fn()
+            status: jest.fn(function () {
+                return this
+            }), send: jest.fn()
         }
-        const next = jest.fn();
+        const next = jest.fn()
 
         // when
-        await plaidController.createAccessToken(request as any, response as any, next)
+        await controllerFunction(request as any, response as any, next)
 
         // then
-        expect(next).toHaveBeenCalledWith(expect.any(UnauthorizedException));
+        expect(next).toHaveBeenCalledWith(expect.any(UnauthorizedException))
     })
 })

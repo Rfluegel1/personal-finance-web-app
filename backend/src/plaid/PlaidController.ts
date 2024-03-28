@@ -7,8 +7,11 @@ import {UnauthorizedException} from '../exceptions/UnauthorizedException'
 export default class PlaidController {
     plaidService = new PlaidService()
 
-    async createLinkToken(request: Request, response: Response): Promise<Response<string>> {
+    async createLinkToken(request: Request, response: Response, next: NextFunction) {
         getLogger().info('Received create link token request')
+        if (!request.isAuthenticated()) {
+            return next(new UnauthorizedException('create link token'))
+        }
         const linkToken = await this.plaidService.createLinkToken()
         getLogger().info('Sending create link token response')
         return response.status(StatusCodes.CREATED).send(linkToken)
