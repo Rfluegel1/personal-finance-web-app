@@ -1,7 +1,7 @@
 import Todo from '../../src/todos/Todo'
 import {UUID_REG_EXP} from '../../src/utils'
 
-describe('Post object', () => {
+describe('Todo object', () => {
     it('default constructor sets default values', () => {
         // when
         const result: Todo = new Todo()
