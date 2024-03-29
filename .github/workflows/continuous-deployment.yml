@@ -20,6 +20,7 @@ jobs:
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
       PLAID_SECRET: ${{ secrets.PLAID_SECRET }}
+      CIPHER_KEY: ${{ secrets.CIPHER_KEY }}
     timeout-minutes: 10
 
     services:
