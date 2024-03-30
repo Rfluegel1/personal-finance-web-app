@@ -11,13 +11,13 @@ export default class BankRepository {
 
     async saveBank(bank: Bank) {
         await this.executeWithCatch(async () => {
-            return await this.bankRepository.save(bank)
+            await this.bankRepository.save(bank)
         })
     }
 
     async deleteBank(id: string) {
         await this.executeWithCatch(async () => {
-            return await this.bankRepository.delete(id)
+            await this.bankRepository.delete(id)
         })
     }
 
@@ -31,7 +31,7 @@ export default class BankRepository {
         return bank
     }
 
-    async getBanksByOwner(owner: string){
+    async getBanksByOwner(owner: string) {
         return await this.executeWithCatch(async () => {
             return await this.bankRepository.find({where: {owner: owner}})
         })
