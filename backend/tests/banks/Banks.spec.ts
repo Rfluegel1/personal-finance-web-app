@@ -1,5 +1,5 @@
-import {UUID_REG_EXP} from '../src/utils'
-import Bank from '../src/Bank'
+import {UUID_REG_EXP} from '../../src/utils'
+import Bank from '../../src/banks/Bank'
 
 describe('Bank object', () => {
     it('default constructor sets default values', () => {
