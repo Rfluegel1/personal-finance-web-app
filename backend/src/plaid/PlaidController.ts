@@ -22,15 +22,17 @@ export default class PlaidController {
         }
     }
 
-    async createAccessToken(request: Request, response: Response, next: NextFunction) {
+    async exchangeTokenAndSaveBank(request: Request, response: Response, next: NextFunction) {
         getLogger().info('Received create access token request')
         if (!request.isAuthenticated()) {
             return next(new UnauthorizedException('create access token'))
         }
+        const publicToken = request.body.public_token
+        const userId = (request.user as User).id
         try {
-            const accessToken = await this.plaidService.createAccessToken(request.body.public_token)
+            const bankId = await this.plaidService.exchangeTokenAndSaveBank(publicToken, userId)
             getLogger().info('Sending create access token response')
-            return response.status(StatusCodes.CREATED).send(accessToken)
+            return response.status(StatusCodes.CREATED).send(bankId)
         } catch (error) {
             next(error)
         }

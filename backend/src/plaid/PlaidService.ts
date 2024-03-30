@@ -1,8 +1,9 @@
-import axios from 'axios'
 import {plaidClient} from './PlaidConfiguration'
 import {CountryCode, LinkTokenCreateRequest, Products} from 'plaid'
+import BankService from '../banks/BankService'
 
 export default class PlaidService {
+    bankService = new BankService()
     async createLinkToken(userId: string): Promise<any> {
         const plaidRequest: LinkTokenCreateRequest = {
             'client_name': 'personal-finance-web-app',
@@ -17,10 +18,11 @@ export default class PlaidService {
         return {link_token: response.data.link_token}
     }
 
-    async createAccessToken(publicToken: string): Promise<any> {
+    async exchangeTokenAndSaveBank(publicToken: string, userId: string): Promise<any> {
         let response = await plaidClient.itemPublicTokenExchange({
             'public_token': publicToken
         })
-        return {access_token: response.data.access_token}
+        let bankId = (await this.bankService.createBank(response.data.access_token, userId)).id
+        return {bankId: bankId}
     }
 }

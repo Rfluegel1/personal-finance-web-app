@@ -9,7 +9,8 @@ async function ensureTestUser(client: AxiosInstance, email: string, password: st
         const jar = new CookieJar()
         const adminClient = wrapper(axios.create({jar, withCredentials: true}))
         await authenticateAsAdmin(adminClient)
-        await adminClient.get(`${process.env.BASE_URL}/api/users?email=${email}`)
+        const response = await adminClient.get(`${process.env.BASE_URL}/api/users?email=${email}`)
+        return response.data.id
     } catch (error) {
         if ((error as AxiosError)?.response?.status === StatusCodes.NOT_FOUND) {
             const createResponse = await client.post(`${process.env.BASE_URL}/api/users`, {

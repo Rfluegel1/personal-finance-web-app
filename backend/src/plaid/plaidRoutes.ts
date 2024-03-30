@@ -58,6 +58,6 @@ router.post('/create_link_token', plaidController.createLinkToken.bind(plaidCont
  *                   type: string
  *                   description: An access token provided by plaid.
  */
-router.post('/create_access_token', plaidController.createAccessToken.bind(plaidController))
+router.post('/exchange_token_and_save_bank', plaidController.exchangeTokenAndSaveBank.bind(plaidController))
 
 export default router

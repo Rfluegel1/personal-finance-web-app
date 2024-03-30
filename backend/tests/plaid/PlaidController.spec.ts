@@ -15,7 +15,7 @@ jest.mock('../../src/plaid/PlaidService', () => {
     return jest.fn().mockImplementation(() => {
         return {
             createLinkToken: jest.fn(),
-            createAccessToken: jest.fn()
+            exchangeTokenAndSaveBank: jest.fn()
         }
     })
 })
@@ -48,30 +48,31 @@ describe('Plaid controller', () => {
             expect(response.send).toHaveBeenCalledWith({link_token: mockedLinkToken})
         })
 
-        test('should send public token to service and return access token from service', async () => {
+        test('should send public token to service and return bank id from service', async () => {
             // given
             const request = {
                 body: {public_token: 'public_token'},
-                isAuthenticated: () => true
+                isAuthenticated: () => true,
+                user: {id: 'user'}
             }
             const response = {
                 status: jest.fn().mockReturnThis(),
                 send: jest.fn()
             }
 
-            let mockedAccessToken = randomUUID();
-            (plaidController.plaidService.createAccessToken as jest.Mock).mockImplementation((publicToken) => {
-                if (publicToken === 'public_token') {
-                    return {access_token: mockedAccessToken}
+            let mockedBankId = randomUUID();
+            (plaidController.plaidService.exchangeTokenAndSaveBank as jest.Mock).mockImplementation((publicToken, user) => {
+                if (publicToken === 'public_token' && user === 'user') {
+                    return {bankId: mockedBankId}
                 }
             })
 
             // when
-            await plaidController.createAccessToken(request as any, response as any, jest.fn())
+            await plaidController.exchangeTokenAndSaveBank(request as any, response as any, jest.fn())
 
             // then
             expect(response.status).toHaveBeenCalledWith(StatusCodes.CREATED)
-            expect(response.send).toHaveBeenCalledWith({access_token: mockedAccessToken})
+            expect(response.send).toHaveBeenCalledWith({bankId: mockedBankId})
         })
     })
 
@@ -97,11 +98,12 @@ describe('Plaid controller', () => {
             expect(next).toHaveBeenCalledWith(error)
         })
 
-        test('should call next with error when access token creation fails', async () => {
+        test('should call next with error when access token creation and bank save fails', async () => {
             // given
             const request = {
                 body: {public_token: 'public_token'},
-                isAuthenticated: () => true
+                isAuthenticated: () => true,
+                user: {id: 'user'}
             }
             const response = {
                 status: jest.fn().mockReturnThis(),
@@ -109,10 +111,10 @@ describe('Plaid controller', () => {
             }
             const next = jest.fn()
             const error = new Error('error');
-            (plaidController.plaidService.createAccessToken as jest.Mock).mockRejectedValue(error)
+            (plaidController.plaidService.exchangeTokenAndSaveBank as jest.Mock).mockRejectedValue(error)
 
             // when
-            await plaidController.createAccessToken(request as any, response as any, next)
+            await plaidController.exchangeTokenAndSaveBank(request as any, response as any, next)
 
             // then
             expect(next).toHaveBeenCalledWith(error)
@@ -120,9 +122,9 @@ describe('Plaid controller', () => {
     })
 
     it.each`
-    apiEndpoint            | controllerFunction
-    ${'createAccessToken'} | ${plaidController.createAccessToken}
-    ${'createLinkToken'}   | ${plaidController.createLinkToken}
+    apiEndpoint                   | controllerFunction
+    ${'exchangeTokenAndSaveBank'} | ${plaidController.exchangeTokenAndSaveBank}
+    ${'createLinkToken'}          | ${plaidController.createLinkToken}
     `('$apiEndpoint returns unauthorized when the request session is not authenticated', async (
         {controllerFunction}
     ) => {
