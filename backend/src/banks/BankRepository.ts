@@ -1,6 +1,5 @@
 import Bank from './Bank'
 import DataSourceService from '../dataSource/DataSourceService'
-import Todo from '../todos/Todo'
 import {getLogger} from '../logger'
 import {DatabaseException} from '../exceptions/DatabaseException'
 import {NotFoundException} from '../exceptions/NotFoundException'

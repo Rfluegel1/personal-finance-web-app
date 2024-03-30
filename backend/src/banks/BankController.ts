@@ -3,6 +3,7 @@ import BankService from './BankService'
 import {StatusCodes} from 'http-status-codes'
 import User from '../users/User'
 import {UnauthorizedException} from '../exceptions/UnauthorizedException'
+import {BadRequestException} from '../exceptions/BadRequestException'
 
 export default class BankController {
 
@@ -53,6 +54,9 @@ export default class BankController {
             return next(new UnauthorizedException('delete a bank by owner'))
         }
         const owner = request.query.owner
+        if (!owner) {
+            return next(new BadRequestException('owner is required'))
+        }
         try {
             const banks = await this.bankService.getBanksByOwner(owner as string)
             response.status(StatusCodes.OK).send({banks: banks})

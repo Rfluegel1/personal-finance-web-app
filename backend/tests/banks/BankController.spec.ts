@@ -371,4 +371,21 @@ describe('Bank controller', () => {
             expect(next).toHaveBeenCalledWith(expect.any(DatabaseException));
         });
     });
+
+    test('getBanksByOwner should next error when owner is not provided', async () => {
+        // given
+        const request = {
+            isAuthenticated: () => true,
+            query: {},
+            user: {role: 'admin'}
+        }
+        const response = {}
+        const next = jest.fn()
+
+        // when
+        await bankController.getBanksByOwner(request as any, response as any, next)
+
+        // then
+        expect(next).toHaveBeenCalledWith(expect.any(BadRequestException))
+    })
 })

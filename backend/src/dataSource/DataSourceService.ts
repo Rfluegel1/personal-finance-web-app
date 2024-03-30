@@ -3,6 +3,7 @@ import { getLogger } from '../logger';
 import { DatabaseException } from '../exceptions/DatabaseException';
 import Todo from '../todos/Todo';
 import User from '../users/User';
+import Bank from '../banks/Bank'
 
 export default class DataSourceService {
 
@@ -35,7 +36,8 @@ export default class DataSourceService {
 			synchronize: false,
 			entities: [
 				Todo,
-				User
+				User,
+				Bank
 			],
 			migrations: [
 				'src/migrations/*.ts'
