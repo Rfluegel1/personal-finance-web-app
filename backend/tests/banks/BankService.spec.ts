@@ -2,6 +2,8 @@ import {v4 as uuidv4} from 'uuid'
 import {UUID_REG_EXP} from '../../src/utils'
 import BankService from '../../src/banks/BankService'
 import Bank from '../../src/banks/Bank'
+import {CipherUtility} from '../../src/CipherUtility'
+import {randomUUID} from 'node:crypto'
 
 // setup
 jest.mock('../../src/banks/BankRepository', () => {
@@ -15,42 +17,49 @@ jest.mock('../../src/banks/BankRepository', () => {
     })
 })
 
+jest.mock('../../src/CipherUtility')
+
 describe('Bank service', () => {
     let service: BankService = new BankService()
     it('createBank should call repository and returns Bank', async () => {
-        const expectedBank = {accessToken: 'the accessToken', owner: 'the owner'}
+        let encrypted = randomUUID();
+        (CipherUtility.encrypt as jest.Mock).mockReturnValue(encrypted)
+        const expectedBank = {accessToken: encrypted, owner: 'the owner'}
         // when
         let result: Bank = await service.createBank('the accessToken', 'the owner')
         // then
         expect(service.bankRepository.saveBank).toHaveBeenCalledWith(expect.objectContaining(expectedBank))
-        expect(result.accessToken).toEqual('the accessToken')
+        expect(result.accessToken).toEqual(encrypted)
         expect(result.owner).toEqual('the owner')
         expect(result.id).toMatch(UUID_REG_EXP)
     })
     it('updateBank gets from repository, calls repository to update, and returns Bank', async () => {
         //given
+        let encrypted = randomUUID();
+        (CipherUtility.encrypt as jest.Mock).mockReturnValue(encrypted)
         const id: string = uuidv4()
-        const expectedBank = {accessToken: 'the accessToken', owner: 'the owner'};
+        const expectedBank = {accessToken: encrypted, owner: 'the owner'};
         (service.bankRepository.getBank as jest.Mock).mockImplementation(jest.fn(() => {
-            let todo = new Bank()
-            todo.id = id
-            return todo
+            let bank = new Bank()
+            bank.id = id
+            return bank
         }))
         // when
         let result: Bank = await service.updateBank(id, 'the accessToken', 'the owner')
         // then
         expect(service.bankRepository.saveBank).toHaveBeenCalledWith(expect.objectContaining(expectedBank))
-        expect(result.accessToken).toEqual('the accessToken')
+        expect(result.accessToken).toEqual(encrypted)
         expect(result.owner).toEqual('the owner')
         expect(result.id).toEqual(id)
     })
     it.each`
     accessToken          | owner          | expected
-    ${undefined}  | ${undefined}       | ${{accessToken: 'old accessToken', owner: 'old owner'}}
-    ${'new accessToken'} | ${'new owner'} | ${{accessToken: 'new accessToken', owner: 'new owner'}}
+    ${undefined}         | ${undefined}   | ${{accessToken: 'old accessToken', owner: 'old owner'}}
+    ${'new accessToken'} | ${'new owner'} | ${{accessToken: randomUUID(), owner: 'new owner'}}
     `('updateBank only sets defined fields on updated Bank',
         async ({accessToken, owner, expected}) => {
             //given
+            (CipherUtility.encrypt as jest.Mock).mockReturnValue(expected.accessToken)
             const existingBank = new Bank('old accessToken', 'old owner');
             (service.bankRepository.getBank as jest.Mock).mockImplementation((sentId: string) => {
                 if (sentId === existingBank.id) {
@@ -68,6 +77,8 @@ describe('Bank service', () => {
 
     it('getBank returns todos from repository', async () => {
         //given
+        let decrypted = randomUUID();
+        (CipherUtility.decrypt as jest.Mock).mockReturnValue(decrypted)
         const id: string = uuidv4()
         const mockBank = {id: id, accessToken: 'the accessToken', owner: 'the owner'};
 
@@ -79,12 +90,16 @@ describe('Bank service', () => {
         // when
         const result: Bank = await service.getBank(id)
         // then
-        expect(result.accessToken).toEqual('the accessToken')
+        expect(result.accessToken).toEqual(decrypted)
         expect(result.owner).toEqual('the owner')
         expect(result.id).toEqual(id)
     })
     it('getBanksByOwner returns todos from repository', async () => {
         //given
+        let firstDecrypted = randomUUID();
+        (CipherUtility.decrypt as jest.Mock).mockReturnValueOnce(firstDecrypted)
+        let secondDecrypted = randomUUID();
+        (CipherUtility.decrypt as jest.Mock).mockReturnValueOnce(secondDecrypted)
         const id1: string = uuidv4()
         const id2: string = uuidv4()
         const mockBank1: Bank = new Bank('the accessToken', 'the owner')
@@ -104,11 +119,11 @@ describe('Bank service', () => {
 
         let firstBank = result.find((todo: Bank): boolean => todo.id === id1)
         expect(firstBank).toBeInstanceOf(Bank)
-        expect(firstBank?.accessToken).toEqual('the accessToken')
+        expect(firstBank?.accessToken).toEqual(firstDecrypted)
         expect(firstBank?.owner).toEqual('the owner')
 
         let secondBank = result.find((todo: Bank): boolean => todo.id === id2)
-        expect(secondBank?.accessToken).toEqual('the accessToken')
+        expect(secondBank?.accessToken).toEqual(secondDecrypted)
         expect(secondBank?.owner).toEqual('the owner')
         expect(secondBank?.id).toEqual(id2)
     })

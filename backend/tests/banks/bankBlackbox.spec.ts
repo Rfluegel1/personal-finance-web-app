@@ -33,7 +33,7 @@ describe('Bank resource', () => {
         expect(postResponse.status).toEqual(StatusCodes.CREATED)
         const postMessage = postResponse.data
         expect(postMessage.id).toMatch(UUID_REG_EXP)
-        expect(postMessage.accessToken).toEqual('the accessToken')
+        expect(postMessage.accessToken).toBeTruthy()
         expect(postMessage.owner).toEqual(userId)
 
         // when
@@ -57,7 +57,7 @@ describe('Bank resource', () => {
         expect(updateResponse.status).toEqual(StatusCodes.OK)
         let updateMessage = updateResponse.data
         expect(updateMessage.id).toEqual(id)
-        expect(updateMessage.accessToken).toEqual('the updated accessToken')
+        expect(updateMessage.accessToken).toBeTruthy()
         expect(updateMessage.owner).toEqual(userId)
 
         // when

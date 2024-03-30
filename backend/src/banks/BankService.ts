@@ -1,13 +1,16 @@
 import Bank from './Bank'
 import BankRepository from './BankRepository'
+import {CipherUtility} from '../CipherUtility'
 
 export default class BankService {
 
     bankRepository = new BankRepository()
+
     async createBank(accessToken: string, owner: string) {
-        const bank = new Bank(accessToken, owner)
+        const encrypted = CipherUtility.encrypt(accessToken)
+        const bank = new Bank(encrypted, owner)
         await this.bankRepository.saveBank(bank)
-        return bank;
+        return bank
     }
 
     async deleteBank(id: string): Promise<void> {
@@ -15,16 +18,23 @@ export default class BankService {
     }
 
     async getBank(id: string) {
-        return await this.bankRepository.getBank(id)
+        const bank = await this.bankRepository.getBank(id)
+        bank.accessToken = CipherUtility.decrypt(bank.accessToken)
+        return bank
     }
 
     async getBanksByOwner(owner: string) {
-        return await this.bankRepository.getBanksByOwner(owner)
+        const banks = await this.bankRepository.getBanksByOwner(owner)
+        for (let bank of banks) {
+            bank.accessToken = CipherUtility.decrypt(bank.accessToken)
+        }
+        return banks
     }
 
     async updateBank(id: string, accessToken: string, owner: string) {
         const bank = await this.getBank(id)
-        bank.updateDefinedFields(accessToken, owner)
+        const encrypted = CipherUtility.encrypt(accessToken)
+        bank.updateDefinedFields(encrypted, owner)
         await this.bankRepository.saveBank(bank)
         return bank
     }
