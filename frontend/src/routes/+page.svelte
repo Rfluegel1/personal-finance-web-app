@@ -33,15 +33,7 @@
             onSuccess: async (public_token, metadata) => {
                 await axios.post('/api/exchange_token_and_save_bank', {public_token})
                 await axios.get('/api/overview').then(response => {
-                    for (const bank of response.data) {
-                        console.log(bank)
-                        banks.push({
-                            id: banks.length,
-                            name: bank.name,
-                            accounts: [{id: 0, name: 'Default Bank Account'}]
-                        })
-                    }
-                    banks = banks
+                    banks = response.data
                 })
                 console.log('Success', public_token, metadata);
             },
@@ -114,12 +106,12 @@
     <button id='add-bank' on:click={handler.open()} disabled={!link_token}>Add Bank</button>
     <div class='bank-list'>
         <ol>
-            {#each banks as bank (bank.id)}
+            {#each banks as bank}
                 <div class='bank-item'>
                     <li>
                         {bank.name}
                         <ol>
-                            {#each bank.accounts as account (account.id)}
+                            {#each bank.accounts as account}
                                 <li>{account.name}</li>
                             {/each}
                         </ol>

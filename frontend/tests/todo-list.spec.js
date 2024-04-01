@@ -213,17 +213,16 @@ test('should use link flow to add bank and accounts', async ({page}) => {
 
             // then
             await expect(page.locator('text="Huntington Bank"')).toBeVisible();
-            await expect(page.locator('text="Default Bank Account"')).toBeVisible();
 
-            // await expect(page.locator('text="Plaid Checking"')).toBeVisible();
-            // await expect(page.locator('text="Plaid Saving"')).toBeVisible();
-            // await expect(page.locator('text="Plaid CD"')).toBeVisible();
-            // await expect(page.locator('text="Plaid Credit Card"')).toBeVisible();
-            // await expect(page.locator('text="Plaid Money Market"')).toBeVisible();
-            // await expect(page.locator('text="Plaid IRA"')).toBeVisible();
-            // await expect(page.locator('text="Plaid 401k"')).toBeVisible();
-            // await expect(page.locator('text="Plaid Student Loan"')).toBeVisible();
-            // await expect(page.locator('text="Plaid Mortgage')).toBeVisible();
+            await expect(page.locator('text="Plaid Checking"')).toBeVisible();
+            await expect(page.locator('text="Plaid Saving"')).toBeVisible();
+            await expect(page.locator('text="Plaid CD"')).toBeVisible();
+            await expect(page.locator('text="Plaid Credit Card"')).toBeVisible();
+            await expect(page.locator('text="Plaid Money Market"')).toBeVisible();
+            await expect(page.locator('text="Plaid IRA"')).toBeVisible();
+            await expect(page.locator('text="Plaid 401k"')).toBeVisible();
+            await expect(page.locator('text="Plaid Student Loan"')).toBeVisible();
+            await expect(page.locator('text="Plaid Mortgage"')).toBeVisible();
         } finally {
             // cleanup
             await authenticateAsAdmin(client);
