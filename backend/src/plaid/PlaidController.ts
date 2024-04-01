@@ -37,4 +37,19 @@ export default class PlaidController {
             next(error)
         }
     }
+
+    async getBankNames(request: Request, response: Response, next: NextFunction) {
+        getLogger().info('Received get bank names request')
+        if (!request.isAuthenticated()) {
+            return next(new UnauthorizedException('create access token'))
+        }
+        const userId = (request.user as User).id
+        try {
+            const bankNames = await this.plaidService.getBankNames(userId)
+            getLogger().info('Sending get bank names response')
+            return response.status(StatusCodes.OK).send(bankNames)
+        } catch (error) {
+            next(error)
+        }
+    }
 }

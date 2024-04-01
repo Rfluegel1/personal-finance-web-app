@@ -59,5 +59,39 @@ describe('Plaid service', () => {
             // then
             expect(result).toEqual({bankId: mockedBankId})
         })
+
+        test('should call to plaid to get bank names', async () => {
+            // given
+            let userId = 'user'
+            let firstMockedBank = new Bank('access_token1', userId)
+            let secondMockedBank = new Bank('access_token2', userId)
+            plaidService.bankService.getBanksByOwner = jest.fn().mockImplementation((owner) => {
+                if (owner === userId) {
+                    return [firstMockedBank, secondMockedBank]
+                }
+            })
+            plaidClient.accountsGet = jest.fn().mockImplementation((params) => {
+                if (params.access_token === firstMockedBank.accessToken) {
+                    return {data: {item: {institution_id: 'bankId1'}}}
+                }
+                if (params.access_token === secondMockedBank.accessToken) {
+                    return {data: {item: {institution_id: 'bankId2'}}}
+                }
+            })
+            plaidClient.institutionsGetById = jest.fn().mockImplementation((params) => {
+                if (params.institution_id === 'bankId1' && params.country_codes[0] === 'US') {
+                    return {data: {institution: {name: 'bankName1'}}}
+                }
+                if (params.institution_id === 'bankId2' && params.country_codes[0] === 'US') {
+                    return {data: {institution: {name: 'bankName2'}}}
+                }
+            })
+
+            // when
+            const response = await plaidService.getBankNames(userId)
+
+            // then
+            expect(response).toEqual({bankNames: ['bankName1', 'bankName2']})
+        })
     })
 })

@@ -15,7 +15,8 @@ jest.mock('../../src/plaid/PlaidService', () => {
     return jest.fn().mockImplementation(() => {
         return {
             createLinkToken: jest.fn(),
-            exchangeTokenAndSaveBank: jest.fn()
+            exchangeTokenAndSaveBank: jest.fn(),
+            getBankNames: jest.fn()
         }
     })
 })
@@ -74,6 +75,31 @@ describe('Plaid controller', () => {
             expect(response.status).toHaveBeenCalledWith(StatusCodes.CREATED)
             expect(response.send).toHaveBeenCalledWith({bankId: mockedBankId})
         })
+
+        test('should return bank names from service', async () => {
+            // given
+            const request = {
+                isAuthenticated: () => true,
+                user: {id: 'user'}
+            }
+            const response = {
+                status: jest.fn().mockReturnThis(),
+                send: jest.fn()
+            }
+            let mockedBankNames = ['bank1', 'bank2'];
+            (plaidController.plaidService.getBankNames as jest.Mock).mockImplementation((owner) => {
+                if (owner === 'user') {
+                    return {bankNames: mockedBankNames}
+                }
+            })
+
+            // when
+            await plaidController.getBankNames(request as any, response as any, jest.fn())
+
+            // then
+            expect(response.status).toHaveBeenCalledWith(StatusCodes.OK)
+            expect(response.send).toHaveBeenCalledWith({bankNames: mockedBankNames})
+        })
     })
 
     describe('in regards to error handling', () => {
@@ -119,12 +145,34 @@ describe('Plaid controller', () => {
             // then
             expect(next).toHaveBeenCalledWith(error)
         })
+
+        test('should call next with error when get bank names fails', async () => {
+            // given
+            const request = {
+                isAuthenticated: () => true,
+                user: {id: 'user'}
+            }
+            const response = {
+                status: jest.fn().mockReturnThis(),
+                send: jest.fn()
+            }
+            const next = jest.fn()
+            const error = new Error('error');
+            (plaidController.plaidService.getBankNames as jest.Mock).mockRejectedValue(error)
+
+            // when
+            await plaidController.getBankNames(request as any, response as any, next)
+
+            // then
+            expect(next).toHaveBeenCalledWith(error)
+        })
     })
 
     it.each`
     apiEndpoint                   | controllerFunction
     ${'exchangeTokenAndSaveBank'} | ${plaidController.exchangeTokenAndSaveBank}
     ${'createLinkToken'}          | ${plaidController.createLinkToken}
+    ${'getBankNames'}             | ${plaidController.getBankNames}
     `('$apiEndpoint returns unauthorized when the request session is not authenticated', async (
         {controllerFunction}
     ) => {

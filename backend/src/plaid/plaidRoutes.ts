@@ -60,4 +60,24 @@ router.post('/create_link_token', plaidController.createLinkToken.bind(plaidCont
  */
 router.post('/exchange_token_and_save_bank', plaidController.exchangeTokenAndSaveBank.bind(plaidController))
 
+/**
+ * @swagger
+ * /api/bank_names:
+ *   get:
+ *     tags: [Plaid]
+ *     summary: Gets bank names.
+ *     responses:
+ *       200:
+ *         description: A list of bank names.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 bankNames:
+ *                   type: array
+ *                   description: A list of bank names.
+ */
+router.get('/bank_names', plaidController.getBankNames.bind(plaidController))
+
 export default router

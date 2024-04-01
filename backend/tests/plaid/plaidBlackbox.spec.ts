@@ -58,6 +58,13 @@ describe('Plaid resource', () => {
 
                 // then
                 expect(banks.data.banks.find((bank: Bank) => bank.id === bankId)).toBeTruthy()
+
+                // when
+                const response = await client.get(`${process.env.BASE_URL}/api/bank_names`)
+
+                // then
+                expect(response.status).toBe(StatusCodes.OK)
+                expect(response.data.bankNames).toEqual(expect.arrayContaining(['Huntington Bank']))
             } finally {
                 // cleanup
                 const deleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${bankId}`)

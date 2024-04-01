@@ -1,9 +1,15 @@
 import {plaidClient} from './PlaidConfiguration'
-import {CountryCode, LinkTokenCreateRequest, Products} from 'plaid'
+import {
+    CountryCode,
+    InstitutionsGetByIdRequest,
+    LinkTokenCreateRequest,
+    Products
+} from 'plaid'
 import BankService from '../banks/BankService'
 
 export default class PlaidService {
     bankService = new BankService()
+
     async createLinkToken(userId: string): Promise<any> {
         const plaidRequest: LinkTokenCreateRequest = {
             'client_name': 'personal-finance-web-app',
@@ -24,5 +30,21 @@ export default class PlaidService {
         })
         let bankId = (await this.bankService.createBank(response.data.access_token, userId)).id
         return {bankId: bankId}
+    }
+
+    async getBankNames(userId: string): Promise<any> {
+        let bankNames = []
+        const banks = await this.bankService.getBanksByOwner(userId)
+        for (let bank of banks) {
+            let accountsResponse = await plaidClient.accountsGet({
+                access_token: bank.accessToken
+            })
+            let institutionResponse = await plaidClient.institutionsGetById({
+                institution_id: accountsResponse.data.item.institution_id,
+                country_codes: [CountryCode.Us]
+            } as InstitutionsGetByIdRequest)
+            bankNames.push(institutionResponse.data.institution.name)
+        }
+        return {bankNames: bankNames}
     }
 }
