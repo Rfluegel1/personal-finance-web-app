@@ -32,11 +32,12 @@
             token: link_token,
             onSuccess: async (public_token, metadata) => {
                 await axios.post('/api/exchange_token_and_save_bank', {public_token})
-                await axios.get('/api/bank_names').then(response => {
-                    for (const bankName of response.data.bankNames) {
+                await axios.get('/api/overview').then(response => {
+                    for (const bank of response.data) {
+                        console.log(bank)
                         banks.push({
                             id: banks.length,
-                            name: bankName,
+                            name: bank.name,
                             accounts: [{id: 0, name: 'Default Bank Account'}]
                         })
                     }

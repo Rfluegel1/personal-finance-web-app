@@ -30,7 +30,7 @@ describe('Plaid resource', () => {
         await logOutUser(client)
     })
 
-    test('should exchange a public token and create bank', async () => {
+    test('should exchange a public token and create bank and access bank names and access account names', async () => {
         if (process.env.NODE_ENV === 'development') {
             // given
             await authenticateAsAdmin(admin)
@@ -60,11 +60,26 @@ describe('Plaid resource', () => {
                 expect(banks.data.banks.find((bank: Bank) => bank.id === bankId)).toBeTruthy()
 
                 // when
-                const response = await client.get(`${process.env.BASE_URL}/api/bank_names`)
+                const response = await client.get(`${process.env.BASE_URL}/api/overview`)
 
                 // then
                 expect(response.status).toBe(StatusCodes.OK)
-                expect(response.data.bankNames).toEqual(expect.arrayContaining(['Huntington Bank']))
+                expect(response.data).toEqual(
+                    [{
+                        name: 'Huntington Bank',
+                        accounts: [
+                            {name: 'Plaid Checking'},
+                            {name: 'Plaid Saving'},
+                            {name: 'Plaid CD'},
+                            {name: 'Plaid Credit Card'},
+                            {name: 'Plaid Money Market'},
+                            {name: 'Plaid IRA'},
+                            {name: 'Plaid 401k'},
+                            {name: 'Plaid Student Loan'},
+                            {name: 'Plaid Mortgage'}
+                        ]
+                    }]
+                )
             } finally {
                 // cleanup
                 const deleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${bankId}`)

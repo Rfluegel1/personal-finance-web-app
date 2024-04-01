@@ -62,22 +62,32 @@ router.post('/exchange_token_and_save_bank', plaidController.exchangeTokenAndSav
 
 /**
  * @swagger
- * /api/bank_names:
+ * /api/overview:
  *   get:
  *     tags: [Plaid]
- *     summary: Gets bank names.
+ *     summary: Gets bank names and their account names.
  *     responses:
- *       200:
- *         description: A list of bank names.
+ *       '200':
+ *         description: A list of banks with their accounts
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 bankNames:
- *                   type: array
- *                   description: A list of bank names.
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     example: Huntington Bank
+ *                   accounts:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                           example: Plaid Checking
  */
-router.get('/bank_names', plaidController.getBankNames.bind(plaidController))
+router.get('/overview', plaidController.getOverview.bind(plaidController))
 
 export default router

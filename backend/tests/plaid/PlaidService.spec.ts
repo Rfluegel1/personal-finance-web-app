@@ -72,10 +72,26 @@ describe('Plaid service', () => {
             })
             plaidClient.accountsGet = jest.fn().mockImplementation((params) => {
                 if (params.access_token === firstMockedBank.accessToken) {
-                    return {data: {item: {institution_id: 'bankId1'}}}
+                    return {
+                        data: {
+                            item: {institution_id: 'bankId1'},
+                            accounts: [
+                                {name: 'bank1AccountName1'},
+                                {name: 'bank1AccountName2'}
+                            ]
+                        }
+                    }
                 }
                 if (params.access_token === secondMockedBank.accessToken) {
-                    return {data: {item: {institution_id: 'bankId2'}}}
+                    return {
+                        data: {
+                            item: {institution_id: 'bankId2'},
+                            accounts: [
+                                {name: 'bank2AccountName1'},
+                                {name: 'bank2AccountName2'}
+                            ]
+                        }
+                    }
                 }
             })
             plaidClient.institutionsGetById = jest.fn().mockImplementation((params) => {
@@ -88,10 +104,19 @@ describe('Plaid service', () => {
             })
 
             // when
-            const response = await plaidService.getBankNames(userId)
+            const response = await plaidService.getOverview(userId)
 
             // then
-            expect(response).toEqual({bankNames: ['bankName1', 'bankName2']})
+            expect(response).toEqual([
+                {
+                    name: 'bankName1',
+                    accounts: [{name: 'bank1AccountName1'}, {name: 'bank1AccountName2'}]
+                },
+                {
+                    name: 'bankName2',
+                    accounts: [{name: 'bank2AccountName1'}, {name: 'bank2AccountName2'}]
+                },
+            ])
         })
     })
 })

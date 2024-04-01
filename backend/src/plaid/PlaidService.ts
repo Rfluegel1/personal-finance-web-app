@@ -32,8 +32,8 @@ export default class PlaidService {
         return {bankId: bankId}
     }
 
-    async getBankNames(userId: string): Promise<any> {
-        let bankNames = []
+    async getOverview(userId: string): Promise<any> {
+        let overview = []
         const banks = await this.bankService.getBanksByOwner(userId)
         for (let bank of banks) {
             let accountsResponse = await plaidClient.accountsGet({
@@ -43,8 +43,13 @@ export default class PlaidService {
                 institution_id: accountsResponse.data.item.institution_id,
                 country_codes: [CountryCode.Us]
             } as InstitutionsGetByIdRequest)
-            bankNames.push(institutionResponse.data.institution.name)
+            overview.push({
+                name: institutionResponse.data.institution.name,
+                accounts: accountsResponse.data.accounts.map(account => {
+                    return {name: account.name}
+                })
+            })
         }
-        return {bankNames: bankNames}
+        return overview
     }
 }

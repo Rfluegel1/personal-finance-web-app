@@ -16,7 +16,7 @@ jest.mock('../../src/plaid/PlaidService', () => {
         return {
             createLinkToken: jest.fn(),
             exchangeTokenAndSaveBank: jest.fn(),
-            getBankNames: jest.fn()
+            getOverview: jest.fn()
         }
     })
 })
@@ -87,14 +87,14 @@ describe('Plaid controller', () => {
                 send: jest.fn()
             }
             let mockedBankNames = ['bank1', 'bank2'];
-            (plaidController.plaidService.getBankNames as jest.Mock).mockImplementation((owner) => {
+            (plaidController.plaidService.getOverview as jest.Mock).mockImplementation((owner) => {
                 if (owner === 'user') {
                     return {bankNames: mockedBankNames}
                 }
             })
 
             // when
-            await plaidController.getBankNames(request as any, response as any, jest.fn())
+            await plaidController.getOverview(request as any, response as any, jest.fn())
 
             // then
             expect(response.status).toHaveBeenCalledWith(StatusCodes.OK)
@@ -158,10 +158,10 @@ describe('Plaid controller', () => {
             }
             const next = jest.fn()
             const error = new Error('error');
-            (plaidController.plaidService.getBankNames as jest.Mock).mockRejectedValue(error)
+            (plaidController.plaidService.getOverview as jest.Mock).mockRejectedValue(error)
 
             // when
-            await plaidController.getBankNames(request as any, response as any, next)
+            await plaidController.getOverview(request as any, response as any, next)
 
             // then
             expect(next).toHaveBeenCalledWith(error)
@@ -172,7 +172,7 @@ describe('Plaid controller', () => {
     apiEndpoint                   | controllerFunction
     ${'exchangeTokenAndSaveBank'} | ${plaidController.exchangeTokenAndSaveBank}
     ${'createLinkToken'}          | ${plaidController.createLinkToken}
-    ${'getBankNames'}             | ${plaidController.getBankNames}
+    ${'getBankNames'}             | ${plaidController.getOverview}
     `('$apiEndpoint returns unauthorized when the request session is not authenticated', async (
         {controllerFunction}
     ) => {
