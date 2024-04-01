@@ -190,9 +190,9 @@ test('should disable add bank button when link token is not set', async ({page, 
     await expect(page.locator('button[id="add-bank"]')).toBeDisabled();
 })
 
-test('should use link token to create public token to exchange for access token', async ({page}) => {
+test('should use link flow to add bank and accounts', async ({page}) => {
     if (process.env.NODE_ENV === 'development') {
-        test.setTimeout(45000);
+        test.setTimeout(15000);
         // given
         await logInTestUser(page);
 
@@ -211,6 +211,17 @@ test('should use link token to create public token to exchange for access token'
 
             // then
             await expect(page.locator('text="Huntington Bank"')).toBeVisible();
+            await expect(page.locator('text="Default Bank Account"')).toBeVisible();
+
+            // await expect(page.locator('text="Plaid Checking"')).toBeVisible();
+            // await expect(page.locator('text="Plaid Saving"')).toBeVisible();
+            // await expect(page.locator('text="Plaid CD"')).toBeVisible();
+            // await expect(page.locator('text="Plaid Credit Card"')).toBeVisible();
+            // await expect(page.locator('text="Plaid Money Market"')).toBeVisible();
+            // await expect(page.locator('text="Plaid IRA"')).toBeVisible();
+            // await expect(page.locator('text="Plaid 401k"')).toBeVisible();
+            // await expect(page.locator('text="Plaid Student Loan"')).toBeVisible();
+            // await expect(page.locator('text="Plaid Mortgage')).toBeVisible();
         } finally {
             // cleanup
             await authenticateAsAdmin(client);

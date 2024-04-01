@@ -34,7 +34,11 @@
                 await axios.post('/api/exchange_token_and_save_bank', {public_token})
                 await axios.get('/api/bank_names').then(response => {
                     for (const bankName of response.data.bankNames) {
-                        banks.push({id: banks.length, name: bankName})
+                        banks.push({
+                            id: banks.length,
+                            name: bankName,
+                            accounts: [{id: 0, name: 'Default Bank Account'}]
+                        })
                     }
                     banks = banks
                 })
@@ -111,7 +115,14 @@
         <ol>
             {#each banks as bank (bank.id)}
                 <div class='bank-item'>
-                    <li>{bank.name}</li>
+                    <li>
+                        {bank.name}
+                        <ol>
+                            {#each bank.accounts as account (account.id)}
+                                <li>{account.name}</li>
+                            {/each}
+                        </ol>
+                    </li>
                 </div>
             {/each}
         </ol>
