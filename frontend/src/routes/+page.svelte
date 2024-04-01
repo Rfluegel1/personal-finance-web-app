@@ -30,9 +30,14 @@
     function initializePlaid() {
         handler = Plaid.create({
             token: link_token,
-            onSuccess: (public_token, metadata) => {
-                banks.push({id: banks.length, name: 'Default Bank Account'})
-                banks = banks
+            onSuccess: async (public_token, metadata) => {
+                await axios.post('/api/exchange_token_and_save_bank', {public_token})
+                await axios.get('/api/bank_names').then(response => {
+                    for (const bankName of response.data.bankNames) {
+                        banks.push({id: banks.length, name: bankName})
+                    }
+                    banks = banks
+                })
                 console.log('Success', public_token, metadata);
             },
             onExit: (err, metadata) => {
