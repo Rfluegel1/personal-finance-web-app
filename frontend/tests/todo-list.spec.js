@@ -115,6 +115,8 @@ test('user without email verification cannot create tasks, and is asked to verif
                                                                                            }) => {
     // given
     let email;
+    const jar = new CookieJar();
+    const client = wrapper(axios.create({jar, withCredentials: true}));
     try {
         email = await registerTemporaryUser(page);
 
