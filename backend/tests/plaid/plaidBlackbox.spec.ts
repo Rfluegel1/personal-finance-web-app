@@ -77,7 +77,8 @@ describe('Plaid resource', () => {
                             {name: 'Plaid 401k'},
                             {name: 'Plaid Student Loan'},
                             {name: 'Plaid Mortgage'}
-                        ]
+                        ],
+                        transactions: expect.arrayContaining([{amount: 1000}])
                     }]
                 )
             } finally {
