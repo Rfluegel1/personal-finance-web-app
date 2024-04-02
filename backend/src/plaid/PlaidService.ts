@@ -51,7 +51,7 @@ export default class PlaidService {
                     return {name: account.name}
                 }),
                 transactions: transactions.map((transaction: any) => {
-                    return {amount: transaction.amount}
+                    return {amount: transaction.amount, date: transaction.date}
                 })
             })
         }

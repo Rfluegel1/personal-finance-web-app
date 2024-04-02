@@ -108,10 +108,10 @@ describe('Plaid service', () => {
                         data: {
                             item: {institution_id: 'bankId1'},
                             transactions: [
-                                {amount: 1},
-                                {amount: 1},
-                                {amount: 2},
-                                {amount: 2}
+                                {amount: 1, date: '1-1-1'},
+                                {amount: 1, date: '1-1-1'},
+                                {amount: 2, date: '1-1-1'},
+                                {amount: 2, date: '1-1-1'}
                             ],
                             total_transactions: 4,
                             accounts: [
@@ -129,10 +129,10 @@ describe('Plaid service', () => {
                         data: {
                             item: {institution_id: 'bankId2'},
                             transactions: [
-                                {amount: 3},
-                                {amount: 3},
-                                {amount: 4},
-                                {amount: 4}
+                                {amount: 3, date: '1-1-1'},
+                                {amount: 3, date: '1-1-1'},
+                                {amount: 4, date: '1-1-1'},
+                                {amount: 4, date: '1-1-1'}
                             ],
                             total_transactions: 4,
                             accounts: [
@@ -159,10 +159,10 @@ describe('Plaid service', () => {
                         {name: 'bank1AccountName2'}
                     ],
                     transactions: [
-                        {amount: 1},
-                        {amount: 1},
-                        {amount: 2},
-                        {amount: 2}
+                        {amount: 1, date: '1-1-1'},
+                        {amount: 1, date: '1-1-1'},
+                        {amount: 2, date: '1-1-1'},
+                        {amount: 2, date: '1-1-1'}
                     ]
                 },
                 {
@@ -172,10 +172,10 @@ describe('Plaid service', () => {
                         {name: 'bank2AccountName2'}
                     ],
                     transactions: [
-                        {amount: 3},
-                        {amount: 3},
-                        {amount: 4},
-                        {amount: 4}
+                        {amount: 3, date: '1-1-1'},
+                        {amount: 3, date: '1-1-1'},
+                        {amount: 4, date: '1-1-1'},
+                        {amount: 4, date: '1-1-1'}
                     ]
                 },
             ])
