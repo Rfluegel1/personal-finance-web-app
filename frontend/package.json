@@ -37,6 +37,7 @@
 		"@sveltejs/adapter-static": "^3.0.1",
 		"@types/node": "^20.11.16",
 		"axios": "^1.6.7",
+		"d3": "^7.9.0",
 		"dotenv": "^16.4.1"
 	}
 }
