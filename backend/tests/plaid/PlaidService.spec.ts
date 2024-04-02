@@ -117,10 +117,10 @@ describe('Plaid service', () => {
                             accounts: [
                                 {
                                     name: 'bank1AccountName1',
-                                    balances: {current: 100}
+                                    type: 'depository', balances: {current: 100}
                                 }, {
                                     name: 'bank1AccountName2',
-                                    balances: {current: 200}
+                                    type: 'credit', balances: {current: 200}
                                 }
                             ],
                         }
@@ -140,10 +140,10 @@ describe('Plaid service', () => {
                             accounts: [
                                 {
                                     name: 'bank2AccountName1',
-                                    balances: {current: 300}
+                                    type: 'loan', balances: {current: 300}
                                 }, {
                                     name: 'bank2AccountName2',
-                                    balances: {current: 400}
+                                    type: 'investment', balances: {current: 400}
                                 }
                             ],
                         }
@@ -159,8 +159,8 @@ describe('Plaid service', () => {
                 {
                     name: 'bankName1',
                     accounts: [
-                        {name: 'bank1AccountName1', balances: {current: 100}},
-                        {name: 'bank1AccountName2', balances: {current: 200}}
+                        {name: 'bank1AccountName1', type: 'depository', balances: {current: 100}},
+                        {name: 'bank1AccountName2', type: 'credit', balances: {current: 200}}
                     ],
                     transactions: [
                         {amount: 1, date: '1-1-1'},
@@ -172,8 +172,8 @@ describe('Plaid service', () => {
                 {
                     name: 'bankName2',
                     accounts: [
-                        {name: 'bank2AccountName1', balances: {current: 300}},
-                        {name: 'bank2AccountName2', balances: {current: 400}}
+                        {name: 'bank2AccountName1', type: 'loan', balances: {current: 300}},
+                        {name: 'bank2AccountName2', type: 'investment', balances: {current: 400}}
                     ],
                     transactions: [
                         {amount: 3, date: '1-1-1'},

@@ -68,17 +68,17 @@ describe('Plaid resource', () => {
                     [{
                         name: 'Huntington Bank',
                         accounts: [
-                            {name: 'Plaid Checking', balances: {current: 110}},
-                            {name: 'Plaid Saving', balances: {current: 210}},
-                            {name: 'Plaid CD', balances: {current: 1000}},
-                            {name: 'Plaid Credit Card', balances: {current: 410}},
-                            {name: 'Plaid Money Market', balances: {current: 43200}},
-                            {name: 'Plaid IRA', balances: {current: 320.76}},
-                            {name: 'Plaid 401k', balances: {current: 23631.9805}},
-                            {name: 'Plaid Student Loan', balances: {current: 65262}},
-                            {name: 'Plaid Mortgage', balances: {current: 56302.06}}
+                            {type: 'depository', name: 'Plaid Checking', balances: {current: 110}},
+                            {type: 'depository', name: 'Plaid Saving', balances: {current: 210}},
+                            {type: 'depository', name: 'Plaid CD', balances: {current: 1000}},
+                            {type: 'credit', name: 'Plaid Credit Card', balances: {current: 410}},
+                            {type: 'depository', name: 'Plaid Money Market', balances: {current: 43200}},
+                            {type: 'investment', name: 'Plaid IRA', balances: {current: 320.76}},
+                            {type: 'investment', name: 'Plaid 401k', balances: {current: 23631.9805}},
+                            {type: 'loan', name: 'Plaid Student Loan', balances: {current: 65262}},
+                            {type: 'loan', name: 'Plaid Mortgage', balances: {current: 56302.06}}
                         ],
-                        transactions: expect.arrayContaining([{amount: 1000, date: "2022-04-04"}])
+                        transactions: expect.arrayContaining([{amount: 1000, date: '2022-04-04'}])
                     }]
                 )
             } finally {
