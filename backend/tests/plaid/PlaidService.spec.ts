@@ -116,9 +116,11 @@ describe('Plaid service', () => {
                             total_transactions: 4,
                             accounts: [
                                 {
-                                    name: 'bank1AccountName1'
+                                    name: 'bank1AccountName1',
+                                    balances: {current: 100}
                                 }, {
-                                    name: 'bank1AccountName2'
+                                    name: 'bank1AccountName2',
+                                    balances: {current: 200}
                                 }
                             ],
                         }
@@ -137,9 +139,11 @@ describe('Plaid service', () => {
                             total_transactions: 4,
                             accounts: [
                                 {
-                                    name: 'bank2AccountName1'
+                                    name: 'bank2AccountName1',
+                                    balances: {current: 300}
                                 }, {
-                                    name: 'bank2AccountName2'
+                                    name: 'bank2AccountName2',
+                                    balances: {current: 400}
                                 }
                             ],
                         }
@@ -155,8 +159,8 @@ describe('Plaid service', () => {
                 {
                     name: 'bankName1',
                     accounts: [
-                        {name: 'bank1AccountName1'},
-                        {name: 'bank1AccountName2'}
+                        {name: 'bank1AccountName1', balances: {current: 100}},
+                        {name: 'bank1AccountName2', balances: {current: 200}}
                     ],
                     transactions: [
                         {amount: 1, date: '1-1-1'},
@@ -168,8 +172,8 @@ describe('Plaid service', () => {
                 {
                     name: 'bankName2',
                     accounts: [
-                        {name: 'bank2AccountName1'},
-                        {name: 'bank2AccountName2'}
+                        {name: 'bank2AccountName1', balances: {current: 300}},
+                        {name: 'bank2AccountName2', balances: {current: 400}}
                     ],
                     transactions: [
                         {amount: 3, date: '1-1-1'},
@@ -240,7 +244,7 @@ describe('Plaid service', () => {
                     transactions: [{amount: 1}],
                     total_transactions: 2,
                     item: {institution_id: 'bankId1'},
-                    accounts: [{name: 'bank1AccountName1'}]
+                    accounts: [{name: 'bank1AccountName1', balances: {current: 1}}]
                 },
             });
             (plaidClient.institutionsGetById as jest.Mock).mockResolvedValue({data: {institution: {name: 'bankName1'}}})

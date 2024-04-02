@@ -48,7 +48,7 @@ export default class PlaidService {
             overview.push({
                 name: institutionResponse.data.institution.name,
                 accounts: transactionsResponse.data.accounts.map((account: any) => {
-                    return {name: account.name}
+                    return {name: account.name, balances: {current: account.balances.current}}
                 }),
                 transactions: transactions.map((transaction: any) => {
                     return {amount: transaction.amount, date: transaction.date}

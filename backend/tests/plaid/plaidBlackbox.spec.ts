@@ -68,15 +68,15 @@ describe('Plaid resource', () => {
                     [{
                         name: 'Huntington Bank',
                         accounts: [
-                            {name: 'Plaid Checking'},
-                            {name: 'Plaid Saving'},
-                            {name: 'Plaid CD'},
-                            {name: 'Plaid Credit Card'},
-                            {name: 'Plaid Money Market'},
-                            {name: 'Plaid IRA'},
-                            {name: 'Plaid 401k'},
-                            {name: 'Plaid Student Loan'},
-                            {name: 'Plaid Mortgage'}
+                            {name: 'Plaid Checking', balances: {current: 110}},
+                            {name: 'Plaid Saving', balances: {current: 210}},
+                            {name: 'Plaid CD', balances: {current: 1000}},
+                            {name: 'Plaid Credit Card', balances: {current: 410}},
+                            {name: 'Plaid Money Market', balances: {current: 43200}},
+                            {name: 'Plaid IRA', balances: {current: 320.76}},
+                            {name: 'Plaid 401k', balances: {current: 23631.9805}},
+                            {name: 'Plaid Student Loan', balances: {current: 65262}},
+                            {name: 'Plaid Mortgage', balances: {current: 56302.06}}
                         ],
                         transactions: expect.arrayContaining([{amount: 1000, date: "2022-04-04"}])
                     }]
