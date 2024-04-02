@@ -37,14 +37,20 @@ export default class PlaidService {
         let overview = []
         const banks = await this.bankService.getBanksByOwner(userId)
         for (let bank of banks) {
-            let transactionsResponse = await this.getTransactionsResponse(bank)
-            let institutionResponse = await this.getInstitutionsGetById(transactionsResponse)
+            let transactions: any[] = []
+            const transactionsResponse = await this.getTransactionsResponseWithRetry(bank)
+            transactions = transactions.concat(transactionsResponse.data.transactions)
+            while (transactions.length < transactionsResponse.data.total_transactions) {
+                const paginatedTransactionsResponse = await this.getTransactionsResponseWithRetry(bank, transactions.length)
+                transactions = transactions.concat(paginatedTransactionsResponse.data.transactions)
+            }
+            const institutionResponse = await this.getInstitutionsGetById(transactionsResponse)
             overview.push({
                 name: institutionResponse.data.institution.name,
                 accounts: transactionsResponse.data.accounts.map((account: any) => {
                     return {name: account.name}
                 }),
-                transactions: transactionsResponse.data.transactions.map((transaction: any) => {
+                transactions: transactions.map((transaction: any) => {
                     return {amount: transaction.amount}
                 })
             })
@@ -52,22 +58,25 @@ export default class PlaidService {
         return overview
     }
 
-    async getTransactionsResponse(bank: any): Promise<any> {
+    async getTransactionsResponseWithRetry(bank: any, offset = 0): Promise<any> {
         try {
-             const transactionResponse = await plaidClient.transactionsGet({
+            const transactionResponse = await plaidClient.transactionsGet({
                 access_token: bank.accessToken,
                 start_date: '2022-01-01',
-                end_date: '2023-01-01'
+                end_date: '2023-01-01',
+                options: {
+                    offset: offset
+                }
             } as TransactionsGetRequest)
             if (transactionResponse.data?.transactions.length === 0) {
                 await new Promise(resolve => setTimeout(resolve, 100))
-                return await this.getTransactionsResponse(bank)
+                return await this.getTransactionsResponseWithRetry(bank)
             }
             return transactionResponse
         } catch (error: any) {
             if (error.response?.data?.error_code === 'PRODUCT_NOT_READY') {
                 await new Promise(resolve => setTimeout(resolve, 100))
-                return await this.getTransactionsResponse(bank)
+                return await this.getTransactionsResponseWithRetry(bank)
             } else {
                 throw error
             }
