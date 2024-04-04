@@ -78,7 +78,7 @@ describe('Plaid resource', () => {
                             {type: 'loan', name: 'Plaid Student Loan', balances: {current: 65262}},
                             {type: 'loan', name: 'Plaid Mortgage', balances: {current: 56302.06}}
                         ],
-                        transactions: expect.arrayContaining([{amount: 1000, date: '2022-04-04'}])
+                        transactions: expect.arrayContaining([{amount: 25, date: "2022-12-31"}])
                     }]
                 )
             } finally {
