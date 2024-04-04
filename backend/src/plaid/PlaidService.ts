@@ -1,12 +1,12 @@
 import {plaidClient} from './PlaidConfiguration'
 import {
+    AccountBase,
     CountryCode,
     InstitutionsGetByIdRequest,
     LinkTokenCreateRequest,
-    Products, TransactionsGetRequest
+    Products, Transaction, TransactionsGetRequest
 } from 'plaid'
 import BankService from '../banks/BankService'
-import {AxiosResponse} from 'axios'
 
 export default class PlaidService {
     bankService = new BankService()
@@ -37,25 +37,39 @@ export default class PlaidService {
         let overview = []
         const banks = await this.bankService.getBanksByOwner(userId)
         for (let bank of banks) {
-            let transactions: any[] = []
-            const transactionsResponse = await this.getTransactionsResponseWithRetry(bank)
-            transactions = transactions.concat(transactionsResponse.data.transactions)
-            while (transactions.length < transactionsResponse.data.total_transactions) {
-                const paginatedTransactionsResponse = await this.getTransactionsResponseWithRetry(bank, transactions.length)
-                transactions = transactions.concat(paginatedTransactionsResponse.data.transactions)
-            }
-            const institutionResponse = await this.getInstitutionsGetById(transactionsResponse)
+            let {transactions, accounts, institutionId} = await this.getTransactionsAndAccountsAndInstitutionId(bank)
+            let institutionName = await this.getInstitutionName(institutionId)
             overview.push({
-                name: institutionResponse.data.institution.name,
-                accounts: transactionsResponse.data.accounts.map((account: any) => {
+                name: institutionName,
+                accounts: accounts.map((account: AccountBase) => {
                     return {name: account.name, type: account.type, balances: {current: account.balances.current}}
                 }),
-                transactions: transactions.map((transaction: any) => {
+                transactions: transactions.map((transaction: Transaction) => {
                     return {amount: transaction.amount, date: transaction.date}
                 })
             })
         }
         return overview
+    }
+
+    private async getInstitutionName(institutionId: string) {
+        const institutionResponse = await this.getInstitutionsGetById(institutionId)
+        return institutionResponse.data.institution.name
+    }
+
+    private async getTransactionsAndAccountsAndInstitutionId(bank: any) {
+        let transactions: any[] = []
+        let accounts: any[]
+        let institutionId
+        const transactionsResponse = await this.getTransactionsResponseWithRetry(bank)
+        institutionId = transactionsResponse.data.item.institution_id
+        accounts = transactionsResponse.data.accounts
+        transactions = transactions.concat(transactionsResponse.data.transactions)
+        while (transactions.length < transactionsResponse.data.total_transactions) {
+            const paginatedTransactionsResponse = await this.getTransactionsResponseWithRetry(bank, transactions.length)
+            transactions = transactions.concat(paginatedTransactionsResponse.data.transactions)
+        }
+        return {transactions, accounts, institutionId}
     }
 
     async getTransactionsResponseWithRetry(bank: any, offset = 0): Promise<any> {
@@ -83,9 +97,9 @@ export default class PlaidService {
         }
     }
 
-    private async getInstitutionsGetById(transactionResponse: AxiosResponse<any, any>) {
+    private async getInstitutionsGetById(institutionId: string) {
         return plaidClient.institutionsGetById({
-            institution_id: transactionResponse.data.item.institution_id,
+            institution_id: institutionId,
             country_codes: [CountryCode.Us]
         } as InstitutionsGetByIdRequest)
     }
