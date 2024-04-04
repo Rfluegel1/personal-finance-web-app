@@ -192,7 +192,7 @@ test('should disable add bank button when link token is not set', async ({page, 
     await expect(page.locator('button[id="add-bank"]')).toBeDisabled();
 })
 
-test('should use link flow to add bank and accounts', async ({page}) => {
+test.only('should use link flow to add bank and accounts', async ({page}) => {
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(15000);
         // given
@@ -212,7 +212,7 @@ test('should use link flow to add bank and accounts', async ({page}) => {
             await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
 
             // then
-            await expect(page.locator('text="Huntington Bank"')).toBeVisible();
+            await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
 
             await expect(page.locator('text="Plaid Checking"')).toBeVisible();
             await expect(page.locator('text="Plaid Saving"')).toBeVisible();

@@ -33,7 +33,7 @@
             onSuccess: async (public_token, metadata) => {
                 await axios.post('/api/exchange_token_and_save_bank', {public_token})
                 await axios.get('/api/overview').then(response => {
-                    banks = response.data
+                    banks = response.data.banks
                 })
                 console.log('Success', public_token, metadata);
             },
