@@ -4,7 +4,7 @@ import {
     CountryCode,
     InstitutionsGetByIdRequest,
     LinkTokenCreateRequest,
-    Products, Transaction, TransactionsGetRequest
+    Products, TransactionsGetRequest
 } from 'plaid'
 import BankService from '../banks/BankService'
 
@@ -37,19 +37,33 @@ export default class PlaidService {
         let overview = []
         const banks = await this.bankService.getBanksByOwner(userId)
         for (let bank of banks) {
-            let {transactions, accounts, institutionId} = await this.getTransactionsAndAccountsAndInstitutionId(bank)
-            let institutionName = await this.getInstitutionName(institutionId)
+            const {transactions, accounts, institutionId} = await this.getTransactionsAndAccountsAndInstitutionId(bank)
+            const institutionName = await this.getInstitutionName(institutionId)
+            const accountsToTransactions = this.matchAccountToTransactions(accounts, transactions)
             overview.push({
                 name: institutionName,
                 accounts: accounts.map((account: AccountBase) => {
-                    return {name: account.name, type: account.type, balances: {current: account.balances.current}}
-                }),
-                transactions: transactions.map((transaction: Transaction) => {
-                    return {amount: transaction.amount, date: transaction.date}
+                    return {
+                        name: account.name,
+                        type: account.type,
+                        balances: {current: account.balances.current},
+                        transactions: accountsToTransactions.get(account.account_id)
+                    }
                 })
             })
         }
         return overview
+    }
+
+    private matchAccountToTransactions(accounts: any[], transactions: any[]) {
+        let accountsMap = new Map<string, any>
+        for (let account of accounts) {
+            accountsMap.set(account.account_id, [])
+        }
+        for (let transaction of transactions) {
+            accountsMap.get(transaction.account_id).push({amount: transaction.amount, date: transaction.date})
+        }
+        return accountsMap
     }
 
     private async getInstitutionName(institutionId: string) {

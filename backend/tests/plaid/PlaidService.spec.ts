@@ -84,7 +84,7 @@ describe('Plaid service', () => {
             expect(result).toEqual({bankId: mockedBankId})
         })
 
-        test('should call to plaid to get bank names, account names, and transactions', async () => {
+        test('should call to plaid to get bank names, account names, and associated transactions', async () => {
             // given
             let userId = 'user'
             let firstMockedBank = new Bank('access_token1', userId)
@@ -108,17 +108,19 @@ describe('Plaid service', () => {
                         data: {
                             item: {institution_id: 'bankId1'},
                             transactions: [
-                                {amount: 1, date: '1-1-1'},
-                                {amount: 1, date: '1-1-1'},
-                                {amount: 2, date: '1-1-1'},
-                                {amount: 2, date: '1-1-1'}
+                                {amount: 2, date: '2-2-2', account_id: 'accountId1'},
+                                {amount: 1, date: '1-1-1', account_id: 'accountId2'},
+                                {amount: 4, date: '3-3-3', account_id: 'accountId1'},
+                                {amount: 3, date: '2-2-2', account_id: 'accountId2'}
                             ],
                             total_transactions: 4,
                             accounts: [
                                 {
+                                    account_id: 'accountId1',
                                     name: 'bank1AccountName1',
                                     type: 'depository', balances: {current: 100}
                                 }, {
+                                    account_id: 'accountId2',
                                     name: 'bank1AccountName2',
                                     type: 'credit', balances: {current: 200}
                                 }
@@ -131,17 +133,19 @@ describe('Plaid service', () => {
                         data: {
                             item: {institution_id: 'bankId2'},
                             transactions: [
-                                {amount: 3, date: '1-1-1'},
-                                {amount: 3, date: '1-1-1'},
-                                {amount: 4, date: '1-1-1'},
-                                {amount: 4, date: '1-1-1'}
+                                {amount: 6, date: '4-4-4', account_id: 'accountId3'},
+                                {amount: 5, date: '3-3-3', account_id: 'accountId4'},
+                                {amount: 8, date: '5-5-5', account_id: 'accountId3'},
+                                {amount: 7, date: '4-4-4', account_id: 'accountId4'},
                             ],
                             total_transactions: 4,
                             accounts: [
                                 {
+                                    account_id: 'accountId3',
                                     name: 'bank2AccountName1',
                                     type: 'loan', balances: {current: 300}
                                 }, {
+                                    account_id: 'accountId4',
                                     name: 'bank2AccountName2',
                                     type: 'investment', balances: {current: 400}
                                 }
@@ -159,27 +163,35 @@ describe('Plaid service', () => {
                 {
                     name: 'bankName1',
                     accounts: [
-                        {name: 'bank1AccountName1', type: 'depository', balances: {current: 100}},
-                        {name: 'bank1AccountName2', type: 'credit', balances: {current: 200}}
-                    ],
-                    transactions: [
-                        {amount: 1, date: '1-1-1'},
-                        {amount: 1, date: '1-1-1'},
-                        {amount: 2, date: '1-1-1'},
-                        {amount: 2, date: '1-1-1'}
+                        {
+                            name: 'bank1AccountName1',
+                            type: 'depository',
+                            balances: {current: 100},
+                            transactions: [{amount: 2, date: '2-2-2'}, {amount: 4, date: '3-3-3'}]
+                        },
+                        {
+                            name: 'bank1AccountName2',
+                            type: 'credit',
+                            balances: {current: 200},
+                            transactions: [{amount: 1, date: '1-1-1'}, {amount: 3, date: '2-2-2'}]
+                        }
                     ]
                 },
                 {
                     name: 'bankName2',
                     accounts: [
-                        {name: 'bank2AccountName1', type: 'loan', balances: {current: 300}},
-                        {name: 'bank2AccountName2', type: 'investment', balances: {current: 400}}
-                    ],
-                    transactions: [
-                        {amount: 3, date: '1-1-1'},
-                        {amount: 3, date: '1-1-1'},
-                        {amount: 4, date: '1-1-1'},
-                        {amount: 4, date: '1-1-1'}
+                        {
+                            name: 'bank2AccountName1',
+                            type: 'loan',
+                            balances: {current: 300},
+                            transactions: [{amount: 6, date: '4-4-4'}, {amount: 8, date: '5-5-5'}]
+                        },
+                        {
+                            name: 'bank2AccountName2',
+                            type: 'investment',
+                            balances: {current: 400},
+                            transactions: [{amount: 5, date: '3-3-3'}, {amount: 7, date: '4-4-4'}]
+                        }
                     ]
                 },
             ])
@@ -254,7 +266,7 @@ describe('Plaid service', () => {
 
             // then
             expect(plaidClient.transactionsGet).toHaveBeenCalledTimes(2)
-            expect(result[0].transactions).toEqual([{amount: 1}, {amount: 2}])
+            expect(result[0].accounts[0].transactions).toEqual([{amount: 1}, {amount: 2}])
         })
     })
 })
