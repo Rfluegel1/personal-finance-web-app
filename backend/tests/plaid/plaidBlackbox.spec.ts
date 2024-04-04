@@ -65,66 +65,68 @@ describe('Plaid resource', () => {
                 // then
                 expect(response.status).toBe(StatusCodes.OK)
                 expect(response.data).toEqual(
-                    [{
-                        name: 'Huntington Bank',
-                        accounts: [
-                            {
-                                type: 'depository',
-                                name: 'Plaid Checking',
-                                balances: {current: 110},
-                                transactions: expect.arrayContaining([{amount: 5.4, date: '2022-12-31'}])
-                            },
-                            {
-                                type: 'depository',
-                                name: 'Plaid Saving',
-                                balances: {current: 210},
-                                transactions: expect.arrayContaining([{amount: 25, date: '2022-12-31'}])
-                            },
-                            {
-                                type: 'depository',
-                                name: 'Plaid CD',
-                                balances: {current: 1000},
-                                transactions: expect.arrayContaining([{amount: 1000, date: '2022-12-30'}])
-                            },
-                            {
-                                type: 'credit',
-                                name: 'Plaid Credit Card',
-                                balances: {current: 410},
-                                transactions: expect.arrayContaining([{amount: 78.5, date: '2022-12-29'}])
-                            },
-                            {
-                                type: 'depository',
-                                name: 'Plaid Money Market',
-                                balances: {current: 43200},
-                                transactions: expect.arrayContaining([{amount: 5850, date: '2022-12-30'}])
-                            },
-                            {
-                                type: 'investment',
-                                name: 'Plaid IRA',
-                                balances: {current: 320.76},
-                                transactions: []
-                            },
-                            {
-                                type: 'investment',
-                                name: 'Plaid 401k',
-                                balances: {current: 23631.9805},
-                                transactions: []
-                            },
-                            {
-                                type: 'loan',
-                                name: 'Plaid Student Loan',
-                                balances: {current: 65262},
-                                transactions: []
-                            },
-                            {
-                                type: 'loan',
-                                name: 'Plaid Mortgage',
-                                balances: {current: 56302.06},
-                                transactions: []
-                            },
-                        ]
-                    }]
-                )
+                    {
+                        banks: [{
+                            name: 'Huntington Bank',
+                            accounts: [
+                                {
+                                    type: 'depository',
+                                    name: 'Plaid Checking',
+                                    balances: {current: 110},
+                                    transactions: expect.arrayContaining([{amount: 5.4, date: '2022-12-31'}])
+                                },
+                                {
+                                    type: 'depository',
+                                    name: 'Plaid Saving',
+                                    balances: {current: 210},
+                                    transactions: expect.arrayContaining([{amount: 25, date: '2022-12-31'}])
+                                },
+                                {
+                                    type: 'depository',
+                                    name: 'Plaid CD',
+                                    balances: {current: 1000},
+                                    transactions: expect.arrayContaining([{amount: 1000, date: '2022-12-30'}])
+                                },
+                                {
+                                    type: 'credit',
+                                    name: 'Plaid Credit Card',
+                                    balances: {current: 410},
+                                    transactions: expect.arrayContaining([{amount: 78.5, date: '2022-12-29'}])
+                                },
+                                {
+                                    type: 'depository',
+                                    name: 'Plaid Money Market',
+                                    balances: {current: 43200},
+                                    transactions: expect.arrayContaining([{amount: 5850, date: '2022-12-30'}])
+                                },
+                                {
+                                    type: 'investment',
+                                    name: 'Plaid IRA',
+                                    balances: {current: 320.76},
+                                    transactions: []
+                                },
+                                {
+                                    type: 'investment',
+                                    name: 'Plaid 401k',
+                                    balances: {current: 23631.9805},
+                                    transactions: []
+                                },
+                                {
+                                    type: 'loan',
+                                    name: 'Plaid Student Loan',
+                                    balances: {current: 65262},
+                                    transactions: []
+                                },
+                                {
+                                    type: 'loan',
+                                    name: 'Plaid Mortgage',
+                                    balances: {current: 56302.06},
+                                    transactions: []
+                                },
+                            ]
+                        }],
+                        netWorths: expect.arrayContaining([{value: -32489.75949999995, date: '2022-04-05'}])
+                    })
             } finally {
                 // cleanup
                 const deleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${bankId}`)

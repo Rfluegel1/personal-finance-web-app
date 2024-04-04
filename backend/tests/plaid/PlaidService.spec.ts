@@ -159,42 +159,52 @@ describe('Plaid service', () => {
             const response = await plaidService.getOverview(userId)
 
             // then
-            expect(response).toEqual([
-                {
-                    name: 'bankName1',
-                    accounts: [
-                        {
-                            name: 'bank1AccountName1',
-                            type: 'depository',
-                            balances: {current: 100},
-                            transactions: [{amount: 2, date: '2-2-2'}, {amount: 4, date: '3-3-3'}]
-                        },
-                        {
-                            name: 'bank1AccountName2',
-                            type: 'credit',
-                            balances: {current: 200},
-                            transactions: [{amount: 1, date: '1-1-1'}, {amount: 3, date: '2-2-2'}]
-                        }
-                    ]
-                },
-                {
-                    name: 'bankName2',
-                    accounts: [
-                        {
-                            name: 'bank2AccountName1',
-                            type: 'loan',
-                            balances: {current: 300},
-                            transactions: [{amount: 6, date: '4-4-4'}, {amount: 8, date: '5-5-5'}]
-                        },
-                        {
-                            name: 'bank2AccountName2',
-                            type: 'investment',
-                            balances: {current: 400},
-                            transactions: [{amount: 5, date: '3-3-3'}, {amount: 7, date: '4-4-4'}]
-                        }
-                    ]
-                },
-            ])
+            expect(response).toEqual({
+                banks: [
+                    {
+                        name: 'bankName1',
+                        accounts: [
+                            {
+                                name: 'bank1AccountName1',
+                                type: 'depository',
+                                balances: {current: 100},
+                                transactions: [{amount: 2, date: '2-2-2'}, {amount: 4, date: '3-3-3'}]
+                            },
+                            {
+                                name: 'bank1AccountName2',
+                                type: 'credit',
+                                balances: {current: 200},
+                                transactions: [{amount: 1, date: '1-1-1'}, {amount: 3, date: '2-2-2'}]
+                            }
+                        ]
+                    },
+                    {
+                        name: 'bankName2',
+                        accounts: [
+                            {
+                                name: 'bank2AccountName1',
+                                type: 'loan',
+                                balances: {current: 300},
+                                transactions: [{amount: 6, date: '4-4-4'}, {amount: 8, date: '5-5-5'}]
+                            },
+                            {
+                                name: 'bank2AccountName2',
+                                type: 'investment',
+                                balances: {current: 400},
+                                transactions: [{amount: 5, date: '3-3-3'}, {amount: 7, date: '4-4-4'}]
+                            }
+                        ]
+                    },
+                ],
+                netWorths: [
+                    {date: '1-1-1', value: 0},
+                    {date: '2-2-2', value: 1},
+                    {date: '3-3-3', value: 2},
+                    {date: '4-4-4', value: -7},
+                    {date: '5-5-5', value: -8},
+                    {date: '2024-4-4', value: 0}
+                ]
+            })
         })
 
         test('should call transactions get more than once when bad request message is PRODUCT_NOT_READY', async () => {
@@ -266,7 +276,7 @@ describe('Plaid service', () => {
 
             // then
             expect(plaidClient.transactionsGet).toHaveBeenCalledTimes(2)
-            expect(result[0].accounts[0].transactions).toEqual([{amount: 1}, {amount: 2}])
+            expect(result.banks[0].accounts[0].transactions).toEqual([{amount: 1}, {amount: 2}])
         })
     })
 })

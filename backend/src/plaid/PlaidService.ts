@@ -34,13 +34,13 @@ export default class PlaidService {
     }
 
     async getOverview(userId: string): Promise<any> {
-        let overview = []
+        let overview: { banks: any[], netWorths: any[] } = {banks: [], netWorths: []}
         const banks = await this.bankService.getBanksByOwner(userId)
         for (let bank of banks) {
             const {transactions, accounts, institutionId} = await this.getTransactionsAndAccountsAndInstitutionId(bank)
             const institutionName = await this.getInstitutionName(institutionId)
             const accountsToTransactions = this.matchAccountToTransactions(accounts, transactions)
-            overview.push({
+            overview.banks.push({
                 name: institutionName,
                 accounts: accounts.map((account: AccountBase) => {
                     return {
@@ -52,6 +52,43 @@ export default class PlaidService {
                 })
             })
         }
+        let todaysNetWorth = 0
+        let accounts = overview.banks.flatMap((bank: { name: string, accounts: any }) => bank.accounts)
+        for (let account of accounts) {
+            if (['depository', 'investment'].includes(account.type)) {
+                todaysNetWorth += account.balances.current
+            } else {
+                todaysNetWorth -= account.balances.current
+            }
+        }
+
+        let allTransactions: any[] = [];
+        overview.banks.forEach(bank => {
+            bank.accounts.forEach((account: any) => {
+                const transactions = account.transactions.map((transaction: any) => ({
+                    ...transaction,
+                    accountType: account.type
+                }));
+                allTransactions = allTransactions.concat(transactions);
+            });
+        });
+        allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        let netWorthOverTime: any[] = [];
+        let currentNetWorth = todaysNetWorth;
+        allTransactions.forEach(transaction => {
+            if (['depository', 'investment'].includes(transaction.accountType)) {
+                currentNetWorth += transaction.amount;
+            } else {
+                currentNetWorth -= transaction.amount;
+            }
+            if (netWorthOverTime.length > 0 && netWorthOverTime[netWorthOverTime.length - 1].date === transaction.date) {
+                netWorthOverTime[netWorthOverTime.length - 1].value = currentNetWorth;
+            } else {
+                netWorthOverTime.push({ date: transaction.date, value: currentNetWorth });
+            }
+        });
+        netWorthOverTime.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        overview.netWorths = netWorthOverTime.concat({date: '2024-4-4', value: todaysNetWorth})
         return overview
     }
 
