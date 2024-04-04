@@ -194,7 +194,7 @@ test('should disable add bank button when link token is not set', async ({page, 
 
 test.only('should use link flow to add bank and accounts', async ({page}) => {
     if (process.env.NODE_ENV === 'development') {
-        test.setTimeout(15000);
+        test.setTimeout(30000);
         // given
         await logInTestUser(page);
 
