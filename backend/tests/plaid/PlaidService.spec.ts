@@ -111,10 +111,10 @@ describe('Plaid service', () => {
                         data: {
                             item: {institution_id: 'bankId1'},
                             transactions: [
-                                {amount: 2, date: '2-2-2', account_id: 'accountId1'},
-                                {amount: 1, date: '1-1-1', account_id: 'accountId2'},
-                                {amount: 4, date: '3-3-3', account_id: 'accountId1'},
-                                {amount: 3, date: '2-2-2', account_id: 'accountId2'}
+                                {amount: 2, date: '2001-02-02', account_id: 'accountId1'},
+                                {amount: 1, date: '2000-01-01', account_id: 'accountId2'},
+                                {amount: 4, date: '2002-03-03', account_id: 'accountId1'},
+                                {amount: 3, date: '2001-02-02', account_id: 'accountId2'}
                             ],
                             total_transactions: 4,
                             accounts: [
@@ -138,10 +138,10 @@ describe('Plaid service', () => {
                         data: {
                             item: {institution_id: 'bankId2'},
                             transactions: [
-                                {amount: 6, date: '4-4-4', account_id: 'accountId3'},
-                                {amount: 5, date: '3-3-3', account_id: 'accountId4'},
-                                {amount: 8, date: '5-5-5', account_id: 'accountId3'},
-                                {amount: 7, date: '4-4-4', account_id: 'accountId4'},
+                                {amount: 6, date: '2003-04-04', account_id: 'accountId3'},
+                                {amount: 5, date: '2002-03-03', account_id: 'accountId4'},
+                                {amount: 8, date: '2004-05-05', account_id: 'accountId3'},
+                                {amount: 7, date: '2003-04-04', account_id: 'accountId4'},
                             ],
                             total_transactions: 4,
                             accounts: [
@@ -173,13 +173,13 @@ describe('Plaid service', () => {
                                 name: 'bank1AccountName1',
                                 type: 'depository',
                                 balances: {current: 100},
-                                transactions: [{amount: 2, date: '2-2-2'}, {amount: 4, date: '3-3-3'}]
+                                transactions: [{amount: 2, date: '2001-02-02'}, {amount: 4, date: '2002-03-03'}]
                             },
                             {
                                 name: 'bank1AccountName2',
                                 type: 'credit',
                                 balances: {current: 200},
-                                transactions: [{amount: 1, date: '1-1-1'}, {amount: 3, date: '2-2-2'}]
+                                transactions: [{amount: 1, date: '2000-01-01'}, {amount: 3, date: '2001-02-02'}]
                             }
                         ]
                     },
@@ -190,27 +190,27 @@ describe('Plaid service', () => {
                                 name: 'bank2AccountName1',
                                 type: 'loan',
                                 balances: {current: 300},
-                                transactions: [{amount: 6, date: '4-4-4'}, {amount: 8, date: '5-5-5'}]
+                                transactions: [{amount: 6, date: '2003-04-04'}, {amount: 8, date: '2004-05-05'}]
                             },
                             {
                                 name: 'bank2AccountName2',
                                 type: 'investment',
                                 balances: {current: 400},
-                                transactions: [{amount: 5, date: '3-3-3'}, {amount: 7, date: '4-4-4'}]
+                                transactions: [{amount: 5, date: '2002-03-03'}, {amount: 7, date: '2003-04-04'}]
                             }
                         ]
                     },
                 ],
                 netWorths: [
-                    {date: '1-1-1', value: 0, epochTimestamp: 978328800000},
-                    {date: '2-2-2', value: 1, epochTimestamp: 1012629600000},
-                    {date: '3-3-3', value: 2, epochTimestamp: 1046671200000},
-                    {date: '4-4-4', value: -7, epochTimestamp: 1081058400000},
-                    {date: '5-5-5', value: -8, epochTimestamp: 1115269200000},
+                    {date: '2000-01-01', value: 0, epochTimestamp: 946684800000},
+                    {date: '2001-02-02', value: 1, epochTimestamp: 981072000000},
+                    {date: '2002-03-03', value: 2, epochTimestamp: 1015113600000},
+                    {date: '2003-04-04', value: -7, epochTimestamp: 1049414400000},
+                    {date: '2004-05-05', value: -8, epochTimestamp: 1083715200000},
                     {
                         date: getTodaysDateInYYYYMMDD(),
                         value: 0,
-                        epochTimestamp: new Date(getTodaysDateInYYYYMMDD()).getTime()
+                        epochTimestamp: new Date(getTodaysDateInYYYYMMDD() + 'T00:00:00Z').getTime()
                     }
                 ]
             })

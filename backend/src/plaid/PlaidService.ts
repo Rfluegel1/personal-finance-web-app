@@ -66,7 +66,7 @@ export default class PlaidService {
         let netWorthOverTime = this.getPenultimateAndPreviousNetWorths(overview, todaysNetWorth)
         overview.netWorths = netWorthOverTime.concat({
             date: getTodaysDateInYYYYMMDD(),
-            epochTimestamp: new Date(getTodaysDateInYYYYMMDD()).getTime(),
+            epochTimestamp: new Date(getTodaysDateInYYYYMMDD() + 'T00:00:00Z').getTime(),
             value: todaysNetWorth
         })
     }
@@ -96,7 +96,7 @@ export default class PlaidService {
             } else {
                 netWorthOverTime.push({
                     date: transaction.date,
-                    epochTimestamp: new Date(transaction.date).getTime(),
+                    epochTimestamp: new Date(transaction.date + 'T00:00:00Z').getTime(),
                     value: currentNetWorth
                 })
             }
