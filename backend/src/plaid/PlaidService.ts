@@ -7,6 +7,7 @@ import {
     Products, TransactionsGetRequest
 } from 'plaid'
 import BankService from '../banks/BankService'
+import {getTodaysDateInYYYYMMDD} from '../utils'
 
 export default class PlaidService {
     bankService = new BankService()
@@ -64,8 +65,8 @@ export default class PlaidService {
         let todaysNetWorth = this.getTodaysNetWorth(overview)
         let netWorthOverTime = this.getPenultimateAndPreviousNetWorths(overview, todaysNetWorth)
         overview.netWorths = netWorthOverTime.concat({
-            date: '2024-4-4',
-            epochTimestamp: new Date('2024-4-4').getTime(),
+            date: getTodaysDateInYYYYMMDD(),
+            epochTimestamp: new Date(getTodaysDateInYYYYMMDD()).getTime(),
             value: todaysNetWorth
         })
     }

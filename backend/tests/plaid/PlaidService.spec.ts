@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto'
 import PlaidService from '../../src/plaid/PlaidService'
 import {plaidClient} from '../../src/plaid/PlaidConfiguration'
 import Bank from '../../src/banks/Bank'
+import {getTodaysDateInYYYYMMDD} from '../../src/utils'
 
 jest.mock('../../src/logger', () => ({
     getLogger: jest.fn(() => {
@@ -202,7 +203,11 @@ describe('Plaid service', () => {
                     {date: '3-3-3', value: 2, epochTimestamp: 1046671200000},
                     {date: '4-4-4', value: -7, epochTimestamp: 1081058400000},
                     {date: '5-5-5', value: -8, epochTimestamp: 1115269200000},
-                    {date: '2024-4-4', value: 0, epochTimestamp: 1712206800000}
+                    {
+                        date: getTodaysDateInYYYYMMDD(),
+                        value: 0,
+                        epochTimestamp: new Date(getTodaysDateInYYYYMMDD()).getTime()
+                    }
                 ]
             })
         })
