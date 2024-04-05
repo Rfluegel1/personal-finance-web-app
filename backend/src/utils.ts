@@ -72,18 +72,18 @@ export function checkForHtml() {
 
 export function getTodaysDateInYYYYMMDD(): string {
     const today = new Date()
-    const year = today.getFullYear()
-    const month = (today.getMonth() + 1).toString().padStart(2, '0')
-    const day = today.getDate().toString().padStart(2, '0')
+    const year = today.getUTCFullYear() // Use UTC year
+    const month = (today.getUTCMonth() + 1).toString().padStart(2, '0') // Use UTC month
+    const day = today.getUTCDate().toString().padStart(2, '0') // Use UTC day
 
     return `${year}-${month}-${day}`
 }
 
 export function getTwoYearsPreviousTodaysDateInYYYYMMDD(): string {
     const today = new Date()
-    const year = today.getFullYear() - 2
-    const month = (today.getMonth() + 1).toString().padStart(2, '0')
-    const day = today.getDate().toString().padStart(2, '0')
+    const year = today.getUTCFullYear() - 2 // Subtract 2 from the UTC year
+    const month = (today.getUTCMonth() + 1).toString().padStart(2, '0') // Use UTC month
+    const day = today.getUTCDate().toString().padStart(2, '0') // Use UTC day
 
     return `${year}-${month}-${day}`
 }
