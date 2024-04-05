@@ -113,6 +113,12 @@
                         <ol>
                             {#each bank.accounts as account}
                                 <li>{account.name}</li>
+                                <ol>
+                                    {#each account.transactions as transaction}
+                                        <li>Transaction Value: {transaction.amount}, Transaction
+                                            Date: {transaction.date}</li>
+                                    {/each}
+                                </ol>
                             {/each}
                         </ol>
                     </li>

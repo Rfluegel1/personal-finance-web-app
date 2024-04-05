@@ -192,7 +192,7 @@ test('should disable add bank button when link token is not set', async ({page, 
     await expect(page.locator('button[id="add-bank"]')).toBeDisabled();
 })
 
-test.only('should use link flow to add bank and accounts', async ({page}) => {
+test('should use link flow to add bank and accounts', async ({page}) => {
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
         // given
@@ -215,13 +215,26 @@ test.only('should use link flow to add bank and accounts', async ({page}) => {
             await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
 
             await expect(page.locator('text="Plaid Checking"')).toBeVisible();
+            await expect(page.locator('text="Transaction Value: 5.4, Transaction Date: 2024-03-25"')).toBeVisible();
+
             await expect(page.locator('text="Plaid Saving"')).toBeVisible();
+            await expect(page.locator('text="Transaction Value: 25, Transaction Date: 2024-03-25"')).toBeVisible();
+
             await expect(page.locator('text="Plaid CD"')).toBeVisible();
+            await expect(page.locator('text="Transaction Value: 1000, Transaction Date: 2024-03-24"')).toBeVisible();
+
             await expect(page.locator('text="Plaid Credit Card"')).toBeVisible();
+            await expect(page.locator('text="Transaction Value: 500, Transaction Date: 2024-04-04"')).toBeVisible();
+
             await expect(page.locator('text="Plaid Money Market"')).toBeVisible();
+            await expect(page.locator('text="Transaction Value: 5850, Transaction Date: 2024-03-24"')).toBeVisible();
+
             await expect(page.locator('text="Plaid IRA"')).toBeVisible();
+
             await expect(page.locator('text="Plaid 401k"')).toBeVisible();
+
             await expect(page.locator('text="Plaid Student Loan"')).toBeVisible();
+
             await expect(page.locator('text="Plaid Mortgage"')).toBeVisible();
         } finally {
             // cleanup
