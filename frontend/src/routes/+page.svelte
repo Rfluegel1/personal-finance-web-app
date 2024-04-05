@@ -117,6 +117,11 @@
         <div class='error' role='alert'>Please verify your email address</div>
     {/if}
     <button id='add-bank' on:click={handler.open()} disabled={!link_token}>Add Bank</button>
+    <div id="chart-container">
+        {#if netWorths.length !== 0}
+            <svg id="chart"></svg>
+        {/if}
+    </div>
     <div class='bank-list'>
         <ol>
             {#each banks as bank}
@@ -138,11 +143,6 @@
                 </div>
             {/each}
         </ol>
-    </div>
-    <div id="chart-container">
-        {#if netWorths.length !== 0}
-            <svg id="chart"></svg>
-        {/if}
     </div>
 </main>
 
