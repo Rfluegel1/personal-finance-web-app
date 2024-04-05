@@ -7,7 +7,7 @@ import {
     Products, TransactionsGetRequest
 } from 'plaid'
 import BankService from '../banks/BankService'
-import {getTodaysDateInYYYYMMDD} from '../utils'
+import {getTodaysDateInYYYYMMDD, getTwoYearsPreviousTodaysDateInYYYYMMDD} from '../utils'
 
 export default class PlaidService {
     bankService = new BankService()
@@ -153,8 +153,8 @@ export default class PlaidService {
         try {
             const transactionResponse = await plaidClient.transactionsGet({
                 access_token: bank.accessToken,
-                start_date: '2022-01-01',
-                end_date: '2023-01-01',
+                start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
+                end_date: getTodaysDateInYYYYMMDD(),
                 options: {
                     offset: offset
                 }

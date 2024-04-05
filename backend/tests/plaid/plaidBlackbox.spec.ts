@@ -73,31 +73,31 @@ describe('Plaid resource', () => {
                                     type: 'depository',
                                     name: 'Plaid Checking',
                                     balances: {current: 110},
-                                    transactions: expect.arrayContaining([{amount: 5.4, date: '2022-12-31'}])
+                                    transactions: expect.arrayContaining([{amount: 5.4, date: '2024-03-25'}])
                                 },
                                 {
                                     type: 'depository',
                                     name: 'Plaid Saving',
                                     balances: {current: 210},
-                                    transactions: expect.arrayContaining([{amount: 25, date: '2022-12-31'}])
+                                    transactions: expect.arrayContaining([{amount: 25, date: '2024-03-25'}])
                                 },
                                 {
                                     type: 'depository',
                                     name: 'Plaid CD',
                                     balances: {current: 1000},
-                                    transactions: expect.arrayContaining([{amount: 1000, date: '2022-12-30'}])
+                                    transactions: expect.arrayContaining([{amount: 1000, date: '2024-03-24'}])
                                 },
                                 {
                                     type: 'credit',
                                     name: 'Plaid Credit Card',
                                     balances: {current: 410},
-                                    transactions: expect.arrayContaining([{amount: 78.5, date: '2022-12-29'}])
+                                    transactions: expect.arrayContaining([{amount: 500, date: '2024-04-04'}])
                                 },
                                 {
                                     type: 'depository',
                                     name: 'Plaid Money Market',
                                     balances: {current: 43200},
-                                    transactions: expect.arrayContaining([{amount: 5850, date: '2022-12-30'}])
+                                    transactions: expect.arrayContaining([{amount: 5850, date: '2024-03-24'}])
                                 },
                                 {
                                     type: 'investment',
@@ -126,9 +126,9 @@ describe('Plaid resource', () => {
                             ]
                         }],
                         netWorths: expect.arrayContaining([{
-                            'date': '2022-04-14',
-                            'epochTimestamp': 1649894400000,
-                            'value': -32520.15949999995,
+                            'date': '2024-03-08',
+                            'epochTimestamp': 1709856000000,
+                            'value': -51170.07949999999,
                         }])
                     })
             } finally {

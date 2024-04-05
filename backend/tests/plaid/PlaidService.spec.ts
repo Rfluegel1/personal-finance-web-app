@@ -2,7 +2,7 @@ import {randomUUID} from 'node:crypto'
 import PlaidService from '../../src/plaid/PlaidService'
 import {plaidClient} from '../../src/plaid/PlaidConfiguration'
 import Bank from '../../src/banks/Bank'
-import {getTodaysDateInYYYYMMDD} from '../../src/utils'
+import {getTodaysDateInYYYYMMDD, getTwoYearsPreviousTodaysDateInYYYYMMDD} from '../../src/utils'
 
 jest.mock('../../src/logger', () => ({
     getLogger: jest.fn(() => {
@@ -104,7 +104,9 @@ describe('Plaid service', () => {
                 }
             });
             (plaidClient.transactionsGet as jest.Mock).mockImplementation((params: any) => {
-                if (params.access_token === firstMockedBank.accessToken && params.start_date === '2022-01-01' && params.end_date === '2023-01-01') {
+                if (params.access_token === firstMockedBank.accessToken
+                    && params.start_date === getTwoYearsPreviousTodaysDateInYYYYMMDD()
+                    && params.end_date === getTodaysDateInYYYYMMDD()) {
                     return {
                         data: {
                             item: {institution_id: 'bankId1'},
@@ -129,7 +131,9 @@ describe('Plaid service', () => {
                         }
                     }
                 }
-                if (params.access_token === secondMockedBank.accessToken && params.start_date === '2022-01-01' && params.end_date === '2023-01-01') {
+                if (params.access_token === secondMockedBank.accessToken
+                    && params.start_date === getTwoYearsPreviousTodaysDateInYYYYMMDD()
+                    && params.end_date === getTodaysDateInYYYYMMDD()) {
                     return {
                         data: {
                             item: {institution_id: 'bankId2'},
