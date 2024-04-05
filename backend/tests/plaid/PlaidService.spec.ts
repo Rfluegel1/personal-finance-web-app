@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto'
 import PlaidService from '../../src/plaid/PlaidService'
 import {plaidClient} from '../../src/plaid/PlaidConfiguration'
 import Bank from '../../src/banks/Bank'
+import {getTodaysDateInYYYYMMDD, getTwoYearsPreviousTodaysDateInYYYYMMDD} from '../../src/utils'
 
 jest.mock('../../src/logger', () => ({
     getLogger: jest.fn(() => {
@@ -84,7 +85,7 @@ describe('Plaid service', () => {
             expect(result).toEqual({bankId: mockedBankId})
         })
 
-        test('should call to plaid to get bank names, account names, and transactions', async () => {
+        test('should call to plaid to get bank names, account names, and associated transactions', async () => {
             // given
             let userId = 'user'
             let firstMockedBank = new Bank('access_token1', userId)
@@ -103,22 +104,26 @@ describe('Plaid service', () => {
                 }
             });
             (plaidClient.transactionsGet as jest.Mock).mockImplementation((params: any) => {
-                if (params.access_token === firstMockedBank.accessToken && params.start_date === '2022-01-01' && params.end_date === '2023-01-01') {
+                if (params.access_token === firstMockedBank.accessToken
+                    && params.start_date === getTwoYearsPreviousTodaysDateInYYYYMMDD()
+                    && params.end_date === getTodaysDateInYYYYMMDD()) {
                     return {
                         data: {
                             item: {institution_id: 'bankId1'},
                             transactions: [
-                                {amount: 1, date: '1-1-1'},
-                                {amount: 1, date: '1-1-1'},
-                                {amount: 2, date: '1-1-1'},
-                                {amount: 2, date: '1-1-1'}
+                                {amount: 2, date: '2001-02-02', account_id: 'accountId1'},
+                                {amount: 1, date: '2000-01-01', account_id: 'accountId2'},
+                                {amount: 4, date: '2002-03-03', account_id: 'accountId1'},
+                                {amount: 3, date: '2001-02-02', account_id: 'accountId2'}
                             ],
                             total_transactions: 4,
                             accounts: [
                                 {
+                                    account_id: 'accountId1',
                                     name: 'bank1AccountName1',
                                     type: 'depository', balances: {current: 100}
                                 }, {
+                                    account_id: 'accountId2',
                                     name: 'bank1AccountName2',
                                     type: 'credit', balances: {current: 200}
                                 }
@@ -126,22 +131,26 @@ describe('Plaid service', () => {
                         }
                     }
                 }
-                if (params.access_token === secondMockedBank.accessToken && params.start_date === '2022-01-01' && params.end_date === '2023-01-01') {
+                if (params.access_token === secondMockedBank.accessToken
+                    && params.start_date === getTwoYearsPreviousTodaysDateInYYYYMMDD()
+                    && params.end_date === getTodaysDateInYYYYMMDD()) {
                     return {
                         data: {
                             item: {institution_id: 'bankId2'},
                             transactions: [
-                                {amount: 3, date: '1-1-1'},
-                                {amount: 3, date: '1-1-1'},
-                                {amount: 4, date: '1-1-1'},
-                                {amount: 4, date: '1-1-1'}
+                                {amount: 6, date: '2003-04-04', account_id: 'accountId3'},
+                                {amount: 5, date: '2002-03-03', account_id: 'accountId4'},
+                                {amount: 8, date: '2004-05-05', account_id: 'accountId3'},
+                                {amount: 7, date: '2003-04-04', account_id: 'accountId4'},
                             ],
                             total_transactions: 4,
                             accounts: [
                                 {
+                                    account_id: 'accountId3',
                                     name: 'bank2AccountName1',
                                     type: 'loan', balances: {current: 300}
                                 }, {
+                                    account_id: 'accountId4',
                                     name: 'bank2AccountName2',
                                     type: 'investment', balances: {current: 400}
                                 }
@@ -155,34 +164,56 @@ describe('Plaid service', () => {
             const response = await plaidService.getOverview(userId)
 
             // then
-            expect(response).toEqual([
-                {
-                    name: 'bankName1',
-                    accounts: [
-                        {name: 'bank1AccountName1', type: 'depository', balances: {current: 100}},
-                        {name: 'bank1AccountName2', type: 'credit', balances: {current: 200}}
-                    ],
-                    transactions: [
-                        {amount: 1, date: '1-1-1'},
-                        {amount: 1, date: '1-1-1'},
-                        {amount: 2, date: '1-1-1'},
-                        {amount: 2, date: '1-1-1'}
-                    ]
-                },
-                {
-                    name: 'bankName2',
-                    accounts: [
-                        {name: 'bank2AccountName1', type: 'loan', balances: {current: 300}},
-                        {name: 'bank2AccountName2', type: 'investment', balances: {current: 400}}
-                    ],
-                    transactions: [
-                        {amount: 3, date: '1-1-1'},
-                        {amount: 3, date: '1-1-1'},
-                        {amount: 4, date: '1-1-1'},
-                        {amount: 4, date: '1-1-1'}
-                    ]
-                },
-            ])
+            expect(response).toEqual({
+                banks: [
+                    {
+                        name: 'bankName1',
+                        accounts: [
+                            {
+                                name: 'bank1AccountName1',
+                                type: 'depository',
+                                balances: {current: 100},
+                                transactions: [{amount: 2, date: '2001-02-02'}, {amount: 4, date: '2002-03-03'}]
+                            },
+                            {
+                                name: 'bank1AccountName2',
+                                type: 'credit',
+                                balances: {current: 200},
+                                transactions: [{amount: 1, date: '2000-01-01'}, {amount: 3, date: '2001-02-02'}]
+                            }
+                        ]
+                    },
+                    {
+                        name: 'bankName2',
+                        accounts: [
+                            {
+                                name: 'bank2AccountName1',
+                                type: 'loan',
+                                balances: {current: 300},
+                                transactions: [{amount: 6, date: '2003-04-04'}, {amount: 8, date: '2004-05-05'}]
+                            },
+                            {
+                                name: 'bank2AccountName2',
+                                type: 'investment',
+                                balances: {current: 400},
+                                transactions: [{amount: 5, date: '2002-03-03'}, {amount: 7, date: '2003-04-04'}]
+                            }
+                        ]
+                    },
+                ],
+                netWorths: [
+                    {date: '2000-01-01', value: 0, epochTimestamp: 946684800000},
+                    {date: '2001-02-02', value: 1, epochTimestamp: 981072000000},
+                    {date: '2002-03-03', value: 2, epochTimestamp: 1015113600000},
+                    {date: '2003-04-04', value: -7, epochTimestamp: 1049414400000},
+                    {date: '2004-05-05', value: -8, epochTimestamp: 1083715200000},
+                    {
+                        date: getTodaysDateInYYYYMMDD(),
+                        value: 0,
+                        epochTimestamp: new Date(getTodaysDateInYYYYMMDD() + 'T00:00:00Z').getTime()
+                    }
+                ]
+            })
         })
 
         test('should call transactions get more than once when bad request message is PRODUCT_NOT_READY', async () => {
@@ -254,7 +285,7 @@ describe('Plaid service', () => {
 
             // then
             expect(plaidClient.transactionsGet).toHaveBeenCalledTimes(2)
-            expect(result[0].transactions).toEqual([{amount: 1}, {amount: 2}])
+            expect(result.banks[0].accounts[0].transactions).toEqual([{amount: 1}, {amount: 2}])
         })
     })
 })

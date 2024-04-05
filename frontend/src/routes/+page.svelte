@@ -42,7 +42,7 @@
             onSuccess: async (public_token, metadata) => {
                 await axios.post('/api/exchange_token_and_save_bank', {public_token})
                 await axios.get('/api/overview').then(response => {
-                    banks = response.data
+                    banks = response.data.banks
                 })
                 console.log('Success', public_token, metadata);
             },
@@ -122,6 +122,12 @@
                         <ol>
                             {#each bank.accounts as account}
                                 <li>{account.name}</li>
+                                <ol>
+                                    {#each account.transactions as transaction}
+                                        <li>Transaction Value: {transaction.amount}, Transaction
+                                            Date: {transaction.date}</li>
+                                    {/each}
+                                </ol>
                             {/each}
                         </ol>
                     </li>
