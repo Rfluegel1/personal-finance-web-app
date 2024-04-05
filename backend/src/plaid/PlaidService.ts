@@ -62,11 +62,15 @@ export default class PlaidService {
 
     private getNetWorths(overview: { banks: any[]; netWorths: any[] }) {
         let todaysNetWorth = this.getTodaysNetWorth(overview)
-        let netWorthOverTime = this.getPenultimateAndPerviousNetWorths(overview, todaysNetWorth)
-        overview.netWorths = netWorthOverTime.concat({date: '2024-4-4', value: todaysNetWorth})
+        let netWorthOverTime = this.getPenultimateAndPreviousNetWorths(overview, todaysNetWorth)
+        overview.netWorths = netWorthOverTime.concat({
+            date: '2024-4-4',
+            epochTimestamp: new Date('2024-4-4').getTime(),
+            value: todaysNetWorth
+        })
     }
 
-    private getPenultimateAndPerviousNetWorths(overview: { banks: any[]; netWorths: any[] }, todaysNetWorth: number) {
+    private getPenultimateAndPreviousNetWorths(overview: { banks: any[]; netWorths: any[] }, todaysNetWorth: number) {
         let allTransactions: any[] = []
         overview.banks.forEach(bank => {
             bank.accounts.forEach((account: any) => {
@@ -89,7 +93,11 @@ export default class PlaidService {
             if (netWorthOverTime.length > 0 && netWorthOverTime[netWorthOverTime.length - 1].date === transaction.date) {
                 netWorthOverTime[netWorthOverTime.length - 1].value = currentNetWorth
             } else {
-                netWorthOverTime.push({date: transaction.date, value: currentNetWorth})
+                netWorthOverTime.push({
+                    date: transaction.date,
+                    epochTimestamp: new Date(transaction.date).getTime(),
+                    value: currentNetWorth
+                })
             }
         })
         netWorthOverTime.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())

@@ -125,7 +125,11 @@ describe('Plaid resource', () => {
                                 },
                             ]
                         }],
-                        netWorths: expect.arrayContaining([{value: -32489.75949999995, date: '2022-04-05'}])
+                        netWorths: expect.arrayContaining([{
+                            'date': '2022-04-14',
+                            'epochTimestamp': 1649894400000,
+                            'value': -32520.15949999995,
+                        }])
                     })
             } finally {
                 // cleanup
