@@ -199,6 +199,9 @@ test('should use link flow to add bank and accounts and transactions', async ({p
         await logInTestUser(page);
 
         try {
+            // given
+            await expect(page.locator('svg[id="chart"]')).not.toBeVisible();
+
             // when
             await page.click('button[id="add-bank"]');
 
@@ -236,6 +239,15 @@ test('should use link flow to add bank and accounts and transactions', async ({p
             await expect(page.locator('text="Plaid Student Loan"')).toBeVisible();
 
             await expect(page.locator('text="Plaid Mortgage"')).toBeVisible();
+
+            await expect(page.locator('svg[id="chart"]')).toBeVisible();
+
+            // when
+            await page.reload()
+
+            // then
+            await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
+            await expect(page.locator('svg[id="chart"]')).toBeVisible();
         } finally {
             // cleanup
             await authenticateAsAdmin(client);

@@ -11,6 +11,7 @@
     let banks = [];
     let link_token = '';
     let handler;
+    let netWorths = [];
 
     onMount(async () => {
         if ((await axios.get('/api/users/is-verified')).data.isVerified) {
@@ -29,12 +30,14 @@
     });
 
     onMount(async () => {
-        drawChart([
-            {epochTimestamp: 1609459200000, value: 1000},
-            {epochTimestamp: 1640995200000, value: -1500},
-            {epochTimestamp: 1672531200000, value: 2000},
-        ]);
+        await axios.get('/api/overview').then(response => {
+            banks = response.data.banks
+            netWorths = response.data.netWorths
+        })
+        drawChart(netWorths);
     })
+
+    $: netWorths, drawChart(netWorths);
 
     function initializePlaid() {
         handler = Plaid.create({
@@ -43,6 +46,7 @@
                 await axios.post('/api/exchange_token_and_save_bank', {public_token})
                 await axios.get('/api/overview').then(response => {
                     banks = response.data.banks
+                    netWorths = response.data.netWorths
                 })
                 console.log('Success', public_token, metadata);
             },
@@ -136,7 +140,9 @@
         </ol>
     </div>
     <div id="chart-container">
-        <svg id="chart"></svg>
+        {#if netWorths.length !== 0}
+            <svg id="chart"></svg>
+        {/if}
     </div>
 </main>
 

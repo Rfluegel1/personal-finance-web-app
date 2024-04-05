@@ -287,5 +287,16 @@ describe('Plaid service', () => {
             expect(plaidClient.transactionsGet).toHaveBeenCalledTimes(2)
             expect(result.banks[0].accounts[0].transactions).toEqual([{amount: 1}, {amount: 2}])
         })
+
+        test('should return no net worths when there are no banks', async () => {
+            // given
+            (plaidService.bankService.getBanksByOwner as jest.Mock).mockResolvedValue([]);
+
+            // when
+            const result = await plaidService.getOverview('userId')
+
+            // then
+            expect(result.netWorths.length).toEqual(0)
+        })
     })
 })

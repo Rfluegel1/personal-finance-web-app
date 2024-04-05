@@ -1,6 +1,11 @@
 import * as d3 from "d3";
 
 export default function drawChart(rawData) {
+    if (rawData.length === 0) {
+        return;
+    }
+    d3.select('#chart').selectAll("*").remove(); // This line clears the SVG
+
     let data = rawData.map(d => ({date: new Date(d.epochTimestamp), value: d.value}));
 
     const oldestDate = data[0].date;

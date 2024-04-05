@@ -37,7 +37,9 @@ export default class PlaidService {
     async getOverview(userId: string): Promise<any> {
         let overview: { banks: any[], netWorths: any[] } = {banks: [], netWorths: []}
         await this.getBanks(userId, overview)
-        this.getNetWorths(overview)
+        if (overview.banks.length > 0) {
+            this.getNetWorths(overview)
+        }
         return overview
     }
 
