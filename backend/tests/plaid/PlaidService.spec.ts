@@ -298,5 +298,30 @@ describe('Plaid service', () => {
             // then
             expect(result.netWorths.length).toEqual(0)
         })
+
+        test('should return net worth and account balance values to the second decimal place', async () => {
+            // given
+            let firstMockedBank = new Bank('access_token1');
+            (plaidService.bankService.getBanksByOwner as jest.Mock).mockResolvedValue([firstMockedBank]);
+            (plaidClient.transactionsGet as jest.Mock).mockResolvedValue({
+                data: {
+                    transactions: [{date: '2000-01-01', amount: 1.124123123}, {date: '2001-02-02',amount: 2.135123123}],
+                    total_transactions: 2,
+                    item: {institution_id: 'bankId1'},
+                    accounts: [{name: 'bank1AccountName1', balances: {current: 3.25111}}]
+                },
+            });
+            (plaidClient.institutionsGetById as jest.Mock).mockResolvedValue({data: {institution: {name: 'bankName1'}}})
+
+            // when
+            const result = await plaidService.getOverview('userId')
+
+            // then
+            expect(result.banks[0].accounts[0].balances.current).toEqual(3.25)
+            expect(result.banks[0].accounts[0].transactions[0].amount).toEqual(1.12)
+            expect(result.banks[0].accounts[0].transactions[1].amount).toEqual(2.14)
+            expect(result.netWorths[0].value).toEqual(-6.51)
+            expect(result.netWorths[1].value).toEqual(-5.39)
+        })
     })
 })

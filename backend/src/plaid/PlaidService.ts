@@ -1,6 +1,5 @@
 import {plaidClient} from './PlaidConfiguration'
 import {
-    AccountBase,
     CountryCode,
     InstitutionsGetByIdRequest,
     LinkTokenCreateRequest,
@@ -51,11 +50,11 @@ export default class PlaidService {
             const accountsToTransactions = this.matchAccountToTransactions(accounts, transactions)
             overview.banks.push({
                 name: institutionName,
-                accounts: accounts.map((account: AccountBase) => {
+                accounts: accounts.map((account) => {
                     return {
                         name: account.name,
                         type: account.type,
-                        balances: {current: account.balances.current},
+                        balances: {current: parseFloat(account.balances.current.toFixed(2))},
                         transactions: accountsToTransactions.get(account.account_id)
                     }
                 })
@@ -99,7 +98,7 @@ export default class PlaidService {
                 netWorthOverTime.push({
                     date: transaction.date,
                     epochTimestamp: new Date(transaction.date + 'T00:00:00Z').getTime(),
-                    value: currentNetWorth
+                    value: parseFloat(currentNetWorth.toFixed(2))
                 })
             }
         })
@@ -126,7 +125,10 @@ export default class PlaidService {
             accountsMap.set(account.account_id, [])
         }
         for (let transaction of transactions) {
-            accountsMap.get(transaction.account_id).push({amount: transaction.amount, date: transaction.date})
+            accountsMap.get(transaction.account_id).push({
+                amount: parseFloat(transaction.amount.toFixed(2)),
+                date: transaction.date
+            })
         }
         return accountsMap
     }
