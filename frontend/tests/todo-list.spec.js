@@ -200,10 +200,11 @@ test('should use link flow to add bank and accounts and transactions', async ({p
 
         try {
             // given
-            const plaidSavingTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date 25 2024-03-25'}).locator('th').first();
-            const plaidCDTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date 1000 2024-03-24'}).locator('th').first();
-            const plaidCreditTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date 500 2024-04-04'}).locator('th').first();
-            const plaidMoneyTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date 5850 2024-03-24'}).locator('th').first();
+            let plaidCheckingTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date $5.4 2024-03-25'}).locator('th').first();
+            const plaidSavingTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date $25 2024-03-25'}).locator('th').first();
+            const plaidCDTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date $1000 2024-03-24'}).locator('th').first();
+            const plaidCreditTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date $500 2024-04-04'}).locator('th').first();
+            const plaidMoneyTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date $5850 2024-03-24'}).locator('th').first();
             const plaidIRATable = page.locator('table:nth-child(12)').first();
             const plaid401kTable = page.locator('table:nth-child(14)').first();
             const plaidStudentTable = page.locator('table:nth-child(16)').first();
@@ -227,7 +228,6 @@ test('should use link flow to add bank and accounts and transactions', async ({p
             await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
 
             await expect(page.locator('text="Plaid Checking"')).toBeVisible();
-            let plaidCheckingTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date 5.4 2024-03-25'}).locator('th').first();
             await expect(plaidCheckingTable).toBeVisible();
 
             await expect(page.locator('text="Plaid Saving"')).toBeVisible();
