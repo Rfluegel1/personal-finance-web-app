@@ -19,6 +19,14 @@ jest.mock('../../src/banks/BankRepository', () => {
 
 jest.mock('../../src/CipherUtility')
 
+jest.mock('../../src/logger', () => ({
+    getLogger: jest.fn(() => {
+        return {
+            info: jest.fn()
+        };
+    })
+}));
+
 describe('Bank service', () => {
     let service: BankService = new BankService()
     it('createBank should call repository and returns Bank', async () => {
