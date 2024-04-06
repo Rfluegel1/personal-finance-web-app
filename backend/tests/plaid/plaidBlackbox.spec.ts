@@ -108,7 +108,7 @@ describe('Plaid resource', () => {
                                 {
                                     type: 'investment',
                                     name: 'Plaid 401k',
-                                    balances: {current: 23631.9805},
+                                    balances: {current: 23631.98},
                                     transactions: []
                                 },
                                 {
@@ -128,7 +128,7 @@ describe('Plaid resource', () => {
                         netWorths: expect.arrayContaining([{
                             'date': '2024-03-08',
                             'epochTimestamp': 1709856000000,
-                            'value': -51170.07949999999,
+                            'value': -51170.08,
                         }])
                     })
             } finally {
