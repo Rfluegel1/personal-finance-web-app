@@ -131,22 +131,24 @@
                         <ol>
                             {#each bank.accounts as account}
                                 <li>{account.name}</li>
-                                <table>
-                                    <thead>
-                                    <tr>
-                                        <th>Transaction Value</th>
-                                        <th>Transaction Date</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {#each account.transactions as transaction}
+                                {#if account.transactions.length > 0}
+                                    <table>
+                                        <thead>
                                         <tr>
-                                            <td>{transaction.amount}</td>
-                                            <td>{transaction.date}</td>
+                                            <th>Transaction Value</th>
+                                            <th>Transaction Date</th>
                                         </tr>
-                                    {/each}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                        {#each account.transactions as transaction}
+                                            <tr>
+                                                <td>{transaction.amount}</td>
+                                                <td>{transaction.date}</td>
+                                            </tr>
+                                        {/each}
+                                        </tbody>
+                                    </table>
+                                {/if}
                             {/each}
                         </ol>
                     </li>

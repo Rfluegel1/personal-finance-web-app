@@ -233,12 +233,16 @@ test('should use link flow to add bank and accounts and transactions', async ({p
             await expect(page.locator('table').filter({hasText: 'Transaction Value Transaction Date 5850 2024-03-24'}).locator('th').first()).toBeVisible();
 
             await expect(page.locator('text="Plaid IRA"')).toBeVisible();
+            await expect(page.locator('table:nth-child(12)').first()).not.toBeVisible()
 
             await expect(page.locator('text="Plaid 401k"')).toBeVisible();
+            await expect(page.locator('table:nth-child(14)').first()).not.toBeVisible()
 
             await expect(page.locator('text="Plaid Student Loan"')).toBeVisible();
+            await expect(page.locator('table:nth-child(16)').first()).not.toBeVisible()
 
             await expect(page.locator('text="Plaid Mortgage"')).toBeVisible();
+            await expect(page.locator('table:nth-child(18)').first()).not.toBeVisible()
 
             await expect(page.locator('svg[id="chart"]')).toBeVisible();
 
