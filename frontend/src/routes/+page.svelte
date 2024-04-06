@@ -123,14 +123,14 @@
         {/if}
     </div>
     <div class='bank-list'>
-        <ol>
+        <ul>
             {#each banks as bank}
                 <div class='bank-item'>
                     <li>
-                        {bank.name}
-                        <ol>
+                        <h2>{bank.name}</h2>
+                        <ul>
                             {#each bank.accounts as account}
-                                <li>{account.name}</li>
+                                <li><h3>{account.name}</h3></li>
                                 {#if account.transactions.length > 0}
                                     <table>
                                         <thead>
@@ -142,7 +142,7 @@
                                         <tbody>
                                         {#each account.transactions as transaction}
                                             <tr>
-                                                <td>{transaction.amount}</td>
+                                                <td>${transaction.amount}</td>
                                                 <td>{transaction.date}</td>
                                             </tr>
                                         {/each}
@@ -150,11 +150,11 @@
                                     </table>
                                 {/if}
                             {/each}
-                        </ol>
+                        </ul>
                     </li>
                 </div>
             {/each}
-        </ol>
+        </ul>
     </div>
 </main>
 
@@ -170,5 +170,14 @@
 
     .todo-item button {
         margin-left: 10px;
+    }
+
+    .bank-list ul {
+        list-style-type: none; /* Removes bullet points */
+        padding-left: 1em; /* Retains indentation */
+    }
+
+    .bank-list ul ul { /* Targeting nested ul for accounts specifically */
+        padding-left: 1em; /* You can adjust this value to control the indentation */
     }
 </style>
