@@ -218,19 +218,19 @@ test('should use link flow to add bank and accounts and transactions', async ({p
             await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
 
             await expect(page.locator('text="Plaid Checking"')).toBeVisible();
-            await expect(page.locator('text="Transaction Value: 5.4, Transaction Date: 2024-03-25"')).toBeVisible();
+            await expect(page.locator('table').filter({ hasText: 'Transaction Value Transaction Date 5.4 2024-03-25' }).locator('th').first()).toBeVisible();
 
             await expect(page.locator('text="Plaid Saving"')).toBeVisible();
-            await expect(page.locator('text="Transaction Value: 25, Transaction Date: 2024-03-25"')).toBeVisible();
+            await expect(page.locator('table').filter({ hasText: 'Transaction Value Transaction Date 25 2024-03-25' }).locator('th').first()).toBeVisible();
 
             await expect(page.locator('text="Plaid CD"')).toBeVisible();
-            await expect(page.locator('text="Transaction Value: 1000, Transaction Date: 2024-03-24"')).toBeVisible();
+            await expect(page.locator('table').filter({hasText: 'Transaction Value Transaction Date 1000 2024-03-24'}).locator('th').first()).toBeVisible();
 
             await expect(page.locator('text="Plaid Credit Card"')).toBeVisible();
-            await expect(page.locator('text="Transaction Value: 500, Transaction Date: 2024-04-04"')).toBeVisible();
+            await expect(page.locator('table').filter({hasText: 'Transaction Value Transaction Date 500 2024-04-04'}).locator('th').first()).toBeVisible();
 
             await expect(page.locator('text="Plaid Money Market"')).toBeVisible();
-            await expect(page.locator('text="Transaction Value: 5850, Transaction Date: 2024-03-24"')).toBeVisible();
+            await expect(page.locator('table').filter({hasText: 'Transaction Value Transaction Date 5850 2024-03-24'}).locator('th').first()).toBeVisible();
 
             await expect(page.locator('text="Plaid IRA"')).toBeVisible();
 

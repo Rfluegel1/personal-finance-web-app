@@ -131,12 +131,22 @@
                         <ol>
                             {#each bank.accounts as account}
                                 <li>{account.name}</li>
-                                <ol>
+                                <table>
+                                    <thead>
+                                    <tr>
+                                        <th>Transaction Value</th>
+                                        <th>Transaction Date</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
                                     {#each account.transactions as transaction}
-                                        <li>Transaction Value: {transaction.amount}, Transaction
-                                            Date: {transaction.date}</li>
+                                        <tr>
+                                            <td>{transaction.amount}</td>
+                                            <td>{transaction.date}</td>
+                                        </tr>
                                     {/each}
-                                </ol>
+                                    </tbody>
+                                </table>
                             {/each}
                         </ol>
                     </li>
