@@ -257,3 +257,85 @@ test('should use link flow to add bank and accounts and transactions', async ({p
         }
     }
 })
+
+test.skip('MOCKED: should use link flow to add bank and accounts and transactions', async ({page, context}) => {
+        if (process.env.NODE_ENV === 'development') {
+            test.setTimeout(30000);
+            // given
+            await context.route('**/api/overview', (route) => {
+                route.fulfill({
+                    status: 200,
+                    contentType: 'application/json', // It's good practice to specify the content type
+                    body: JSON.stringify({
+                        banks: [{
+                            name: 'Mocked Bank',
+                            accounts: [{
+                                name: 'Mocked Checking',
+                                balances: {current: 320.76},
+                                transactions: [{
+                                    date: '2021-01-01',
+                                    amount: 100
+                                }]
+                            }, {
+                                name: 'Mocked Savings',
+                                balances: {current: 1000.76},
+                                transactions: []
+                            }]
+                        }],
+                        netWorths: [{
+                            date: '2021-01-01',
+                            value: 100,
+                            epochTimestamp: 1609459200
+                        }, {
+                            date: '2021-01-01',
+                            value: 200,
+                            epochTimestamp: 1709459200
+                        }]
+                    })
+                })
+            })
+
+            await logInTestUser(page);
+
+            try {
+                // expect
+                await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
+                await page.locator('button[id="Mocked Bank-button"]').click()
+
+                let accountsWithTransactions = ['Mocked Checking']
+                let accountsWithoutTransactions = ['Mocked Savings']
+
+                for (let account of accountsWithTransactions) {
+                    await expect(page.locator(`text="${account}"`)).toBeVisible();
+                    await page.locator(`button[id="${account}-button"]`).click();
+                    await expect(page.locator(`table[id="${account}-transactions"]`)).toBeVisible();
+                }
+
+                for (let account of accountsWithoutTransactions) {
+                    await expect(page.locator(`text="${account}"`)).toBeVisible();
+                    await expect(page.locator(`button[id="${account}-button"]`)).not.toBeVisible()
+                    await expect(page.locator(`table[id="${account}-transactions"]`)).not.toBeVisible();
+                }
+
+                await expect(page.locator('svg[id="chart"]')).toBeVisible();
+
+                // when
+                await page.reload()
+
+                // then
+                await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
+                await expect(page.locator('svg[id="chart"]')).toBeVisible();
+            } finally {
+                // cleanup
+                await authenticateAsAdmin(client);
+                const userResponse = await client.get(`${process.env.BASE_URL}/api/users?email=cypressdefault@gmail.com`);
+                const userId = userResponse.data.id;
+                const bankResponse = await client.get(`${process.env.BASE_URL}/api/banks?owner=${userId}`);
+                for (const bank of bankResponse.data.banks) {
+                    await client.delete(`${process.env.BASE_URL}/api/banks/${bank.id}`);
+                }
+                await logOutUserWithClient(client);
+            }
+        }
+    }
+)
