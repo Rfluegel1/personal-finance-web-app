@@ -54,7 +54,7 @@ export default class PlaidService {
                     return {
                         name: account.name,
                         type: account.type,
-                        balances: {current: parseFloat(account.balances.current.toFixed(2))},
+                        balances: {current: account.balances.current},
                         transactions: accountsToTransactions.get(account.account_id)
                     }
                 })
@@ -98,7 +98,7 @@ export default class PlaidService {
                 netWorthOverTime.push({
                     date: transaction.date,
                     epochTimestamp: new Date(transaction.date + 'T00:00:00Z').getTime(),
-                    value: parseFloat(currentNetWorth.toFixed(2))
+                    value: currentNetWorth
                 })
             }
         })
@@ -126,7 +126,7 @@ export default class PlaidService {
         }
         for (let transaction of transactions) {
             accountsMap.get(transaction.account_id).push({
-                amount: parseFloat(transaction.amount.toFixed(2)),
+                amount: transaction.amount,
                 date: transaction.date
             })
         }
