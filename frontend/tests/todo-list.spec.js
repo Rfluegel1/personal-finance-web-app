@@ -193,66 +193,48 @@ test('should disable add bank button when link token is not set', async ({page, 
 })
 
 test('should use link flow to add bank and accounts and transactions', async ({page}) => {
+    async function addHuntingtonBank() {
+        await page.click('button[id="add-bank"]');
+        await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
+        await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Search for 11,000+').fill('huntington');
+        await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Huntington Bank').click()
+        await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Username').fill('user_good');
+        await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Password').fill('pass_good');
+        await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Submit'}).click();
+        await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
+        await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
+    }
+
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
         // given
         await logInTestUser(page);
 
         try {
-            // given
-            let plaidCheckingTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date $5.4 2024-03-25'}).locator('th').first();
-            const plaidSavingTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date $25 2024-03-25'}).locator('th').first();
-            const plaidCDTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date $1000 2024-03-24'}).locator('th').first();
-            const plaidCreditTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date $500 2024-04-04'}).locator('th').first();
-            const plaidMoneyTable = page.locator('table').filter({hasText: 'Transaction Value Transaction Date $5850 2024-03-24'}).locator('th').first();
-            const plaidIRATable = page.locator('table:nth-child(12)').first();
-            const plaid401kTable = page.locator('table:nth-child(14)').first();
-            const plaidStudentTable = page.locator('table:nth-child(16)').first();
-            const plaidMortgageTable = page.locator('table:nth-child(18)').first();
-
             // expect
             await expect(page.locator('svg[id="chart"]')).not.toBeVisible();
 
             // when
-            await page.click('button[id="add-bank"]');
-            await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
-            await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Search for 11,000+').fill('huntington');
-            await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Huntington Bank').click()
-            await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Username').fill('user_good');
-            await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Password').fill('pass_good');
-            await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Submit'}).click();
-            await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
-            await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
+            await addHuntingtonBank();
 
             // then
             await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
+            await page.locator('button[id="Huntington Bank-button"]').click()
 
-            await expect(page.locator('text="Plaid Checking"')).toBeVisible();
-            await expect(plaidCheckingTable).toBeVisible();
+            let accountsWithTransactions = ['Plaid Checking', 'Plaid Saving', 'Plaid CD', 'Plaid Credit Card', 'Plaid Money Market']
+            let accountsWithoutTransactions = ['Plaid IRA', 'Plaid 401k', 'Plaid Student Loan', 'Plaid Mortgage']
 
-            await expect(page.locator('text="Plaid Saving"')).toBeVisible();
-            await expect(plaidSavingTable).toBeVisible();
+            for (let account of accountsWithTransactions) {
+                await expect(page.locator(`text="${account}"`)).toBeVisible();
+                await page.locator(`button[id="${account}-button"]`).click();
+                await expect(page.locator(`table[id="${account}-transactions"]`)).toBeVisible();
+            }
 
-            await expect(page.locator('text="Plaid CD"')).toBeVisible();
-            await expect(plaidCDTable).toBeVisible();
-
-            await expect(page.locator('text="Plaid Credit Card"')).toBeVisible();
-            await expect(plaidCreditTable).toBeVisible();
-
-            await expect(page.locator('text="Plaid Money Market"')).toBeVisible();
-            await expect(plaidMoneyTable).toBeVisible();
-
-            await expect(page.locator('text="Plaid IRA"')).toBeVisible();
-            await expect(plaidIRATable).not.toBeVisible()
-
-            await expect(page.locator('text="Plaid 401k"')).toBeVisible();
-            await expect(plaid401kTable).not.toBeVisible()
-
-            await expect(page.locator('text="Plaid Student Loan"')).toBeVisible();
-            await expect(plaidStudentTable).not.toBeVisible()
-
-            await expect(page.locator('text="Plaid Mortgage"')).toBeVisible();
-            await expect(plaidMortgageTable).not.toBeVisible()
+            for (let account of accountsWithoutTransactions) {
+                await expect(page.locator(`text="${account}"`)).toBeVisible();
+                await expect(page.locator(`button[id="${account}-button"]`)).not.toBeVisible()
+                await expect(page.locator(`table[id="${account}-transactions"]`)).not.toBeVisible();
+            }
 
             await expect(page.locator('svg[id="chart"]')).toBeVisible();
 

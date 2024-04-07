@@ -12,6 +12,7 @@
     let link_token = '';
     let handler;
     let netWorths = [];
+    let visibility = {}
 
     onMount(async () => {
         if ((await axios.get('/api/users/is-verified')).data.isVerified) {
@@ -58,6 +59,13 @@
         });
     }
 
+    function toggleVisibility(name) {
+        if (visibility[name]) {
+            visibility[name] = false;
+        } else {
+            visibility[name] = true;
+        }
+    }
 
     async function createTask() {
         if (!task) {
@@ -128,28 +136,39 @@
                 <div class='bank-item'>
                     <li>
                         <h2>{bank.name}</h2>
+                        <button id={`${bank.name}-button`} on:click={() => toggleVisibility(bank.name)}>
+                            {visibility[bank.name] ? 'Hide' : 'Show'} Accounts
+                        </button>
                         <ul>
-                            {#each bank.accounts as account}
-                                <li><h3>{account.name}</h3></li>
-                                {#if account.transactions.length > 0}
-                                    <table>
-                                        <thead>
-                                        <tr>
-                                            <th>Transaction Value</th>
-                                            <th>Transaction Date</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {#each account.transactions as transaction}
+                            {#if visibility[bank.name]}
+                                {#each bank.accounts as account}
+                                    <li><h3>{account.name}</h3></li>
+                                    {#if account.transactions.length > 0}
+                                        <button id={`${account.name}-button`}
+                                                on:click={() => toggleVisibility(account.name)}>
+                                            {visibility[account.name] ? 'Hide' : 'Show'} Transactions
+                                        </button>
+                                    {/if}
+                                    {#if visibility[account.name]}
+                                        <table id={`${account.name}-transactions`}>
+                                            <thead>
                                             <tr>
-                                                <td>${transaction.amount}</td>
-                                                <td>{transaction.date}</td>
+                                                <th>Transaction Value</th>
+                                                <th>Transaction Date</th>
                                             </tr>
-                                        {/each}
-                                        </tbody>
-                                    </table>
-                                {/if}
-                            {/each}
+                                            </thead>
+                                            <tbody>
+                                            {#each account.transactions as transaction}
+                                                <tr>
+                                                    <td>${transaction.amount}</td>
+                                                    <td>{transaction.date}</td>
+                                                </tr>
+                                            {/each}
+                                            </tbody>
+                                        </table>
+                                    {/if}
+                                {/each}
+                            {/if}
                         </ul>
                     </li>
                 </div>
