@@ -48,7 +48,7 @@ test('should register a new user', async ({ page }) => {
 		await logInTestUser(page, email, 'password12');
 
 		// then
-		await expect(page.locator('h1')).toHaveText('Todo List');
+		await expect(page.locator('h1')).toHaveText('Net Worth');
 	} finally {
 		// cleanup
 		try {

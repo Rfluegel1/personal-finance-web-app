@@ -4,8 +4,6 @@
     import * as d3 from 'd3';
     import drawChart from "$lib/drawGraph.js";
 
-    let todos = [];
-    let task = '';
     let isEmailVerified = false;
     let error = '';
     let banks = [];
@@ -17,26 +15,19 @@
     onMount(async () => {
         if ((await axios.get('/api/users/is-verified')).data.isVerified) {
             isEmailVerified = true;
-            const response = await axios.get('/api/todos');
-            todos = response.data.message;
+            await axios.get('/api/overview').then(response => {
+                banks = response.data.banks
+                netWorths = response.data.netWorths
+            })
+            drawChart(netWorths);
         }
     });
 
     onMount(async () => {
         const linkTokenResponse = await axios.post('/api/create_link_token')
         link_token = linkTokenResponse.data.link_token
-        if (typeof Plaid !== 'undefined') {
-            initializePlaid();
-        }
+        initializePlaid();
     });
-
-    onMount(async () => {
-        await axios.get('/api/overview').then(response => {
-            banks = response.data.banks
-            netWorths = response.data.netWorths
-        })
-        drawChart(netWorths);
-    })
 
     $: netWorths, drawChart(netWorths);
 
@@ -66,24 +57,6 @@
             visibility[name] = true;
         }
     }
-
-    async function createTask() {
-        if (!task) {
-            error = 'Task is required';
-            return;
-        }
-        error = '';
-        await axios.post('/api/todos', {task: task});
-        const response = await axios.get('/api/todos');
-        todos = response.data.message;
-        task = '';
-    }
-
-    async function deleteTask(id) {
-        await axios.delete(`/api/todos/${id}`);
-        const response = await axios.get('/api/todos');
-        todos = response.data.message;
-    }
 </script>
 
 <svelte:head>
@@ -93,25 +66,8 @@
 </svelte:head>
 
 <main>
-    <h1>Todo List</h1>
+    <h1>Net Worth</h1>
     {#if isEmailVerified}
-        <div class='todo-list'>
-            <ol>
-                {#each todos as todo (todo.id)}
-                    <div class='todo-item'>
-                        <li data-testid={todo.task}>{todo.task}</li>
-                        <button data-testid='delete {todo.task}' on:click={() => deleteTask(todo.id)}>X</button>
-                    </div>
-                {/each}
-            </ol>
-        </div>
-        <form>
-            <input id='task' bind:value={task}/>
-            <button id='create' on:click={createTask}>Create Task</button>
-            {#if error}
-                <div class='error' role='alert'>{error}</div>
-            {/if}
-        </form>
         <div>
             <a href='/logout'>Logout</a>
         </div>
@@ -121,74 +77,65 @@
         <div>
             <a href='/password-reset-request'>Change Password</a>
         </div>
+        <button id='add-bank' on:click={handler.open()} disabled={!link_token}>Add Bank</button>
+        <div id="chart-container">
+            {#if netWorths.length !== 0}
+                <svg id="chart"></svg>
+            {/if}
+        </div>
+        <div class='bank-list'>
+            <ul>
+                {#each banks as bank}
+                    <div class='bank-item'>
+                        <li>
+                            <h2>{bank.name}</h2>
+                            <button id={`${bank.name}-button`} on:click={() => toggleVisibility(bank.name)}>
+                                {visibility[bank.name] ? 'Hide' : 'Show'} Accounts
+                            </button>
+                            <ul>
+                                {#if visibility[bank.name]}
+                                    {#each bank.accounts as account}
+                                        <li><h3>{account.name}</h3></li>
+                                        {#if account.transactions.length > 0}
+                                            <button id={`${account.name}-button`}
+                                                    on:click={() => toggleVisibility(account.name)}>
+                                                {visibility[account.name] ? 'Hide' : 'Show'} Transactions
+                                            </button>
+                                        {/if}
+                                        {#if visibility[account.name]}
+                                            <table id={`${account.name}-transactions`}>
+                                                <thead>
+                                                <tr>
+                                                    <th>Transaction Value</th>
+                                                    <th>Transaction Date</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {#each account.transactions as transaction}
+                                                    <tr>
+                                                        <td>${transaction.amount.toFixed(2)}</td>
+                                                        <td>{transaction.date}</td>
+                                                    </tr>
+                                                {/each}
+                                                </tbody>
+                                            </table>
+                                        {/if}
+                                    {/each}
+                                {/if}
+                            </ul>
+                        </li>
+                    </div>
+                {/each}
+            </ul>
+        </div>
     {:else}
         <div class='error' role='alert'>Please verify your email address</div>
     {/if}
-    <button id='add-bank' on:click={handler.open()} disabled={!link_token}>Add Bank</button>
-    <div id="chart-container">
-        {#if netWorths.length !== 0}
-            <svg id="chart"></svg>
-        {/if}
-    </div>
-    <div class='bank-list'>
-        <ul>
-            {#each banks as bank}
-                <div class='bank-item'>
-                    <li>
-                        <h2>{bank.name}</h2>
-                        <button id={`${bank.name}-button`} on:click={() => toggleVisibility(bank.name)}>
-                            {visibility[bank.name] ? 'Hide' : 'Show'} Accounts
-                        </button>
-                        <ul>
-                            {#if visibility[bank.name]}
-                                {#each bank.accounts as account}
-                                    <li><h3>{account.name}</h3></li>
-                                    {#if account.transactions.length > 0}
-                                        <button id={`${account.name}-button`}
-                                                on:click={() => toggleVisibility(account.name)}>
-                                            {visibility[account.name] ? 'Hide' : 'Show'} Transactions
-                                        </button>
-                                    {/if}
-                                    {#if visibility[account.name]}
-                                        <table id={`${account.name}-transactions`}>
-                                            <thead>
-                                            <tr>
-                                                <th>Transaction Value</th>
-                                                <th>Transaction Date</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {#each account.transactions as transaction}
-                                                <tr>
-                                                    <td>${transaction.amount.toFixed(2)}</td>
-                                                    <td>{transaction.date}</td>
-                                                </tr>
-                                            {/each}
-                                            </tbody>
-                                        </table>
-                                    {/if}
-                                {/each}
-                            {/if}
-                        </ul>
-                    </li>
-                </div>
-            {/each}
-        </ul>
-    </div>
 </main>
 
 <style>
     .error {
         color: red;
-    }
-
-    .todo-item {
-        display: flex;
-        align-items: center;
-    }
-
-    .todo-item button {
-        margin-left: 10px;
     }
 
     .bank-list ul {

@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
 import { logInTestUser } from './helpers/logInTestUser.js';
 
-test('valid login should redirect to todoList', async ({ page }) => {
+test('valid login should redirect to main page', async ({ page }) => {
 	// when
 	await logInTestUser(page);
 
 	// then
-	await expect(page.locator('h1')).toHaveText('Todo List');
+	await expect(page.locator('h1')).toHaveText('Net Worth');
 });
 
 test('invalid login displays error message', async ({ page }) => {
@@ -18,7 +18,7 @@ test('invalid login displays error message', async ({ page }) => {
 		page.locator('text="Invalid email or password."')).toBeVisible();
 });
 
-test('logged in user should be redirected to todoList when visiting login page', async ({
+test('logged in user should be redirected to main page when visiting login page', async ({
 																																													page
 																																												}) => {
 	// given
@@ -28,7 +28,7 @@ test('logged in user should be redirected to todoList when visiting login page',
 	await page.goto('/login');
 
 	// then
-	await expect(page.locator('h1')).toHaveText('Todo List');
+	await expect(page.locator('h1')).toHaveText('Net Worth');
 });
 
 test('should display other error message', async ({ page, context }) => {

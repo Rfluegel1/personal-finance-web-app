@@ -30,7 +30,7 @@ test.describe('Email change page', () => {
 		await page.click('a[href="/"]');
 
 		// then
-		await expect(page.locator('h1')).toHaveText('Todo List');
+		await expect(page.locator('h1')).toHaveText('Net Worth');
 	});
 
 	test('should display error message when request fails', async ({ page, context }) => {
@@ -60,6 +60,6 @@ test.describe('Email change page', () => {
 		await page.click('a[href="/"]');
 
 		// then
-		await expect(page.locator('h1')).toHaveText('Todo List');
+		await expect(page.locator('h1')).toHaveText('Net Worth');
 	});
 });

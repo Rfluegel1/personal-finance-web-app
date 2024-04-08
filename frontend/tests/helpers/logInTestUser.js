@@ -14,6 +14,6 @@ export async function logInTestUser(
 	await page.click('button[type="submit"]');
 
 	if (waitForNavigation) {
-		await expect(page.locator('h1')).toHaveText('Todo List');
+		await expect(page.locator('h1')).toHaveText('Net Worth');
 	}
 }
