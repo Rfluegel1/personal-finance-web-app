@@ -1,7 +1,6 @@
 <script>
     import {onMount} from 'svelte';
     import axios from 'axios';
-    import * as d3 from 'd3';
     import drawChart from "$lib/drawGraph.js";
 
     let isEmailVerified = false;
@@ -13,20 +12,32 @@
     let visibility = {}
 
     onMount(async () => {
-        if ((await axios.get('/api/users/is-verified')).data.isVerified) {
-            isEmailVerified = true;
-            await axios.get('/api/overview').then(response => {
-                banks = response.data.banks
-                netWorths = response.data.netWorths
-            })
+        try {
+            isEmailVerified = (await axios.get('/api/users/is-verified')).data.isVerified;
+        } catch (e) {
+            error = 'Failed to verify user'
+        }
+        if (isEmailVerified) {
+            try {
+                await axios.get('/api/overview').then(response => {
+                    banks = response.data.banks
+                    netWorths = response.data.netWorths
+                })
+            } catch (e) {
+                error = 'Failed to get overview'
+            }
             drawChart(netWorths);
         }
     });
 
     onMount(async () => {
-        const linkTokenResponse = await axios.post('/api/create_link_token')
-        link_token = linkTokenResponse.data.link_token
-        initializePlaid();
+        try {
+            const linkTokenResponse = await axios.post('/api/create_link_token')
+            link_token = linkTokenResponse.data.link_token
+            initializePlaid();
+        } catch (e) {
+            error = 'Failed to create link token'
+        }
     });
 
     $: netWorths, drawChart(netWorths);
@@ -35,16 +46,23 @@
         handler = Plaid.create({
             token: link_token,
             onSuccess: async (public_token, metadata) => {
-                await axios.post('/api/exchange_token_and_save_bank', {public_token})
-                await axios.get('/api/overview').then(response => {
-                    banks = response.data.banks
-                    netWorths = response.data.netWorths
-                })
-                console.log('Success', public_token, metadata);
+                try {
+                    await axios.post('/api/exchange_token_and_save_bank', {public_token})
+                } catch (e) {
+                    error = 'Failed to save bank'
+                }
+                try {
+                    await axios.get('/api/overview').then(response => {
+                        banks = response.data.banks
+                        netWorths = response.data.netWorths
+                    })
+                } catch (e) {
+                    error = 'Failed to get overview'
+                }
             },
             onExit: (err, metadata) => {
                 if (err) {
-                    console.error('Plaid Link exit error:', err);
+                    error = 'Plaid link error'
                 }
             }
         });
@@ -67,6 +85,9 @@
 
 <main>
     <h1>Net Worth</h1>
+    {#if error}
+        <div class='error' role='alert'>{error}</div>
+    {/if}
     {#if isEmailVerified}
         <div>
             <a href='/logout'>Logout</a>
