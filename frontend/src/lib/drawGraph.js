@@ -107,7 +107,7 @@ export default function drawChart(rawData) {
             tooltip.transition()
                 .duration(200)
                 .style('opacity', .9);
-            tooltip.html(`Date: ${d3.timeFormat('%Y-%m-%d')(d.date)}<br/>Net Worth: ${d.value}`)
+            tooltip.html(`Date: ${d3.timeFormat('%Y-%m-%d')(d.date)}<br/>Net Worth: $${d.value.toFixed(2)}`)
                 .style('left', `${event.pageX + 10}px`)
                 .style('top', `${event.pageY - 10}px`);
         })

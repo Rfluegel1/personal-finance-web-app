@@ -160,7 +160,7 @@
                                             <tbody>
                                             {#each account.transactions as transaction}
                                                 <tr>
-                                                    <td>${transaction.amount}</td>
+                                                    <td>${transaction.amount.toFixed(2)}</td>
                                                     <td>{transaction.date}</td>
                                                 </tr>
                                             {/each}
