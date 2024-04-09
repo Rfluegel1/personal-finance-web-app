@@ -40,14 +40,16 @@ export default function drawChart(rawData) {
     const line = d3.line().x(d => x(d.date)).y(d => y(d.value));
 
     // Add a neutral line at 0 net worth
-    svg.append("line")
-        .attr("x1", 0)
-        .attr("x2", width)
-        .attr("y1", y(0))
-        .attr("y2", y(0))
-        .attr("stroke-width", 2)
-        .attr("stroke", "black")
-        .style("stroke-dasharray", ("3, 3"));
+    if (minValue < 0 && maxValue > 0) {
+        svg.append("line")
+            .attr("x1", 0)
+            .attr("x2", width)
+            .attr("y1", y(0))
+            .attr("y2", y(0))
+            .attr("stroke-width", 2)
+            .attr("stroke", "black")
+            .style("stroke-dasharray", ("3, 3"));
+    }
 
     // Draw line
     svg.append("path")
