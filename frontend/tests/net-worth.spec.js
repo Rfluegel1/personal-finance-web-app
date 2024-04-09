@@ -317,7 +317,7 @@ test('should display error when create access token on success errors out', asyn
     }
 })
 
-test.only('should display loading while waiting for overview', async ({page, context}) => {
+test('should display loading while waiting for overview', async ({page, context}) => {
     // given
     await context.route('**/api/overview', (route) => {
         setTimeout(() => {
