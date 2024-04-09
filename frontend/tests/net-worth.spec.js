@@ -123,6 +123,14 @@ test('should use link flow to add bank and accounts and transactions', async ({p
             await addHuntingtonBank(page);
 
             // then
+            await expect(page.locator('text="Loading..."')).toBeVisible();
+            await expect(page.locator('button[id="add-bank"]')).toBeDisabled()
+
+            // and
+            await expect(page.locator('text="Loading..."')).not.toBeVisible();
+            await expect(page.locator('button[id="add-bank"]')).not.toBeDisabled()
+
+            // then
             await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
             await page.locator('button[id="Huntington Bank-button"]').click()
 

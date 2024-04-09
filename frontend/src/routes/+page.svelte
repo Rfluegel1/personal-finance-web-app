@@ -51,17 +51,23 @@
             token: link_token,
             onSuccess: async (public_token, metadata) => {
                 try {
+                    isLoading = true;
                     await axios.post('/api/exchange_token_and_save_bank', {public_token})
                 } catch (e) {
                     error = 'Failed to save bank'
+                } finally {
+                    isLoading = false;
                 }
                 try {
+                    isLoading = true;
                     await axios.get('/api/overview').then(response => {
                         banks = response.data.banks
                         netWorths = response.data.netWorths
                     })
                 } catch (e) {
                     error = 'Failed to get overview'
+                } finally {
+                    isLoading = false;
                 }
             },
             onExit: (err, metadata) => {
