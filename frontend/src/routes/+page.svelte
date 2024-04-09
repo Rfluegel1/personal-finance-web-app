@@ -110,9 +110,7 @@
         </div>
         <button id='add-bank' on:click={handler.open()} disabled={!link_token || isLoading}>Add Bank</button>
         <div id="chart-container">
-            {#if netWorths.length !== 0}
-                <svg id="chart"></svg>
-            {/if}
+            <svg id="chart"></svg>
         </div>
         {#if isLoading}
             <div>Loading...</div>
