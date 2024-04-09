@@ -10,6 +10,7 @@
     let handler;
     let netWorths = [];
     let visibility = {}
+    let isLoading = false;
 
     onMount(async () => {
         try {
@@ -19,12 +20,15 @@
         }
         if (isEmailVerified) {
             try {
+                isLoading = true;
                 await axios.get('/api/overview').then(response => {
                     banks = response.data.banks
                     netWorths = response.data.netWorths
                 })
             } catch (e) {
                 error = 'Failed to get overview'
+            } finally {
+                isLoading = false;
             }
             drawChart(netWorths);
         }
@@ -98,12 +102,15 @@
         <div>
             <a href='/password-reset-request'>Change Password</a>
         </div>
-        <button id='add-bank' on:click={handler.open()} disabled={!link_token}>Add Bank</button>
+        <button id='add-bank' on:click={handler.open()} disabled={!link_token || isLoading}>Add Bank</button>
         <div id="chart-container">
             {#if netWorths.length !== 0}
                 <svg id="chart"></svg>
             {/if}
         </div>
+        {#if isLoading}
+            <div>Loading...</div>
+        {/if}
         <div class='bank-list'>
             <ul>
                 {#each banks as bank}

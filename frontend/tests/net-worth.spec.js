@@ -5,13 +5,9 @@ import {wrapper} from 'axios-cookiejar-support';
 import {CookieJar} from 'tough-cookie';
 import {authenticateAsAdmin, logInTestUserWithClient, logOutUserWithClient} from './helpers/api.js';
 import {registerTemporaryUser} from './helpers/registerTemporaryUser.js';
-import {generateTemporaryUserEmail} from './helpers/generateTemporaryUserEmail.js';
 
 const jar = new CookieJar();
 const client = wrapper(axios.create({jar, withCredentials: true}));
-
-const otherJar = new CookieJar();
-const otherClient = wrapper(axios.create({jar: otherJar, withCredentials: true}));
 
 test('should redirect when user is not logged in', async ({page}) => {
     // given
@@ -108,7 +104,7 @@ async function addHuntingtonBank(page) {
         await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Submit'}).click();
         await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
         await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
-    } else{
+    } else {
         throw new Error('This test can only be run in development mode');
     }
 }
@@ -319,4 +315,54 @@ test('should display error when create access token on success errors out', asyn
         // then
         await expect(page.locator('text="Failed to save bank"')).toBeVisible();
     }
+})
+
+test.only('should display loading while waiting for overview', async ({page, context}) => {
+    // given
+    await context.route('**/api/overview', (route) => {
+        setTimeout(() => {
+            route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    banks: [{
+                        name: 'Mocked Bank',
+                        accounts: [{
+                            name: 'Mocked Checking',
+                            balances: {current: 320.76},
+                            transactions: [{
+                                date: '2021-01-01',
+                                amount: 100
+                            }]
+                        }, {
+                            name: 'Mocked Savings',
+                            balances: {current: 1000.76},
+                            transactions: []
+                        }]
+                    }],
+                    netWorths: [{
+                        date: '2021-01-01',
+                        value: 100,
+                        epochTimestamp: 1609459200
+                    }, {
+                        date: '2021-01-01',
+                        value: 200,
+                        epochTimestamp: 1709459200
+                    }]
+                })
+            });
+        }, 1000);
+    });
+
+    // when
+    await logInTestUser(page);
+
+    // then
+    await expect(page.locator('text="Loading..."')).toBeVisible();
+    await expect(page.locator('button[id="add-bank"]')).toBeDisabled()
+
+
+    // and
+    await expect(page.locator('text="Loading..."')).not.toBeVisible();
+    await expect(page.locator('button[id="add-bank"]')).not.toBeDisabled()
 })
