@@ -109,6 +109,9 @@
             <a href='/password-reset-request'>Change Password</a>
         </div>
         <button id='add-bank' on:click={handler.open()} disabled={!link_token || isLoading}>Add Bank</button>
+        {#if netWorths.length > 0}
+            <h2>${netWorths[netWorths.length - 1].value.toFixed(2)}</h2>
+        {/if}
         <div id="chart-container">
             <svg id="chart"></svg>
         </div>

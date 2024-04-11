@@ -135,6 +135,8 @@ test('should use link flow to add bank and accounts and transactions', async ({p
             await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
             await page.locator('button[id="Huntington Bank-button"]').click()
 
+            await expect(page.locator('text="$-53501.32"')).toBeVisible();
+
             let accountsWithTransactions = ['Plaid Checking', 'Plaid Saving', 'Plaid CD', 'Plaid Credit Card', 'Plaid Money Market']
             let accountsWithoutTransactions = ['Plaid IRA', 'Plaid 401k', 'Plaid Student Loan', 'Plaid Mortgage']
 
