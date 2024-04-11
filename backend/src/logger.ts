@@ -11,8 +11,8 @@ const createLogger = () => {
 }
 
 const maskSensitiveInfo = winston.format((info) => {
-    if (info.message?.message?.config?.headers?.PLAID_SECRET) {
-        info.message.message.config.headers.PLAID_SECRET = '********';
+    if (info.message?.config?.headers?.PLAID_SECRET) {
+        info.message.config.headers.PLAID_SECRET = '********';
     }
     return info;
 });
