@@ -55,7 +55,7 @@ export function determineAndSendError() {
             getLogger().error(errorWithStatus)
             return response.status(StatusCodes.UNAUTHORIZED).send({message: error.message})
         }
-        getLogger().error(JSON.stringify(errorWithStatus))
+        getLogger().error(JSON.stringify(error))
         return response.status(StatusCodes.INTERNAL_SERVER_ERROR).send({message: 'Generic Internal Server Error'})
     }
 }
