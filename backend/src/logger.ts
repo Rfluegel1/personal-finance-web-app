@@ -5,10 +5,17 @@ cls.getNamespace('global')
 const createLogger = () => {
     return winston.createLogger({
         level: 'info',
-        format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+        format: winston.format.combine(winston.format.timestamp(), maskSensitiveInfo(), winston.format.json()),
         transports: [new winston.transports.Console()]
     })
 }
+
+const maskSensitiveInfo = winston.format((info) => {
+    if (info.message.message.config.headers.PLAID_SECRET) {
+        info.message.message.config.headers.PLAID_SECRET = '********';
+    }
+    return info;
+});
 
 export const logger = createLogger()
 
