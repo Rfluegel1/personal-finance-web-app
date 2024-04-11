@@ -39,14 +39,14 @@ export default class PlaidController {
     }
 
     async getOverview(request: Request, response: Response, next: NextFunction) {
-        getLogger().info('Received get bank names request')
+        getLogger().info('Received get overview request')
         if (!request.isAuthenticated()) {
-            return next(new UnauthorizedException('create access token'))
+            return next(new UnauthorizedException('get overview'))
         }
         const userId = (request.user as User).id
         try {
             const banks = await this.plaidService.getOverview(userId)
-            getLogger().info('Sending get bank names response')
+            getLogger().info('Sending get overview response')
             return response.status(StatusCodes.OK).send(banks)
         } catch (error) {
             next(error)
