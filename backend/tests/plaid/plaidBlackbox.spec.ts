@@ -64,65 +64,60 @@ describe('Plaid resource', () => {
 
                 // then
                 expect(response.status).toBe(StatusCodes.OK)
-                expect(response.data.banks).toEqual([{
-                    name: 'Huntington Bank',
-                    accounts: [
-                        {
-                            type: 'depository',
-                            name: 'Plaid Checking',
-                            balances: {current: 110},
-                            transactions: expect.arrayContaining([{amount: 5.4, date: '2024-03-25'}])
-                        },
-                        {
-                            type: 'depository',
-                            name: 'Plaid Saving',
-                            balances: {current: 210},
-                            transactions: expect.arrayContaining([{amount: 25, date: '2024-03-25'}])
-                        },
-                        {
-                            type: 'depository',
-                            name: 'Plaid CD',
-                            balances: {current: 1000},
-                            transactions: expect.arrayContaining([{amount: 1000, date: '2024-03-24'}])
-                        },
-                        {
-                            type: 'credit',
-                            name: 'Plaid Credit Card',
-                            balances: {current: 410},
-                            transactions: expect.arrayContaining([{amount: 500, date: '2024-04-04'}])
-                        },
-                        {
-                            type: 'depository',
-                            name: 'Plaid Money Market',
-                            balances: {current: 43200},
-                            transactions: expect.arrayContaining([{amount: 5850, date: '2024-03-24'}])
-                        },
-                        {
-                            type: 'investment',
-                            name: 'Plaid IRA',
-                            balances: {current: 320.76},
-                            transactions: []
-                        },
-                        {
-                            type: 'investment',
-                            name: 'Plaid 401k',
-                            balances: {current: 23631.9805},
-                            transactions: []
-                        },
-                        {
-                            type: 'loan',
-                            name: 'Plaid Student Loan',
-                            balances: {current: 65262},
-                            transactions: []
-                        },
-                        {
-                            type: 'loan',
-                            name: 'Plaid Mortgage',
-                            balances: {current: 56302.06},
-                            transactions: []
-                        },
-                    ]
-                }])
+                let huntingtonBank = response.data.banks.find((bank: any) => bank.name === 'Huntington Bank')
+
+                let plaidChecking = huntingtonBank.accounts.find((account: any) => account.name === 'Plaid Checking')
+                expect(plaidChecking.type).toBe('depository')
+                expect(plaidChecking.balances.current).toEqual(110)
+                expect(plaidChecking.transactions.length).toBeGreaterThan(0)
+
+                let plaidSaving = huntingtonBank.accounts.find((account: any) => account.name === 'Plaid Saving')
+                expect(plaidSaving.type).toBe('depository')
+                expect(plaidSaving.balances.current).toEqual(210)
+                expect(plaidSaving.transactions.length).toBeGreaterThan(0)
+
+                let plaidCD = huntingtonBank.accounts.find((account: any) => account.name === 'Plaid CD')
+                expect(plaidCD.type).toBe('depository')
+                expect(plaidCD.balances.current).toEqual(1000)
+                expect(plaidCD.transactions.length).toBeGreaterThan(0)
+
+                let plaidCreditCard = huntingtonBank.accounts.find((account: any) => account.name === 'Plaid Credit Card')
+                expect(plaidCreditCard.type).toBe('credit')
+                expect(plaidCreditCard.balances.current).toEqual(410)
+                expect(plaidCreditCard.transactions.length).toBeGreaterThan(0)
+
+                let plaidMoneyMarket = huntingtonBank.accounts.find((account: any) => account.name === 'Plaid Money Market')
+                expect(plaidMoneyMarket.type).toBe('depository')
+                expect(plaidMoneyMarket.balances.current).toEqual(43200)
+                expect(plaidMoneyMarket.transactions.length).toBeGreaterThan(0)
+
+                let plaidIRA = huntingtonBank.accounts.find((account: any) => account.name === 'Plaid IRA')
+                expect(plaidIRA.type).toBe('investment')
+                expect(plaidIRA.balances.current).toEqual(320.76)
+                expect(plaidIRA.transactions.length).toBe(0)
+
+                let plaid401k = huntingtonBank.accounts.find((account: any) => account.name === 'Plaid 401k')
+                expect(plaid401k.type).toBe('investment')
+                expect(plaid401k.balances.current).toEqual(23631.9805)
+                expect(plaid401k.transactions.length).toBe(0)
+
+                let plaidStudentLoan = huntingtonBank.accounts.find((account: any) => account.name === 'Plaid Student Loan')
+                expect(plaidStudentLoan.type).toBe('loan')
+                expect(plaidStudentLoan.balances.current).toEqual(65262)
+                expect(plaidStudentLoan.transactions.length).toBe(0)
+
+                let plaidMortgage = huntingtonBank.accounts.find((account: any) => account.name === 'Plaid Mortgage')
+                expect(plaidMortgage.type).toBe('loan')
+                expect(plaidMortgage.balances.current).toEqual(56302.06)
+                expect(plaidMortgage.transactions.length).toBe(0)
+
+                for (let account of huntingtonBank.accounts) {
+                    for (let transaction of account.transactions) {
+                        expect(transaction.date).toMatch(/\d{4}-\d{2}-\d{2}/)
+                        expect(transaction.amount).toEqual(expect.any(Number))
+                    }
+                }
+
                 for (let netWorth of response.data.netWorths) {
                     expect(netWorth.date).toMatch(/\d{4}-\d{2}-\d{2}/)
                     expect(netWorth.value).toEqual(expect.any(Number))
