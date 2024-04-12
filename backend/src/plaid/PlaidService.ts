@@ -163,10 +163,6 @@ export default class PlaidService {
                     offset: offset
                 }
             } as TransactionsGetRequest)
-            // if (transactionResponse.data?.transactions.length === 0) {
-            //     await new Promise(resolve => setTimeout(resolve, 100))
-            //     return await this.getTransactionsResponseWithRetry(bank)
-            // }
             return transactionResponse
         } catch (error: any) {
             if (error.response?.data?.error_code === 'PRODUCT_NOT_READY') {
