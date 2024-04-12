@@ -1,10 +1,5 @@
 import {plaidClient} from './PlaidConfiguration'
-import {
-    CountryCode,
-    InstitutionsGetByIdRequest,
-    LinkTokenCreateRequest,
-    Products, TransactionsGetRequest
-} from 'plaid'
+import {CountryCode, InstitutionsGetByIdRequest, LinkTokenCreateRequest, Products, TransactionsGetRequest} from 'plaid'
 import BankService from '../banks/BankService'
 import {getTodaysDateInYYYYMMDD, getTwoYearsPreviousTodaysDateInYYYYMMDD} from '../utils'
 
@@ -19,7 +14,7 @@ export default class PlaidService {
             'user': {
                 'client_user_id': userId
             },
-            'products': [Products.Transactions]
+            'products': [Products.Transactions, Products.Investments]
         }
         let response = await plaidClient.linkTokenCreate(plaidRequest)
         return {link_token: response.data.link_token}
@@ -149,6 +144,16 @@ export default class PlaidService {
         while (transactions.length < transactionsResponse.data.total_transactions) {
             const paginatedTransactionsResponse = await this.getTransactionsResponseWithRetry(bank, transactions.length)
             transactions = transactions.concat(paginatedTransactionsResponse.data.transactions)
+        }
+        for (let account of accounts) {
+            if (account.type === 'investment') {
+                const investmentTransactionsResponse = await plaidClient.investmentsTransactionsGet({
+                    access_token: bank.accessToken,
+                    start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
+                    end_date: getTodaysDateInYYYYMMDD()
+                })
+                transactions = transactions.concat(investmentTransactionsResponse.data.investment_transactions)
+            }
         }
         return {transactions, accounts, institutionId}
     }

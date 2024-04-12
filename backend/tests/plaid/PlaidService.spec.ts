@@ -18,7 +18,8 @@ jest.mock('../../src/plaid/PlaidConfiguration', () => ({
         linkTokenCreate: jest.fn(),
         itemPublicTokenExchange: jest.fn(),
         institutionsGetById: jest.fn(),
-        accountsGet: jest.fn()
+        accountsGet: jest.fn(),
+        investmentsTransactionsGet: jest.fn()
     }
 }))
 
@@ -139,11 +140,37 @@ describe('Plaid service', () => {
                             item: {institution_id: 'bankId2'},
                             transactions: [
                                 {amount: 6, date: '2003-04-04', account_id: 'accountId3'},
-                                {amount: 5, date: '2002-03-03', account_id: 'accountId4'},
                                 {amount: 8, date: '2004-05-05', account_id: 'accountId3'},
+                            ],
+                            total_transactions: 2,
+                            accounts: [
+                                {
+                                    account_id: 'accountId3',
+                                    name: 'bank2AccountName1',
+                                    type: 'loan', balances: {current: 300}
+                                }, {
+                                    account_id: 'accountId4',
+                                    name: 'bank2AccountName2',
+                                    type: 'investment', balances: {current: 400}
+                                }
+                            ],
+                        }
+                    }
+                }
+            });
+
+            (plaidClient.investmentsTransactionsGet as jest.Mock).mockImplementation((params: any) => {
+                if (params.access_token === secondMockedBank.accessToken
+                    && params.start_date === getTwoYearsPreviousTodaysDateInYYYYMMDD()
+                    && params.end_date === getTodaysDateInYYYYMMDD()) {
+                    return {
+                        data: {
+                            item: {institution_id: 'bankId2'},
+                            investment_transactions: [
+                                {amount: 5, date: '2002-03-03', account_id: 'accountId4'},
                                 {amount: 7, date: '2003-04-04', account_id: 'accountId4'},
                             ],
-                            total_transactions: 4,
+                            total_transactions: 2,
                             accounts: [
                                 {
                                     account_id: 'accountId3',
@@ -277,7 +304,7 @@ describe('Plaid service', () => {
 
         test('should return no net worths when there are no banks', async () => {
             // given
-            (plaidService.bankService.getBanksByOwner as jest.Mock).mockResolvedValue([]);
+            (plaidService.bankService.getBanksByOwner as jest.Mock).mockResolvedValue([])
 
             // when
             const result = await plaidService.getOverview('userId')

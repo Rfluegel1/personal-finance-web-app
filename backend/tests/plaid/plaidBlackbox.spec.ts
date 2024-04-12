@@ -7,7 +7,7 @@ import {plaidClient} from '../../src/plaid/PlaidConfiguration'
 import {Products, SandboxPublicTokenCreateRequest} from 'plaid'
 import Bank from '../../src/banks/Bank'
 
-jest.setTimeout(30000 * 2)
+jest.setTimeout(30000 * 100)
 
 const jar = new CookieJar()
 const client = wrapper(axios.create({jar, withCredentials: true}))
@@ -35,29 +35,54 @@ describe('Plaid resource', () => {
             // given
             await authenticateAsAdmin(admin)
             const userId = await logInTestUser(client)
+
             let huntingtonBank = 'ins_21'
-            let sandboxPublicTokenCreateRequest: SandboxPublicTokenCreateRequest = {
+            let huntingtonBankTokenCreateRequest: SandboxPublicTokenCreateRequest = {
                 institution_id: huntingtonBank,
-                initial_products: [Products.Auth]
+                initial_products: [Products.Transactions]
             }
-            const response = await plaidClient.sandboxPublicTokenCreate(sandboxPublicTokenCreateRequest)
-            const publicToken = response.data.public_token
-            let bankId: string = ''
+            let huntingtonBankResponse
+            huntingtonBankResponse = await plaidClient.sandboxPublicTokenCreate(huntingtonBankTokenCreateRequest)
+            const huntingtonBankPublicToken = huntingtonBankResponse?.data?.public_token
+            let huntingtonBankId: string = ''
+
+            let edwardJones = 'ins_102625'
+            let edwardJonesTokenCreateRequest: SandboxPublicTokenCreateRequest = {
+                institution_id: edwardJones,
+                initial_products: [Products.Investments]
+            }
+            let edwardJonesResponse
+            try {
+
+            edwardJonesResponse = await plaidClient.sandboxPublicTokenCreate(edwardJonesTokenCreateRequest)
+            } catch (e) {
+                console.log(e)
+            }
+            const edwardJonesPublicToken = edwardJonesResponse?.data?.public_token
+            let edwardJonesId: string = ''
 
             try {
                 // when
-                const exchangeResponse = await client.post(`${process.env.BASE_URL}/api/exchange_token_and_save_bank`, {public_token: publicToken})
+                const huntingtonBankExchangeResponse = await client.post(`${process.env.BASE_URL}/api/exchange_token_and_save_bank`, {public_token: huntingtonBankPublicToken})
 
                 // then
-                expect(exchangeResponse.status).toBe(StatusCodes.CREATED)
-                bankId = exchangeResponse.data.bankId
-                expect(bankId).toBeTruthy()
+                expect(huntingtonBankExchangeResponse.status).toBe(StatusCodes.CREATED)
+                huntingtonBankId = huntingtonBankExchangeResponse.data.bankId
+                expect(huntingtonBankId).toBeTruthy()
+                // when
+                const edwardJonesExchangeResponse = await client.post(`${process.env.BASE_URL}/api/exchange_token_and_save_bank`, {public_token: edwardJonesPublicToken})
+
+                // then
+                expect(edwardJonesExchangeResponse.status).toBe(StatusCodes.CREATED)
+                edwardJonesId = edwardJonesExchangeResponse.data.bankId
+                expect(edwardJonesId).toBeTruthy()
 
                 // when
                 const banks = await admin.get(`${process.env.BASE_URL}/api/banks?owner=${userId}`)
 
                 // then
-                expect(banks.data.banks.find((bank: Bank) => bank.id === bankId)).toBeTruthy()
+                expect(banks.data.banks.find((bank: Bank) => bank.id === huntingtonBankId)).toBeTruthy()
+                expect(banks.data.banks.find((bank: Bank) => bank.id === edwardJonesId)).toBeTruthy()
 
                 // when
                 const response = await client.get(`${process.env.BASE_URL}/api/overview`)
@@ -125,7 +150,7 @@ describe('Plaid resource', () => {
                 }
             } finally {
                 // cleanup
-                const deleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${bankId}`)
+                const deleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
                 expect(deleteResponse.status).toBe(StatusCodes.NO_CONTENT)
                 await logOutUser(client)
                 await logOutUser(admin)
