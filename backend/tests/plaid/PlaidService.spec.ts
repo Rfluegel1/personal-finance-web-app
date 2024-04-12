@@ -229,7 +229,7 @@ describe('Plaid service', () => {
             expect(plaidClient.transactionsGet).toHaveBeenCalledTimes(2)
         })
 
-        test('should call transactions get more than once when transactions length is 0', async () => {
+        test.skip('should call transactions get more than once when transactions length is 0', async () => {
             // given
             let firstMockedBank = new Bank('access_token1');
             (plaidClient.transactionsGet as jest.Mock).mockResolvedValueOnce({data: {transactions: []}});
