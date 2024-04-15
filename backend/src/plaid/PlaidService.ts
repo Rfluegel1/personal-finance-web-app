@@ -14,7 +14,7 @@ export default class PlaidService {
             'user': {
                 'client_user_id': userId
             },
-            'products': [Products.Auth],
+            'products': [Products.Balance],
             'required_if_supported_products': [Products.Transactions, Products.Investments, Products.Liabilities],
         }
         let response = await plaidClient.linkTokenCreate(plaidRequest)
