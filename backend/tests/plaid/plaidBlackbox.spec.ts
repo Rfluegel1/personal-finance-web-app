@@ -49,7 +49,7 @@ describe('Plaid resource', () => {
             let edwardJones = 'ins_102625'
             let edwardJonesTokenCreateRequest: SandboxPublicTokenCreateRequest = {
                 institution_id: edwardJones,
-                initial_products: [Products.Investments]
+                initial_products: [Products.Transactions]
             }
             let edwardJonesResponse
             try {

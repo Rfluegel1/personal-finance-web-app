@@ -34,7 +34,7 @@ const swaggerDefinition = {
 
 const options = {
 	swaggerDefinition,
-	apis: ['./src/**/*.ts']
+	apis: ['./src/**/*.ts', './dist/**/*.js']
 };
 
 const swaggerSpec = swaggerJsdoc(options);

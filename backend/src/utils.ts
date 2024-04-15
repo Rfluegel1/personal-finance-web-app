@@ -55,7 +55,23 @@ export function determineAndSendError() {
             getLogger().error(errorWithStatus)
             return response.status(StatusCodes.UNAUTHORIZED).send({message: error.message})
         }
-        getLogger().error(errorWithStatus)
+        if (error.response) {
+            getLogger().error(JSON.stringify({
+                message: 'API responded with an error',
+                statusCode: error.response.status,
+                data: error.response.data,
+                headers: error.response.headers
+            }))
+        } else if (error.request) {
+            getLogger().error(JSON.stringify({
+                message: 'Request made but no response received',
+                request: {
+                    headers: error.request.headers
+                }
+            }))
+        } else {
+            getLogger().error(JSON.stringify(error))
+        }
         return response.status(StatusCodes.INTERNAL_SERVER_ERROR).send({message: 'Generic Internal Server Error'})
     }
 }
