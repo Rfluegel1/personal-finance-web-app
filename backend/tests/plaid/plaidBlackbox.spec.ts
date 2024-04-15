@@ -46,18 +46,13 @@ describe('Plaid resource', () => {
             const huntingtonBankPublicToken = huntingtonBankResponse?.data?.public_token
             let huntingtonBankId: string = ''
 
-            let edwardJones = 'ins_102625'
+            let edwardJones = 'ins_115607'
             let edwardJonesTokenCreateRequest: SandboxPublicTokenCreateRequest = {
                 institution_id: edwardJones,
-                initial_products: [Products.Transactions]
+                initial_products: [Products.Investments]
             }
             let edwardJonesResponse
-            try {
-
             edwardJonesResponse = await plaidClient.sandboxPublicTokenCreate(edwardJonesTokenCreateRequest)
-            } catch (e) {
-                console.log(e)
-            }
             const edwardJonesPublicToken = edwardJonesResponse?.data?.public_token
             let edwardJonesId: string = ''
 
@@ -136,7 +131,19 @@ describe('Plaid resource', () => {
                 expect(plaidMortgage.balances.current).toEqual(56302.06)
                 expect(plaidMortgage.transactions.length).toBe(0)
 
-                for (let account of huntingtonBank.accounts) {
+                let edwardJones = response.data.banks.find((bank: any) => bank.name === 'Edward Jones - U.S. Clients Access')
+
+                let edwardJonesIRA = edwardJones.accounts.find((account: any) => account.name === 'Plaid IRA')
+                expect(edwardJonesIRA.type).toBe('investment')
+                expect(edwardJonesIRA.balances.current).toEqual(320.76)
+                expect(edwardJonesIRA.transactions.length).toBeGreaterThan(0)
+
+                let edwardJones401k = edwardJones.accounts.find((account: any) => account.name === 'Plaid 401k')
+                expect(edwardJones401k.type).toBe('investment')
+                expect(edwardJones401k.balances.current).toEqual(23631.9805)
+                expect(edwardJones401k.transactions.length).toBeGreaterThan(0)
+
+                for (let account of huntingtonBank.accounts.concat(edwardJones.accounts)) {
                     for (let transaction of account.transactions) {
                         expect(transaction.date).toMatch(/\d{4}-\d{2}-\d{2}/)
                         expect(transaction.amount).toEqual(expect.any(Number))
@@ -150,8 +157,10 @@ describe('Plaid resource', () => {
                 }
             } finally {
                 // cleanup
-                const deleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
-                expect(deleteResponse.status).toBe(StatusCodes.NO_CONTENT)
+                const huntingtonDeleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
+                expect(huntingtonDeleteResponse.status).toBe(StatusCodes.NO_CONTENT)
+                const edwardJonesDeleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${edwardJonesId}`)
+                expect(edwardJonesDeleteResponse.status).toBe(StatusCodes.NO_CONTENT)
                 await logOutUser(client)
                 await logOutUser(admin)
             }

@@ -15,7 +15,7 @@ export default class PlaidService {
                 'client_user_id': userId
             },
             'products': [Products.Transactions],
-            'required_if_supported_products': [ Products.Investments, Products.Liabilities],
+            'required_if_supported_products': [Products.Investments, Products.Liabilities],
         }
         let response = await plaidClient.linkTokenCreate(plaidRequest)
         return {link_token: response.data.link_token}
@@ -42,8 +42,17 @@ export default class PlaidService {
         const banks = await this.bankService.getBanksByOwner(userId)
         for (let bank of banks) {
             const {transactions, accounts, institutionId} = await this.getTransactionsAndAccountsAndInstitutionId(bank)
-            const institutionName = await this.getInstitutionName(institutionId)
-            const accountsToTransactions = this.matchAccountToTransactions(accounts, transactions)
+            const {institutionName, institutionProducts} = await this.getInstitutionNameAndProducts(institutionId)
+            let investmentTransactions: any[] = []
+            if (institutionProducts.includes(Products.Investments)) {
+                const investmentTransactionsResponse = await plaidClient.investmentsTransactionsGet({
+                    access_token: bank.accessToken,
+                    start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
+                    end_date: getTodaysDateInYYYYMMDD()
+                })
+                investmentTransactions = investmentTransactions.concat(investmentTransactionsResponse.data.investment_transactions)
+            }
+            const accountsToTransactions = this.matchAccountToTransactions(accounts, transactions, investmentTransactions)
             overview.banks.push({
                 name: institutionName,
                 accounts: accounts.map((account) => {
@@ -115,12 +124,12 @@ export default class PlaidService {
         return todaysNetWorth
     }
 
-    private matchAccountToTransactions(accounts: any[], transactions: any[]) {
+    private matchAccountToTransactions(accounts: any[], transactions: any[], investmentTransactions: any[]) {
         let accountsMap = new Map<string, any>
         for (let account of accounts) {
             accountsMap.set(account.account_id, [])
         }
-        for (let transaction of transactions) {
+        for (let transaction of transactions.concat(investmentTransactions)) {
             accountsMap.get(transaction.account_id).push({
                 amount: transaction.amount,
                 date: transaction.date
@@ -129,9 +138,12 @@ export default class PlaidService {
         return accountsMap
     }
 
-    private async getInstitutionName(institutionId: string) {
+    private async getInstitutionNameAndProducts(institutionId: string) {
         const institutionResponse = await this.getInstitutionsGetById(institutionId)
-        return institutionResponse.data.institution.name
+        return {
+            institutionName: institutionResponse.data.institution.name,
+            institutionProducts: institutionResponse.data.institution.products
+        }
     }
 
     private async getTransactionsAndAccountsAndInstitutionId(bank: any) {
@@ -145,16 +157,6 @@ export default class PlaidService {
         while (transactions.length < transactionsResponse.data.total_transactions) {
             const paginatedTransactionsResponse = await this.getTransactionsResponseWithRetry(bank, transactions.length)
             transactions = transactions.concat(paginatedTransactionsResponse.data.transactions)
-        }
-        for (let account of accounts) {
-            if (account.type === 'investment') {
-                const investmentTransactionsResponse = await plaidClient.investmentsTransactionsGet({
-                    access_token: bank.accessToken,
-                    start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
-                    end_date: getTodaysDateInYYYYMMDD()
-                })
-                transactions = transactions.concat(investmentTransactionsResponse.data.investment_transactions)
-            }
         }
         return {transactions, accounts, institutionId}
     }

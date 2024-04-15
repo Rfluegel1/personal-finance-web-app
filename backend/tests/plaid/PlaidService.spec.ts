@@ -99,10 +99,18 @@ describe('Plaid service', () => {
             });
             (plaidClient.institutionsGetById as jest.Mock).mockImplementation((params: any) => {
                 if (params.institution_id === 'bankId1' && params.country_codes[0] === 'US') {
-                    return {data: {institution: {name: 'bankName1'}}}
+                    return {
+                        data: {
+                            institution: {name: 'bankName1', products: ['transactions']}
+                        }
+                    }
                 }
                 if (params.institution_id === 'bankId2' && params.country_codes[0] === 'US') {
-                    return {data: {institution: {name: 'bankName2'}}}
+                    return {
+                        data: {
+                            institution: {name: 'bankName2', products: ['investments']}
+                        }
+                    }
                 }
             });
             (plaidClient.transactionsGet as jest.Mock).mockImplementation((params: any) => {
@@ -293,7 +301,7 @@ describe('Plaid service', () => {
                     accounts: [{name: 'bank1AccountName1', balances: {current: 1}}]
                 },
             });
-            (plaidClient.institutionsGetById as jest.Mock).mockResolvedValue({data: {institution: {name: 'bankName1'}}})
+            (plaidClient.institutionsGetById as jest.Mock).mockResolvedValue({data: {institution: {name: 'bankName1', products:[]}}})
 
             // when
             const result = await plaidService.getOverview('userId')
