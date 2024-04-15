@@ -103,7 +103,7 @@ async function addHuntingtonBank(page) {
         await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Password').fill('pass_good');
         await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Submit'}).click();
         await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
-        await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
+        await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Allow'}).click();
     } else {
         throw new Error('This test can only be run in development mode');
     }

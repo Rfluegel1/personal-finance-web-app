@@ -1,10 +1,5 @@
 import {plaidClient} from './PlaidConfiguration'
-import {
-    CountryCode,
-    InstitutionsGetByIdRequest,
-    LinkTokenCreateRequest,
-    Products, TransactionsGetRequest
-} from 'plaid'
+import {CountryCode, InstitutionsGetByIdRequest, LinkTokenCreateRequest, Products, TransactionsGetRequest} from 'plaid'
 import BankService from '../banks/BankService'
 import {getTodaysDateInYYYYMMDD, getTwoYearsPreviousTodaysDateInYYYYMMDD} from '../utils'
 
@@ -19,7 +14,8 @@ export default class PlaidService {
             'user': {
                 'client_user_id': userId
             },
-            'products': [Products.Transactions]
+            'products': [Products.Assets],
+            'required_if_supported_products': [Products.Transactions, Products.Investments, Products.Liabilities],
         }
         let response = await plaidClient.linkTokenCreate(plaidRequest)
         return {link_token: response.data.link_token}
