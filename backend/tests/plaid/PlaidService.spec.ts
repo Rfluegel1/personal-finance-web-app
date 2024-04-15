@@ -56,8 +56,8 @@ describe('Plaid service', () => {
                 'user': {
                     'client_user_id': userId
                 },
-                'products': ['balance'],
-                'required_if_supported_products': ['transactions', 'investments', 'liabilities']
+                'products': ['transactions'],
+                'required_if_supported_products': ['investments', 'liabilities']
             })
             expect(result).toEqual({link_token: mockedLinkToken})
         })
