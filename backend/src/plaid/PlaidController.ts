@@ -22,6 +22,21 @@ export default class PlaidController {
         }
     }
 
+    async createUpdateLinkToken(request: Request, response: Response, next: NextFunction) {
+        getLogger().info('Received create update link token request')
+        if (!request.isAuthenticated()) {
+            return next(new UnauthorizedException('create update link token'))
+        }
+        try {
+            const linkToken = await this.plaidService.createUpdateLinkToken((request.user as User).id, request.body.itemId)
+            getLogger().info('Sending create update link token request')
+            return response.status(StatusCodes.CREATED).send(linkToken)
+        } catch (error) {
+            next(error)
+        }
+
+    }
+
     async exchangeTokenAndSaveBank(request: Request, response: Response, next: NextFunction) {
         getLogger().info('Received create access token request')
         if (!request.isAuthenticated()) {

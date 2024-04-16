@@ -32,6 +32,36 @@ router.post('/create_link_token', plaidController.createLinkToken.bind(plaidCont
 
 /**
  * @swagger
+ * /api/create_update_link_token:
+ *   post:
+ *     tags: [Plaid]
+ *     summary: Creates update link token.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               itemId:
+ *                 type: string
+ *                 description: The unique id of the bank assigned by Plaid.
+ *     responses:
+ *       201:
+ *         description: A temporary link token to be used with subsequent requests.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 link_token:
+ *                   type: string
+ *                   description: A link token provided by plaid.
+ */
+router.post('/create_update_link_token', plaidController.createUpdateLinkToken.bind(plaidController))
+
+/**
+ * @swagger
  * /api/create_access_token:
  *   post:
  *     tags: [Plaid]

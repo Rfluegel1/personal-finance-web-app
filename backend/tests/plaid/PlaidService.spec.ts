@@ -28,7 +28,8 @@ jest.mock('../../src/banks/BankService', () => {
         return {
             createBank: jest.fn(),
             getBanksByOwner: jest.fn(),
-            getBank: jest.fn()
+            getBank: jest.fn(),
+            getBankByItemId: jest.fn(),
         }
     })
 })
@@ -54,6 +55,36 @@ describe('Plaid service', () => {
                 'client_name': 'personal-finance-web-app',
                 'country_codes': ['US'],
                 'language': 'en',
+                'user': {
+                    'client_user_id': userId
+                },
+                'products': ['transactions'],
+                'required_if_supported_products': ['investments', 'liabilities']
+            })
+            expect(result).toEqual({link_token: mockedLinkToken})
+        })
+
+        test('should call to plaid and return update link token', async () => {
+            // given
+            let mockedLinkToken = randomUUID();
+            (plaidClient.linkTokenCreate as jest.Mock).mockResolvedValue({data: {link_token: mockedLinkToken}})
+
+            let userId = 'user';
+            (plaidService.bankService.getBankByItemId as jest.Mock).mockImplementation((itemId) => {
+                if (itemId === 'itemId') {
+                    return 'accessToken'
+                }
+            })
+
+            // when
+            const result = await plaidService.createUpdateLinkToken(userId, 'itemId')
+
+            // then
+            expect(plaidClient.linkTokenCreate).toHaveBeenCalledWith({
+                'client_name': 'personal-finance-web-app',
+                'country_codes': ['US'],
+                'language': 'en',
+                'accessToken': 'accessToken',
                 'user': {
                     'client_user_id': userId
                 },
@@ -301,7 +332,14 @@ describe('Plaid service', () => {
                     accounts: [{name: 'bank1AccountName1', balances: {current: 1}}]
                 },
             });
-            (plaidClient.institutionsGetById as jest.Mock).mockResolvedValue({data: {institution: {name: 'bankName1', products:[]}}})
+            (plaidClient.institutionsGetById as jest.Mock).mockResolvedValue({
+                data: {
+                    institution: {
+                        name: 'bankName1',
+                        products: []
+                    }
+                }
+            })
 
             // when
             const result = await plaidService.getOverview('userId')

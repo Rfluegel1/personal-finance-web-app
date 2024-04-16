@@ -30,6 +30,49 @@ describe('Plaid resource', () => {
         await logOutUser(client)
     })
 
+    test('should create a update link token', async () => {
+        if (process.env.NODE_ENV === 'development') {
+            // given
+            await authenticateAsAdmin(admin)
+            await logInTestUser(client)
+            let huntingtonBank = 'ins_21'
+            let huntingtonBankTokenCreateRequest: SandboxPublicTokenCreateRequest = {
+                institution_id: huntingtonBank,
+                initial_products: [Products.Transactions]
+            }
+            let huntingtonBankResponse
+            huntingtonBankResponse = await plaidClient.sandboxPublicTokenCreate(huntingtonBankTokenCreateRequest)
+            const huntingtonBankPublicToken = huntingtonBankResponse?.data?.public_token
+            let huntingtonBankId: string = ''
+
+            try {
+                const huntingtonBankExchangeResponse = await client.post(`${process.env.BASE_URL}/api/exchange_token_and_save_bank`, {public_token: huntingtonBankPublicToken})
+                huntingtonBankId = huntingtonBankExchangeResponse.data.bankId
+                const getBankResponse = await admin.get(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
+                const huntingtonBankAccessToken = getBankResponse.data.accessToken
+                const transactionsGetResponse = await plaidClient.transactionsGet({
+                    access_token: huntingtonBankAccessToken,
+                    start_date: '2021-01-01',
+                    end_date: '2021-01-31'
+                })
+                const item_id = transactionsGetResponse.data.item.item_id
+
+                // when
+                const response = await client.post(`${process.env.BASE_URL}/api/create_update_link_token`, {itemId: item_id})
+
+                // then
+                expect(response.status).toBe(StatusCodes.CREATED)
+                expect(response.data.link_token).toBeTruthy()
+            } finally {
+                // cleanup
+                const huntingtonDeleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
+                expect(huntingtonDeleteResponse.status).toBe(StatusCodes.NO_CONTENT)
+                await logOutUser(client)
+                await logOutUser(admin)
+            }
+        }
+    })
+
     test('should exchange a public token and create bank and access bank names and access account names', async () => {
         if (process.env.NODE_ENV === 'development') {
             // given
