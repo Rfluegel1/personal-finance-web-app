@@ -23,8 +23,8 @@ describe('Bank resource', () => {
         ).data.id
 
         // given
-        const bank: Bank = new Bank('the accessToken',  userId)
-        const updateBank: Bank = new Bank('the updated accessToken', userId)
+        const bank: Bank = new Bank('the accessToken',  userId, 'the itemId')
+        const updateBank: Bank = new Bank('the updated accessToken', userId, 'the updated itemId')
 
         // when
         const postResponse = await client.post(`${process.env.BASE_URL}/api/banks`, bank)
@@ -35,6 +35,7 @@ describe('Bank resource', () => {
         expect(postMessage.id).toMatch(UUID_REG_EXP)
         expect(postMessage.accessToken).toBeTruthy()
         expect(postMessage.owner).toEqual(userId)
+        expect(postMessage.itemId).toEqual('the itemId')
 
         // when
         const id = postMessage.id
@@ -46,6 +47,19 @@ describe('Bank resource', () => {
         expect(getMessage.id).toEqual(id)
         expect(getMessage.accessToken).toEqual('the accessToken')
         expect(getMessage.owner).toEqual(userId)
+        expect(postMessage.itemId).toEqual('the itemId')
+
+        // when
+        const itemId = postMessage.itemId
+        const itemIdGetResponse = await client.get(`${process.env.BASE_URL}/api/banks?itemId=${itemId}`)
+
+        // then
+        expect(itemIdGetResponse.status).toEqual(StatusCodes.OK)
+        const itemIdData = itemIdGetResponse.data
+        expect(itemIdData.id).toEqual(id)
+        expect(itemIdData.accessToken).toEqual('the accessToken')
+        expect(itemIdData.owner).toEqual(userId)
+        expect(itemIdData.itemId).toEqual(itemId)
 
         // when
         const updateResponse = await client.put(
@@ -59,6 +73,7 @@ describe('Bank resource', () => {
         expect(updateMessage.id).toEqual(id)
         expect(updateMessage.accessToken).toBeTruthy()
         expect(updateMessage.owner).toEqual(userId)
+        expect(updateMessage.itemId).toEqual('the updated itemId')
 
         // when
         const getAfterUpdateResponse = await client.get(

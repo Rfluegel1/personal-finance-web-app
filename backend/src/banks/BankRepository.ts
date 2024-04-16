@@ -36,6 +36,16 @@ export default class BankRepository {
         })
     }
 
+    async getBankByItemId(itemId: string) {
+        const bank = await this.executeWithCatch(async () => {
+            return await this.bankRepository.findOne({where: {itemId: itemId}})
+        })
+        if (!bank) {
+            throw new NotFoundException(itemId)
+        }
+        return bank
+    }
+
     async executeWithCatch(action: () => Promise<any>): Promise<any> {
         try {
             return await action()
