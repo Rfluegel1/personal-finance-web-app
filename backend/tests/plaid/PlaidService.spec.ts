@@ -72,7 +72,7 @@ describe('Plaid service', () => {
             let userId = 'user';
             (plaidService.bankService.getBankByItemId as jest.Mock).mockImplementation((itemId) => {
                 if (itemId === 'itemId') {
-                    return 'accessToken'
+                    return {accessToken: 'accessToken'}
                 }
             })
 
@@ -84,7 +84,7 @@ describe('Plaid service', () => {
                 'client_name': 'personal-finance-web-app',
                 'country_codes': ['US'],
                 'language': 'en',
-                'accessToken': 'accessToken',
+                'access_token': 'accessToken',
                 'user': {
                     'client_user_id': userId
                 },

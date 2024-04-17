@@ -50,6 +50,10 @@ describe('Plaid resource', () => {
                 huntingtonBankId = huntingtonBankExchangeResponse.data.bankId
                 const getBankResponse = await admin.get(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
                 const huntingtonBankAccessToken = getBankResponse.data.accessToken
+                let waitForPlaidApiToBeReadyInLieuOfAddingRetryLogic = async () => {
+                    await new Promise(resolve => setTimeout(resolve, 1000))
+                }
+                await waitForPlaidApiToBeReadyInLieuOfAddingRetryLogic()
                 const transactionsGetResponse = await plaidClient.transactionsGet({
                     access_token: huntingtonBankAccessToken,
                     start_date: '2021-01-01',
