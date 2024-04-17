@@ -59,12 +59,12 @@ router.get('/banks', bankController.getBanksByQuery.bind(bankController));
 
 /**
  * @swagger
- * /api/banks/:id:
+ * /api/banks/{id}:
  *   get:
  *     summary: Returns a bank by id that is created by authenticated user. Admin only.
  *     tags: [Banks]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:
@@ -94,12 +94,12 @@ router.get('/banks/:id', bankController.getBank.bind(bankController));
 
 /**
  * @swagger
- * /api/banks/:id:
+ * /api/banks/{id}:
  *   put:
  *     summary: Updates a banks by id. Admin only.
  *     tags: [Banks]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:
@@ -119,6 +119,9 @@ router.get('/banks/:id', bankController.getBank.bind(bankController));
  *                 owner:
  *                   type: string
  *                   description: The user's id.
+ *                 itemId:
+ *                   type: string
+ *                   description: The item id.
  *     responses:
  *       200:
  *         description: A banks.
@@ -142,12 +145,12 @@ router.put('/banks/:id', bankController.updateBank.bind(bankController));
 
 /**
  * @swagger
- * /api/banks/:id:
+ * /api/banks/{id}:
  *   delete:
  *     summary: Deletes a banks by id that is created by authenticated user. Admin only.
  *     tags: [Banks]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:

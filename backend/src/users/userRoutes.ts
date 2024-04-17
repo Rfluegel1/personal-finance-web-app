@@ -36,12 +36,12 @@ router.get('/users/is-verified', userController.isVerified.bind(userController))
 
 /**
  * @swagger
- * /api/users/:id:
+ * /api/users/{id}:
  *   get:
  *     summary: Returns a user by id.
  *     tags: [Users]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:
@@ -72,12 +72,12 @@ router.get('/users/:id', userController.getUser.bind(userController))
 
 /**
  * @swagger
- * /api/users/:id:
+ * /api/users/{id}:
  *   put:
  *     summary: Updates a user by id. Admin only.
  *     tags: [Users]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:
@@ -190,12 +190,12 @@ router.get('/users', userController.getUserByEmail.bind(userController))
 
 /**
  * @swagger
- * /api/users/:id:
+ * /api/users/{id}:
  *   delete:
  *     summary: Deletes a user by id.
  *     tags: [Users]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:

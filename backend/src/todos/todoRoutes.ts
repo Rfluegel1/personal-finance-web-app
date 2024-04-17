@@ -46,12 +46,12 @@ router.get('/todos', todoController.getTodosByCreatedBy.bind(todoController));
 
 /**
  * @swagger
- * /api/todos/:id:
+ * /api/todos/{id}:
  *   get:
  *     summary: Returns a todo by id that is created by authenticated user.
  *     tags: [Todos]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:
@@ -81,12 +81,12 @@ router.get('/todos/:id', todoController.getTodo.bind(todoController));
 
 /**
  * @swagger
- * /api/todos/:id:
+ * /api/todos/{id}:
  *   put:
  *     summary: Updates a todo by id that is created by authenticated user.
  *     tags: [Todos]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:
@@ -129,12 +129,12 @@ router.put('/todos/:id', todoController.updateTodo.bind(todoController));
 
 /**
  * @swagger
- * /api/todos/:id:
+ * /api/todos/{id}:
  *   delete:
  *     summary: Deletes a todo by id that is created by authenticated user.
  *     tags: [Todos]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:
