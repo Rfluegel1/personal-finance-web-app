@@ -21,9 +21,9 @@ export default class Bank {
         this.itemId = itemId
     }
 
-    updateDefinedFields(task: string, owner: string, itemId: string): void {
-        if (task !== undefined) {
-            this.accessToken = task
+    updateDefinedFields(accessToken: string, owner: string, itemId: string): void {
+        if (accessToken !== undefined) {
+            this.accessToken = accessToken
         }
         if (owner !== undefined) {
             this.owner = owner
