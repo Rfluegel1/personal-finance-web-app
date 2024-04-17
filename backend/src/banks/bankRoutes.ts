@@ -17,10 +17,23 @@ let bankController = new BankController();
  *       in: cookie
  *       name: connect.sid
  *
- * /api/banks?owner=:userId:
+ * /api/banks?query=:value:
  *   get:
  *     tags: [Banks]
- *     summary: Returns a list of banks owned by userId. Admin only.
+ *     summary: Returns a list or single bank that match the query. Admin only.
+ *     parameters:
+ *       - in: query
+ *         name: owner
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The user ID to filter the list of banks. Mutually exclusive search query.
+ *       - in: query
+ *         name: itemId
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The item ID to filter the single bank. Mutually exclusive search query.
  *     responses:
  *       200:
  *         description: A list of banks.
@@ -46,12 +59,12 @@ router.get('/banks', bankController.getBanksByQuery.bind(bankController));
 
 /**
  * @swagger
- * /api/banks/:id:
+ * /api/banks/{id}:
  *   get:
- *     summary: Returns a banks by id that is created by authenticated user. Admin only.
+ *     summary: Returns a bank by id that is created by authenticated user. Admin only.
  *     tags: [Banks]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:
@@ -81,12 +94,12 @@ router.get('/banks/:id', bankController.getBank.bind(bankController));
 
 /**
  * @swagger
- * /api/banks/:id:
+ * /api/banks/{id}:
  *   put:
  *     summary: Updates a banks by id. Admin only.
  *     tags: [Banks]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:
@@ -106,6 +119,9 @@ router.get('/banks/:id', bankController.getBank.bind(bankController));
  *                 owner:
  *                   type: string
  *                   description: The user's id.
+ *                 itemId:
+ *                   type: string
+ *                   description: The item id.
  *     responses:
  *       200:
  *         description: A banks.
@@ -129,12 +145,12 @@ router.put('/banks/:id', bankController.updateBank.bind(bankController));
 
 /**
  * @swagger
- * /api/banks/:id:
+ * /api/banks/{id}:
  *   delete:
  *     summary: Deletes a banks by id that is created by authenticated user. Admin only.
  *     tags: [Banks]
  *     parameters:
- *       - in: parameter
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:

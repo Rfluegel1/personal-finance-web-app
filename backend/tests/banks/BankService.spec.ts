@@ -62,6 +62,20 @@ describe('Bank service', () => {
         expect(result.owner).toEqual('the owner')
         expect(result.id).toEqual(id)
     })
+
+    it('updateBank works when access token is falsy', async () => {
+        //given
+        const id: string = uuidv4();
+        (service.bankRepository.getBank as jest.Mock).mockImplementation(jest.fn(() => {
+            let bank = new Bank()
+            bank.id = id
+            return bank
+        }))
+        // when
+        let result: Bank = await service.updateBank(id, undefined, undefined, undefined)
+        // then
+        expect(result).toBeTruthy()
+    })
     it.each`
     accessToken          | owner          | itemId          | expected
     ${undefined}         | ${undefined}   | ${undefined}   | ${{accessToken: 'old accessToken', owner: 'old owner', itemId: 'old itemId'}}
@@ -69,7 +83,9 @@ describe('Bank service', () => {
     `('updateBank only sets defined fields on updated Bank',
         async ({accessToken, owner, itemId,  expected}) => {
             //given
-            (CipherUtility.encrypt as jest.Mock).mockReturnValue(expected.accessToken)
+            (CipherUtility.encrypt as jest.Mock).mockReturnValue(expected.accessToken);
+            (CipherUtility.decrypt as jest.Mock).mockReturnValue('old accessToken')
+
             const existingBank = new Bank('old accessToken', 'old owner', 'old itemId');
             (service.bankRepository.getBank as jest.Mock).mockImplementation((sentId: string) => {
                 if (sentId === existingBank.id) {

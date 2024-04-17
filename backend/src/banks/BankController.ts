@@ -60,7 +60,7 @@ export default class BankController {
     async getBanksByQuery(request: Request, response: Response, next: NextFunction) {
         getLogger().info('Received get banks by query request', {requestUser: request.user})
         if (!request.isAuthenticated() || (request.user as User).role !== 'admin') {
-            return next(new UnauthorizedException('delete a bank by owner'))
+            return next(new UnauthorizedException('query banks'))
         }
         const owner = request.query.owner
         const itemId = request.query.itemId
