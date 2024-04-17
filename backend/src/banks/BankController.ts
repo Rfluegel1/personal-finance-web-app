@@ -17,8 +17,9 @@ export default class BankController {
         }
         const accessToken = request.body.accessToken
         const owner = (request.user as User).id
+        const itemId = request.body.itemId
         try {
-            const bank = await this.bankService.createBank(accessToken, owner)
+            const bank = await this.bankService.createBank(accessToken, owner, itemId)
             getLogger().info('Sending create bank request')
             response.status(StatusCodes.CREATED).send(bank)
         } catch (e: any) {
@@ -56,21 +57,32 @@ export default class BankController {
         }
     }
 
-    async getBanksByOwner(request: Request, response: Response, next: NextFunction) {
-        getLogger().info('Received get banks by owner request', {requestUser: request.user})
+    async getBanksByQuery(request: Request, response: Response, next: NextFunction) {
+        getLogger().info('Received get banks by query request', {requestUser: request.user})
         if (!request.isAuthenticated() || (request.user as User).role !== 'admin') {
             return next(new UnauthorizedException('delete a bank by owner'))
         }
         const owner = request.query.owner
-        if (!owner) {
-            return next(new BadRequestException('owner is required'))
+        const itemId = request.query.itemId
+        if (!owner && !itemId) {
+            return next(new BadRequestException('owner or itemId is required'))
         }
-        try {
-            const banks = await this.bankService.getBanksByOwner(owner as string)
-            getLogger().info('Sending get banks by owner request')
-            response.status(StatusCodes.OK).send({banks: banks})
-        } catch (e: any) {
-            next(e)
+        if (owner) {
+            try {
+                const banks = await this.bankService.getBanksByOwner(owner as string)
+                getLogger().info('Sending get banks by owner request')
+                response.status(StatusCodes.OK).send({banks: banks})
+            } catch (e: any) {
+                next(e)
+            }
+        } else if (itemId) {
+            try {
+                const bank = await this.bankService.getBankByItemId(itemId as string)
+                getLogger().info('Sending get bank by itemId request')
+                response.status(StatusCodes.OK).send(bank)
+            } catch (e: any) {
+                next(e)
+            }
         }
     }
 
@@ -82,8 +94,9 @@ export default class BankController {
         const id = request.params.id
         const accessToken = request.body.accessToken
         const owner = request.body.owner
+        const itemId = request.body.itemId
         try {
-            const bank = await this.bankService.updateBank(id, accessToken, owner)
+            const bank = await this.bankService.updateBank(id, accessToken, owner, itemId)
             getLogger().info('Sending update bank request')
             response.status(StatusCodes.OK).send(bank)
         } catch (e: any) {

@@ -17,7 +17,8 @@ jest.mock('../../src/banks/BankService', () => {
             deleteBank: jest.fn(),
             getBank: jest.fn(),
             updateBank: jest.fn(),
-            getBanksByOwner: jest.fn()
+            getBanksByOwner: jest.fn(),
+            getBankByItemId: jest.fn(),
         }
     })
 })
@@ -44,11 +45,11 @@ describe('Bank controller', () => {
 
         it('createBank responds with data that is returned from the BankService', async () => {
             // given
-            const mockBank = {id: uuidv4(), accessToken: 'the accessToken', owner: 'the owner'}
+            const mockBank = {id: uuidv4(), accessToken: 'the accessToken', owner: 'the owner', 'itemId': 'the itemId'}
             const request = {
                 isAuthenticated: () => true,
-                body: {accessToken: 'the accessToken'},
-                user: { id: 'the owner', role: 'admin'}
+                body: {accessToken: 'the accessToken', itemId: 'the itemId'},
+                user: {id: 'the owner', role: 'admin'}
             }
             const response = {
                 status: jest.fn(function () {
@@ -56,8 +57,8 @@ describe('Bank controller', () => {
                 }), send: jest.fn()
             };
 
-            (bankController.bankService.createBank as jest.Mock).mockImplementation((accessToken, owner) => {
-                if (accessToken === 'the accessToken' && owner === 'the owner') {
+            (bankController.bankService.createBank as jest.Mock).mockImplementation((accessToken, owner, itemId) => {
+                if (accessToken === 'the accessToken' && owner === 'the owner' && itemId === 'the itemId') {
                     return mockBank
                 }
             })
@@ -79,10 +80,11 @@ describe('Bank controller', () => {
                 },
                 body: {
                     accessToken: 'the accessToken',
-                    owner: undefined
+                    owner: undefined,
+                    itemId: undefined
                 },
                 isAuthenticated: () => true,
-                user: { role: 'admin'}
+                user: {role: 'admin'}
             }
             const response = {
                 status: jest.fn(function () {
@@ -91,8 +93,8 @@ describe('Bank controller', () => {
                 send: jest.fn()
             };
 
-            (bankController.bankService.updateBank as jest.Mock).mockImplementation((sentId, accessToken, owner) => {
-                if (sentId === id && accessToken === 'the accessToken' && owner === undefined) {
+            (bankController.bankService.updateBank as jest.Mock).mockImplementation((sentId, accessToken, owner, itemId) => {
+                if (sentId === id && accessToken === 'the accessToken' && owner === undefined && itemId === undefined) {
                     return mockBank
                 }
             });
@@ -117,7 +119,7 @@ describe('Bank controller', () => {
             const request = {
                 params: {id: id},
                 isAuthenticated: () => true,
-                user: {  role: 'admin' }
+                user: {role: 'admin'}
             }
             const response = {
                 status: jest.fn(function () {
@@ -139,6 +141,35 @@ describe('Bank controller', () => {
             expect(response.status).toHaveBeenCalledWith(StatusCodes.OK)
             expect(response.send).toHaveBeenCalledWith(mockBank)
         })
+        it('getBankByItemId responds with data that is returned from the BankService', async () => {
+            // given
+            let id: string = uuidv4()
+            const mockBank = {id: id, accessToken: 'the accessToken', owner: 'the owner', itemId: 'itemId'}
+            const request = {
+                query: {itemId: 'itemId'},
+                isAuthenticated: () => true,
+                user: {role: 'admin'}
+            }
+            const response = {
+                status: jest.fn(function () {
+                    return this
+                }),
+                send: jest.fn()
+            };
+
+            (bankController.bankService.getBankByItemId as jest.Mock).mockImplementation((sentId) => {
+                if ('itemId' === sentId) {
+                    return mockBank
+                }
+            })
+
+            // when
+            await bankController.getBanksByQuery(request as any, response as any, jest.fn())
+
+            // then
+            expect(response.status).toHaveBeenCalledWith(StatusCodes.OK)
+            expect(response.send).toHaveBeenCalledWith(mockBank)
+        })
         it('deleteBank should call service and respond with NO_CONTENT', async () => {
             // given
             let id: string = uuidv4()
@@ -146,7 +177,7 @@ describe('Bank controller', () => {
             const request = {
                 isAuthenticated: () => true,
                 params: {id: id},
-                user: {  role: 'admin' }
+                user: {role: 'admin'}
             }
             const response = {
                 sendStatus: jest.fn(function () {
@@ -180,7 +211,7 @@ describe('Bank controller', () => {
                 query: {
                     owner: 'the owner'
                 },
-                user: { role:'admin'}
+                user: {role: 'admin'}
             }
             const response = {
                 status: jest.fn(function () {
@@ -196,7 +227,7 @@ describe('Bank controller', () => {
             })
 
             // when
-            await bankController.getBanksByOwner(request as any, response as any, jest.fn())
+            await bankController.getBanksByQuery(request as any, response as any, jest.fn())
 
             // then
             expect(response.status).toHaveBeenCalledWith(StatusCodes.OK)
@@ -211,7 +242,8 @@ describe('Bank controller', () => {
     ${'getBank'}             | ${bankController.getBank}
     ${'deleteBank'}          | ${bankController.deleteBank}
     ${'updateBank'}          | ${bankController.updateBank}
-    ${'getBanksByOwner'} | ${bankController.getBanksByOwner}
+    ${'getBanksByOwner'}     | ${bankController.getBanksByQuery}
+    ${'getBankByItemId'}     | ${bankController.getBanksByQuery}
     `('$apiEndpoint returns unauthorized when the request session is not authenticated', async (
             {controllerFunction}
         ) => {
@@ -239,7 +271,8 @@ describe('Bank controller', () => {
     ${'getBank'}             | ${bankController.getBank}
     ${'deleteBank'}          | ${bankController.deleteBank}
     ${'updateBank'}          | ${bankController.updateBank}
-    ${'getBanksByOwner'} | ${bankController.getBanksByOwner}
+    ${'getBanksByOwner'}     | ${bankController.getBanksByQuery}
+    ${'getBankByItemId'}     | ${bankController.getBanksByQuery}
     `('$apiEndpoint returns unauthorized when the request session is not authenticated as admin', async (
             {controllerFunction}
         ) => {
@@ -267,65 +300,86 @@ describe('Bank controller', () => {
         it('createBank should next error that is returned from the BankService', async () => {
             // given
             const request = {
-                body: { accessToken: 'the accessToken' },
+                body: {accessToken: 'the accessToken'},
                 user: {role: 'admin'},
                 isAuthenticated: () => true
-            };
+            }
             const response = {};
 
             (bankController.bankService.createBank as jest.Mock).mockImplementation(() => {
-                throw new DatabaseException();
-            });
-            const next: NextFunction = jest.fn();
+                throw new DatabaseException()
+            })
+            const next: NextFunction = jest.fn()
 
             // when
-            await bankController.createBank(request as any, response as any, next);
+            await bankController.createBank(request as any, response as any, next)
 
             // then
-            expect(next).toHaveBeenCalledWith(expect.any(DatabaseException));
-        });
+            expect(next).toHaveBeenCalledWith(expect.any(DatabaseException))
+        })
         it('deleteBank should next error that is returned from the BankService', async () => {
             // given
-            let id: string = uuidv4();
+            let id: string = uuidv4()
             const request = {
                 isAuthenticated: () => true,
-                params: { id: id },
+                params: {id: id},
                 user: {role: 'admin'}
-            };
+            }
             const response = {};
 
             (bankController.bankService.deleteBank as jest.Mock).mockImplementation(() => {
-                throw new DatabaseException();
-            });
-            const next: NextFunction = jest.fn();
+                throw new DatabaseException()
+            })
+            const next: NextFunction = jest.fn()
 
             // when
-            await bankController.deleteBank(request as any, response as any, next);
+            await bankController.deleteBank(request as any, response as any, next)
 
             // then
-            expect(next).toHaveBeenCalledWith(expect.any(DatabaseException));
-        });
+            expect(next).toHaveBeenCalledWith(expect.any(DatabaseException))
+        })
         it('getBank should next error that is returned from the BankService', async () => {
             // given
-            let id: string = uuidv4();
+            let id: string = uuidv4()
             const request = {
                 isAuthenticated: () => true,
                 user: {role: 'admin'},
-                params: { id: id }
-            };
+                params: {id: id}
+            }
             const response = {};
 
             (bankController.bankService.getBank as jest.Mock).mockImplementation(() => {
-                throw new NotFoundException('id');
-            });
-            const next: NextFunction = jest.fn();
+                throw new NotFoundException('id')
+            })
+            const next: NextFunction = jest.fn()
 
             // when
-            await bankController.getBank(request as any, response as any, next);
+            await bankController.getBank(request as any, response as any, next)
 
             // then
-            expect(next).toHaveBeenCalledWith(expect.any(NotFoundException));
-        });
+            expect(next).toHaveBeenCalledWith(expect.any(NotFoundException))
+        })
+        it('getBankByItemId should next error that is returned from the BankService', async () => {
+            // given
+            let id: string = uuidv4()
+            const request = {
+                isAuthenticated: () => true,
+                user: {role: 'admin'},
+                query: {itemId: 'itemId'}
+            }
+            const response = {};
+
+            (bankController.bankService.getBankByItemId as jest.Mock).mockImplementation(() => {
+                throw new NotFoundException('id')
+            })
+            const next: NextFunction = jest.fn()
+
+            // when
+            await bankController.getBanksByQuery(request as any, response as any, next)
+
+            // then
+            expect(next).toHaveBeenCalledWith(expect.any(NotFoundException))
+        })
         it('getBanksByOwner should next error that is returned from the BankService', async () => {
             // given
             const request = {
@@ -334,45 +388,45 @@ describe('Bank controller', () => {
                     owner: 'the owner'
                 },
                 user: {role: 'admin'},
-            };
+            }
             const response = {};
 
             (bankController.bankService.getBanksByOwner as jest.Mock).mockImplementation(() => {
-                throw new DatabaseException();
-            });
-            const next: NextFunction = jest.fn();
+                throw new DatabaseException()
+            })
+            const next: NextFunction = jest.fn()
 
             // when
-            await bankController.getBanksByOwner(request as any, response as any, next);
+            await bankController.getBanksByQuery(request as any, response as any, next)
 
             // then
-            expect(next).toHaveBeenCalledWith(expect.any(DatabaseException));
-        });
+            expect(next).toHaveBeenCalledWith(expect.any(DatabaseException))
+        })
         it('updateBank should next error that is returned from the BankService', async () => {
             // given
-            let id: string = uuidv4();
+            let id: string = uuidv4()
             const request = {
                 isAuthenticated: () => true,
                 user: {role: 'admin'},
-                params: { id: id },
-                body: { accessToken: 'the accessToken' }
-            };
+                params: {id: id},
+                body: {accessToken: 'the accessToken'}
+            }
             const response = {};
 
             (bankController.bankService.updateBank as jest.Mock).mockImplementation(() => {
-                throw new DatabaseException();
-            });
-            const next: NextFunction = jest.fn();
+                throw new DatabaseException()
+            })
+            const next: NextFunction = jest.fn()
 
             // when
-            await bankController.updateBank(request as any, response as any, next);
+            await bankController.updateBank(request as any, response as any, next)
 
             // then
-            expect(next).toHaveBeenCalledWith(expect.any(DatabaseException));
-        });
-    });
+            expect(next).toHaveBeenCalledWith(expect.any(DatabaseException))
+        })
+    })
 
-    test('getBanksByOwner should next error when owner is not provided', async () => {
+    test('getBanksByOwner should next error when no query is not provided', async () => {
         // given
         const request = {
             isAuthenticated: () => true,
@@ -383,7 +437,7 @@ describe('Bank controller', () => {
         const next = jest.fn()
 
         // when
-        await bankController.getBanksByOwner(request as any, response as any, next)
+        await bankController.getBanksByQuery(request as any, response as any, next)
 
         // then
         expect(next).toHaveBeenCalledWith(expect.any(BadRequestException))

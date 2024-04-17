@@ -41,7 +41,7 @@ export default class PlaidService {
         let response = await plaidClient.itemPublicTokenExchange({
             'public_token': publicToken
         })
-        let bankId = (await this.bankService.createBank(response.data.access_token, userId)).id
+        let bankId = (await this.bankService.createBank(response.data.access_token, userId, response.data.item_id)).id
         return {bankId: bankId}
     }
 

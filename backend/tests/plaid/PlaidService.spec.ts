@@ -97,14 +97,15 @@ describe('Plaid service', () => {
         test('should call to plaid to exchange public token for access token and to bank', async () => {
             // given
             let mockedAccessToken = randomUUID()
-            let mockedBankId = randomUUID();
+            let mockedBankId = randomUUID()
+            let mockedItemId = randomUUID();
             (plaidClient.itemPublicTokenExchange as jest.Mock).mockImplementation((param: any) => {
                 if (param.public_token === 'public_token') {
-                    return {data: {access_token: mockedAccessToken}}
+                    return {data: {access_token: mockedAccessToken, item_id: mockedItemId}}
                 }
             });
-            (plaidService.bankService.createBank as jest.Mock).mockImplementation((accessToken: any, owner: any) => {
-                if (accessToken === mockedAccessToken && owner === 'user') {
+            (plaidService.bankService.createBank as jest.Mock).mockImplementation((accessToken: any, owner: any, itemId) => {
+                if (accessToken === mockedAccessToken && owner === 'user' && mockedItemId === itemId) {
                     const bank = new Bank(accessToken, owner)
                     bank.id = mockedBankId
                     return bank

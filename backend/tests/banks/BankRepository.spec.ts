@@ -79,6 +79,27 @@ describe('Bank repository', () => {
             expect(actual[1].accessToken).toEqual('the accessToken2');
             expect(actual[1].owner).toEqual('the owner');
         });
+        it('getBanksByItemId selects from bankRepository', async () => {
+            //given
+            const id1 = uuidv4();
+            const mockBank1 = new Bank('the accessToken1', 'the owner', 'theItemId');
+            mockBank1.id = id1;
+            (repository.bankRepository.findOne as jest.Mock).mockImplementation(jest.fn((options) => {
+                if (options.where.itemId === 'theItemId') {
+                    return mockBank1
+                }
+            }));
+
+            // when
+            const actual = await repository.getBankByItemId('theItemId');
+
+            // then
+            expect(actual).toBeInstanceOf(Bank);
+            expect(actual.id).toEqual(id1);
+            expect(actual.accessToken).toEqual('the accessToken1');
+            expect(actual.owner).toEqual('the owner');
+            expect(actual.itemId).toEqual('theItemId');
+        });
         it('deleteBank deletes from bankRepository', async () => {
             //given
             const id = uuidv4();
@@ -111,6 +132,13 @@ describe('Bank repository', () => {
             //expect
             await expect(repository.getBanksByOwner('asd')).rejects.toThrow('Error interacting with the database');
         });
+        it('getBanksByOwner throws database exception', async () => {
+            // given
+            let error = new Error('DB Error');
+            (repository.bankRepository.findOne as jest.Mock).mockRejectedValue(error);
+            //expect
+            await expect(repository.getBankByItemId('asd')).rejects.toThrow('Error interacting with the database');
+        });
         it('deleteBank throws database exception', async () => {
             // given
             let error = new Error('DB Error');
@@ -127,5 +155,13 @@ describe('Bank repository', () => {
         }));
         // when and then
         await expect(() => repository.getBank(uuidv4())).rejects.toThrow(NotFoundException);
+    });
+    it('getBankByItemId throws not found when query result is empty', async () => {
+        //given
+        (repository.bankRepository.findOne as jest.Mock).mockImplementation(jest.fn(() => {
+            return null;
+        }));
+        // when and then
+        await expect(() => repository.getBankByItemId(uuidv4())).rejects.toThrow(NotFoundException);
     });
 });

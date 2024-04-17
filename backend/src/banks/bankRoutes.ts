@@ -42,7 +42,7 @@ let bankController = new BankController();
  *                     type: string
  *                     description: The user's id.
  */
-router.get('/banks', bankController.getBanksByOwner.bind(bankController));
+router.get('/banks', bankController.getBanksByQuery.bind(bankController));
 
 /**
  * @swagger
