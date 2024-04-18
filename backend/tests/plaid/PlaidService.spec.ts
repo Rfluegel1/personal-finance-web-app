@@ -100,20 +100,20 @@ describe('Plaid service', () => {
                 }
             });
             (plaidClient.itemGet as jest.Mock).mockImplementation((params: any) => {
-              if (params.access_token === firstMockedBank.accessToken) {
-                return {
-                  data: {
-                    item: {institution_id: 'bankId1'}
-                  }
+                if (params.access_token === firstMockedBank.accessToken) {
+                    return {
+                        data: {
+                            item: {institution_id: 'bankId1'}
+                        }
+                    }
                 }
-              }
-              if (params.access_token === secondMockedBank.accessToken) {
-                return {
-                  data: {
-                    item: {institution_id: 'bankId2'}
-                  }
+                if (params.access_token === secondMockedBank.accessToken) {
+                    return {
+                        data: {
+                            item: {institution_id: 'bankId2'}
+                        }
+                    }
                 }
-              }
             });
             (plaidClient.institutionsGetById as jest.Mock).mockImplementation((params: any) => {
                 if (params.institution_id === 'bankId1' && params.country_codes[0] === 'US') {
@@ -283,6 +283,50 @@ describe('Plaid service', () => {
 
             // then
             expect(plaidClient.transactionsGet).toHaveBeenCalledTimes(2)
+        })
+
+        test('should return notice that item login required was experienced', async () => {
+            // given
+            let userId = 'user'
+            let firstMockedBank = new Bank('access_token1', userId, '1234');
+            (plaidService.bankService.getBanksByOwner as jest.Mock).mockImplementation((owner) => {
+                if (owner === userId) {
+                    return [firstMockedBank]
+                }
+            });
+            (plaidClient.itemGet as jest.Mock).mockImplementation((params: any) => {
+                if (params.access_token === firstMockedBank.accessToken) {
+                    return {
+                        data: {
+                            item: {institution_id: 'bankId1'}
+                        }
+                    }
+                }
+            });
+            (plaidClient.institutionsGetById as jest.Mock).mockImplementation((params: any) => {
+                if (params.institution_id === 'bankId1' && params.country_codes[0] === 'US') {
+                    return {
+                        data: {
+                            institution: {name: 'bankName1', products: ['transactions']}
+                        }
+                    }
+                }
+            });
+            (plaidClient.transactionsGet as jest.Mock).mockRejectedValueOnce({response: {data: {error_code: 'ITEM_LOGIN_REQUIRED'}}})
+
+            // when
+            const response = await plaidService.getOverview(userId)
+
+            // then
+            expect(response).toEqual({
+                banks: [{
+                    name: 'bankName1',
+                    itemId: '1234',
+                    accounts: [],
+                    error: 'ITEM_LOGIN_REQUIRED'
+                }],
+                netWorths: []
+            })
         })
 
         test('should throw error when bad request message is not PRODUCT_NOT_READY', async () => {
