@@ -31,6 +31,7 @@ jest.mock('../../src/banks/BankService', () => {
             getBanksByOwner: jest.fn(),
             getBank: jest.fn(),
             getBankByItemId: jest.fn(),
+            updateBank: jest.fn()
         }
     })
 })
@@ -118,6 +119,29 @@ describe('Plaid service', () => {
 
             // then
             expect(result).toEqual({bankId: mockedBankId})
+        })
+        test('should call to plaid to exchange public token for access token and update bank', async () => {
+            // given
+            let mockedAccessToken = randomUUID()
+            let mockedItemId = randomUUID();
+            (plaidClient.itemPublicTokenExchange as jest.Mock).mockImplementation((param: any) => {
+                if (param.public_token === 'public_token') {
+                    return {data: {access_token: mockedAccessToken, item_id: mockedItemId}}
+                }
+            });
+            (plaidService.bankService.updateBank as jest.Mock).mockImplementation((accessToken: any, bankId) => {
+                if (accessToken === mockedAccessToken && bankId === 'bankId') {
+                    const bank = new Bank(accessToken)
+                    bank.id = 'bankId'
+                    return bank
+                }
+            })
+
+            // when
+            const result = await plaidService.exchangeTokenAndUpdateBank('public_token', 'bankId')
+
+            // then
+            expect(result).toEqual({bankId: 'bankId'})
         })
 
         test('should call to plaid to get bank names, account names, and associated transactions', async () => {

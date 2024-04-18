@@ -38,16 +38,32 @@ export default class PlaidController {
     }
 
     async exchangeTokenAndSaveBank(request: Request, response: Response, next: NextFunction) {
-        getLogger().info('Received create access token request')
+        getLogger().info('Received create exchange token and save bank request')
         if (!request.isAuthenticated()) {
-            return next(new UnauthorizedException('create access token'))
+            return next(new UnauthorizedException('create exchange token and save bank'))
         }
         const publicToken = request.body.public_token
         const userId = (request.user as User).id
         try {
             const bankId = await this.plaidService.exchangeTokenAndSaveBank(publicToken, userId)
-            getLogger().info('Sending create access token response')
+            getLogger().info('Sending create exchange token and save bank response')
             return response.status(StatusCodes.CREATED).send(bankId)
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async exchangeTokenAndUpdateBank(request: Request, response: Response, next: NextFunction) {
+        getLogger().info('Received create exchange token and update bank request')
+        if (!request.isAuthenticated()) {
+            return next(new UnauthorizedException('create exchange token and update bank'))
+        }
+        const bankId = request.body.bankId
+        const publicToken = request.body.publicToken
+        try {
+            await this.plaidService.exchangeTokenAndUpdateBank(publicToken, bankId)
+            getLogger().info('Sending create exchange token and update bank response')
+            return response.status(StatusCodes.CREATED).send({bankId: bankId})
         } catch (error) {
             next(error)
         }

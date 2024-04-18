@@ -77,6 +77,59 @@ describe('Plaid resource', () => {
         }
     })
 
+    test('should exchange a public token and update the access token of existing bank', async () => {
+        // given
+        await authenticateAsAdmin(admin)
+        const userId = await logInTestUser(client)
+
+        let huntingtonBank = 'ins_21'
+        let huntingtonBankTokenCreateRequest: SandboxPublicTokenCreateRequest = {
+            institution_id: huntingtonBank,
+            initial_products: [Products.Transactions]
+        }
+        let huntingtonBankResponse
+        huntingtonBankResponse = await plaidClient.sandboxPublicTokenCreate(huntingtonBankTokenCreateRequest)
+        const huntingtonBankPublicToken = huntingtonBankResponse?.data?.public_token
+        let huntingtonBankId: string = ''
+        try {
+
+            const huntingtonBankExchangeResponse = await client.post(`${process.env.BASE_URL}/api/exchange_token_and_save_bank`, {public_token: huntingtonBankPublicToken})
+
+            // expect
+            expect(huntingtonBankExchangeResponse.status).toBe(StatusCodes.CREATED)
+            huntingtonBankId = huntingtonBankExchangeResponse.data.bankId
+            expect(huntingtonBankId).toBeTruthy()
+
+            const getBankResponse = await admin.get(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
+            const startingAccessToken = getBankResponse.data.accessToken
+
+            // when
+            let secondHuntingtonBankTokenCreateRequest: SandboxPublicTokenCreateRequest = {
+                institution_id: huntingtonBank,
+                initial_products: [Products.Transactions]
+            }
+            let secondHuntingtonBankResponse
+            secondHuntingtonBankResponse = await plaidClient.sandboxPublicTokenCreate(secondHuntingtonBankTokenCreateRequest)
+            const secondHuntingtonBankPublicToken = secondHuntingtonBankResponse?.data?.public_token
+            const huntingtonBankUpdateResponse = await client.post(`${process.env.BASE_URL}/api/exchange_token_and_update_bank`, {
+                publicToken: secondHuntingtonBankPublicToken,
+                bankId: huntingtonBankId
+            })
+
+            // then
+            expect(huntingtonBankUpdateResponse.status).toBe(StatusCodes.CREATED)
+            const updatedBankResponse = await admin.get(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
+            const updatedAccessToken = updatedBankResponse.data.accessToken
+            expect(updatedAccessToken).not.toEqual(startingAccessToken)
+        } finally {
+            // cleanup
+            const huntingtonDeleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
+            expect(huntingtonDeleteResponse.status).toBe(StatusCodes.NO_CONTENT)
+            await logOutUser(client)
+            await logOutUser(admin)
+        }
+    })
+
     test('should exchange a public token and create bank and access bank names and access account names', async () => {
         if (process.env.NODE_ENV === 'development') {
             // given

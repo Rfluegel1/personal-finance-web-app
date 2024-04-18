@@ -6,6 +6,14 @@ import {getTodaysDateInYYYYMMDD, getTwoYearsPreviousTodaysDateInYYYYMMDD} from '
 export default class PlaidService {
     bankService = new BankService()
 
+    async exchangeTokenAndUpdateBank(publicToken: string, bankId: string): Promise<any> {
+        let response = await plaidClient.itemPublicTokenExchange({
+            'public_token': publicToken
+        })
+        await this.bankService.updateBank(bankId, response.data.access_token, undefined, undefined)
+        return {bankId: bankId}
+    }
+
     async createLinkToken(userId: string): Promise<any> {
         const plaidRequest: LinkTokenCreateRequest = {
             'client_name': 'personal-finance-web-app',

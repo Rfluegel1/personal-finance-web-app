@@ -62,7 +62,7 @@ router.post('/create_update_link_token', plaidController.createUpdateLinkToken.b
 
 /**
  * @swagger
- * /api/create_access_token:
+ * /api/exchange_token_and_save_bank:
  *   post:
  *     tags: [Plaid]
  *     summary: Creates access token.
@@ -84,11 +84,44 @@ router.post('/create_update_link_token', plaidController.createUpdateLinkToken.b
  *             schema:
  *               type: object
  *               properties:
- *                 access_token:
+ *                 bankId:
  *                   type: string
- *                   description: An access token provided by plaid.
+ *                   description: The unique id of the bank.
  */
 router.post('/exchange_token_and_save_bank', plaidController.exchangeTokenAndSaveBank.bind(plaidController))
+
+/**
+ * @swagger
+ * /api/exchange_token_and_update_bank:
+ *   post:
+ *     tags: [Plaid]
+ *     summary: Creates access token.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *                 publicToken:
+ *                   type: string
+ *                   description: The public_token provided by plaid link.
+ *                 itemId:
+ *                   type: string
+ *                   description: The unique id of the bank assigned by Plaid.
+ *     responses:
+ *       201:
+ *         description: A permanent access token to be used with subsequent requests.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 bankId:
+ *                   type: string
+ *                   description: The unique id of the bank.
+ */
+router.post('/exchange_token_and_update_bank', plaidController.exchangeTokenAndUpdateBank.bind(plaidController))
 
 /**
  * @swagger
