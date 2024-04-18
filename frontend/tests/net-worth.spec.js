@@ -261,6 +261,9 @@ test('MOCKED: should show when item login is required', async ({page, context}) 
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
         // given
+        await logInTestUserWithClient(client)
+        const linkTokenResponse = await client.post(`${process.env.BASE_URL}/api/create_link_token`)
+        const linkToken = linkTokenResponse.data.link_token;
         await context.route('**/api/overview', (route) => {
             route.fulfill({
                 status: 200,
@@ -274,7 +277,16 @@ test('MOCKED: should show when item login is required', async ({page, context}) 
                     netWorths: []
                 })
             })
-        })
+        });
+        await context.route('**/api/create_update_link_token', (route) => {
+            route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    linkToken: linkToken
+                })
+            })
+        });
 
         await logInTestUser(page);
 
@@ -283,16 +295,10 @@ test('MOCKED: should show when item login is required', async ({page, context}) 
             await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
             await expect(page.locator('button[id="Mocked Bank-button"]')).not.toBeVisible();
             await expect(page.locator('text="ITEM_LOGIN_REQUIRED"')).toBeVisible();
-            await expect(page.locator('button[id="Mocked Bank-login-button"]')).toBeVisible();
+            await page.locator('button[id="Mocked Bank-login-button"]').click();
+            await expect(page.frameLocator('#plaid-link-iframe-2').getByRole('button', { name: 'Continue' })).toBeVisible();
         } finally {
             // cleanup
-            await authenticateAsAdmin(client);
-            const userResponse = await client.get(`${process.env.BASE_URL}/api/users?email=cypressdefault@gmail.com`);
-            const userId = userResponse.data.id;
-            const bankResponse = await client.get(`${process.env.BASE_URL}/api/banks?owner=${userId}`);
-            for (const bank of bankResponse.data.banks) {
-                await client.delete(`${process.env.BASE_URL}/api/banks/${bank.id}`);
-            }
             await logOutUserWithClient(client);
         }
     }
