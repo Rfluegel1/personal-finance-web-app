@@ -19,7 +19,8 @@ jest.mock('../../src/plaid/PlaidConfiguration', () => ({
         itemPublicTokenExchange: jest.fn(),
         institutionsGetById: jest.fn(),
         accountsGet: jest.fn(),
-        investmentsTransactionsGet: jest.fn()
+        investmentsTransactionsGet: jest.fn(),
+        itemGet: jest.fn()
     }
 }))
 
@@ -97,6 +98,22 @@ describe('Plaid service', () => {
                 if (owner === userId) {
                     return [firstMockedBank, secondMockedBank]
                 }
+            });
+            (plaidClient.itemGet as jest.Mock).mockImplementation((params: any) => {
+              if (params.access_token === firstMockedBank.accessToken) {
+                return {
+                  data: {
+                    item: {institution_id: 'bankId1'}
+                  }
+                }
+              }
+              if (params.access_token === secondMockedBank.accessToken) {
+                return {
+                  data: {
+                    item: {institution_id: 'bankId2'}
+                  }
+                }
+              }
             });
             (plaidClient.institutionsGetById as jest.Mock).mockImplementation((params: any) => {
                 if (params.institution_id === 'bankId1' && params.country_codes[0] === 'US') {

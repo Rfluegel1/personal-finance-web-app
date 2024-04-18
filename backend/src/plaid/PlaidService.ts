@@ -41,8 +41,8 @@ export default class PlaidService {
     private async getBanks(userId: string, overview: { banks: any[]; netWorths: any[] }) {
         const banks = await this.bankService.getBanksByOwner(userId)
         for (let bank of banks) {
-            const {transactions, accounts, institutionId} = await this.getTransactionsAndAccountsAndInstitutionId(bank)
-            const {institutionName, institutionProducts} = await this.getInstitutionNameAndProducts(institutionId)
+            const {institutionName, institutionProducts} = await this.getInstitutionNameAndProducts(bank.accessToken)
+            const {transactions, accounts} = await this.getTransactionsAndAccountsAndInstitutionId(bank)
             let investmentTransactions: any[] = []
             if (institutionProducts.includes(Products.Investments)) {
                 const investmentTransactionsResponse = await plaidClient.investmentsTransactionsGet({
@@ -139,7 +139,14 @@ export default class PlaidService {
         return accountsMap
     }
 
-    private async getInstitutionNameAndProducts(institutionId: string) {
+    private async getInstitutionNameAndProducts(accessToken: string) {
+        const itemResponse = await plaidClient.itemGet({
+            access_token: accessToken
+        })
+        if (!itemResponse.data.item.institution_id) {
+            throw new Error('Institution ID not found')
+        }
+        const institutionId = itemResponse.data.item.institution_id
         const institutionResponse = await this.getInstitutionsGetById(institutionId)
         return {
             institutionName: institutionResponse.data.institution.name,
