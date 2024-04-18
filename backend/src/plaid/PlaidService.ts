@@ -55,6 +55,7 @@ export default class PlaidService {
             const accountsToTransactions = this.matchAccountToTransactions(accounts, transactions, investmentTransactions)
             overview.banks.push({
                 name: institutionName,
+                itemId: bank.itemId,
                 accounts: accounts.map((account) => {
                     return {
                         name: account.name,

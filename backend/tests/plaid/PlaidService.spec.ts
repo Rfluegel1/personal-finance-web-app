@@ -91,8 +91,8 @@ describe('Plaid service', () => {
         test('should call to plaid to get bank names, account names, and associated transactions', async () => {
             // given
             let userId = 'user'
-            let firstMockedBank = new Bank('access_token1', userId)
-            let secondMockedBank = new Bank('access_token2', userId);
+            let firstMockedBank = new Bank('access_token1', userId, '1234')
+            let secondMockedBank = new Bank('access_token2', userId, '5678');
             (plaidService.bankService.getBanksByOwner as jest.Mock).mockImplementation((owner) => {
                 if (owner === userId) {
                     return [firstMockedBank, secondMockedBank]
@@ -205,6 +205,7 @@ describe('Plaid service', () => {
                 banks: [
                     {
                         name: 'bankName1',
+                        itemId: '1234',
                         accounts: [
                             {
                                 name: 'bank1AccountName1',
@@ -222,6 +223,7 @@ describe('Plaid service', () => {
                     },
                     {
                         name: 'bankName2',
+                        itemId: '5678',
                         accounts: [
                             {
                                 name: 'bank2AccountName1',
