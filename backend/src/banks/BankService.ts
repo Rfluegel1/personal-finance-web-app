@@ -50,11 +50,8 @@ export default class BankService {
     async updateBank(id: string, accessToken: string | undefined, owner: string | undefined, itemId: string | undefined) {
         getLogger().info('Updating bank', {id: id})
         const bank = await this.getBank(id)
-        let encrypted = undefined
-        if (accessToken) {
-            encrypted = CipherUtility.encrypt(accessToken)
-        }
-        bank.updateDefinedFields(encrypted, owner, itemId)
+        bank.updateDefinedFields(accessToken, owner, itemId)
+        bank.accessToken = CipherUtility.encrypt(bank.accessToken)
         await this.bankRepository.saveBank(bank)
         getLogger().info('Bank updated', {id: id})
         return bank

@@ -50,7 +50,7 @@ export default class PlaidService {
     async getOverview(userId: string): Promise<any> {
         let overview: { banks: any[], netWorths: any[] } = {banks: [], netWorths: []}
         await this.getBanks(userId, overview)
-        if (overview.banks.length > 0) {
+        if (overview.banks.length > 0 && overview.banks.every(bank => bank.error !== 'ITEM_LOGIN_REQUIRED')) {
             this.getNetWorths(overview)
         }
         return overview
@@ -59,8 +59,26 @@ export default class PlaidService {
     private async getBanks(userId: string, overview: { banks: any[]; netWorths: any[] }) {
         const banks = await this.bankService.getBanksByOwner(userId)
         for (let bank of banks) {
-            const {transactions, accounts, institutionId} = await this.getTransactionsAndAccountsAndInstitutionId(bank)
-            const {institutionName, institutionProducts} = await this.getInstitutionNameAndProducts(institutionId)
+            const {institutionName, institutionProducts} = await this.getInstitutionNameAndProducts(bank.accessToken)
+            let transactions = []
+            let accounts = []
+            try {
+                const response = await this.getTransactionsAndAccountsAndInstitutionId(bank)
+                transactions = response.transactions
+                accounts = response.accounts
+            } catch (error: any) {
+                if (error.message === 'ITEM_LOGIN_REQUIRED') {
+                    overview.banks.push({
+                        name: institutionName,
+                        itemId: bank.itemId,
+                        accounts: [],
+                        error: 'ITEM_LOGIN_REQUIRED'
+                    })
+                    continue
+                } else {
+                    throw error
+                }
+            }
             let investmentTransactions: any[] = []
             if (institutionProducts.includes(Products.Investments)) {
                 const investmentTransactionsResponse = await plaidClient.investmentsTransactionsGet({
@@ -73,6 +91,7 @@ export default class PlaidService {
             const accountsToTransactions = this.matchAccountToTransactions(accounts, transactions, investmentTransactions)
             overview.banks.push({
                 name: institutionName,
+                itemId: bank.itemId,
                 accounts: accounts.map((account) => {
                     return {
                         name: account.name,
@@ -156,7 +175,14 @@ export default class PlaidService {
         return accountsMap
     }
 
-    private async getInstitutionNameAndProducts(institutionId: string) {
+    private async getInstitutionNameAndProducts(accessToken: string) {
+        const itemResponse = await plaidClient.itemGet({
+            access_token: accessToken
+        })
+        if (!itemResponse.data.item.institution_id) {
+            throw new Error('Institution ID not found')
+        }
+        const institutionId = itemResponse.data.item.institution_id
         const institutionResponse = await this.getInstitutionsGetById(institutionId)
         return {
             institutionName: institutionResponse.data.institution.name,
@@ -194,6 +220,8 @@ export default class PlaidService {
             if (error.response?.data?.error_code === 'PRODUCT_NOT_READY') {
                 await new Promise(resolve => setTimeout(resolve, 100))
                 return await this.getTransactionsResponseWithRetry(bank)
+            } else if (error.response?.data?.error_code === 'ITEM_LOGIN_REQUIRED') {
+                throw new Error('ITEM_LOGIN_REQUIRED')
             } else {
                 throw error
             }

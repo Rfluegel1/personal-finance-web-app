@@ -132,6 +132,7 @@ describe('Plaid resource', () => {
                 // then
                 expect(response.status).toBe(StatusCodes.OK)
                 let huntingtonBank = response.data.banks.find((bank: any) => bank.name === 'Huntington Bank')
+                expect(huntingtonBank.itemId).toBeTruthy()
 
                 let plaidChecking = huntingtonBank.accounts.find((account: any) => account.name === 'Plaid Checking')
                 expect(plaidChecking.type).toBe('depository')
@@ -179,6 +180,7 @@ describe('Plaid resource', () => {
                 expect(plaidMortgage.transactions.length).toBe(0)
 
                 let edwardJones = response.data.banks.find((bank: any) => bank.name === 'Edward Jones - U.S. Clients Access')
+                expect(edwardJones.itemId).toBeTruthy()
 
                 let edwardJonesIRA = edwardJones.accounts.find((account: any) => account.name === 'Plaid IRA')
                 expect(edwardJonesIRA.type).toBe('investment')

@@ -124,9 +124,17 @@
                     <div class='bank-item'>
                         <li>
                             <h2>{bank.name}</h2>
-                            <button id={`${bank.name}-button`} on:click={() => toggleVisibility(bank.name)}>
-                                {visibility[bank.name] ? 'Hide' : 'Show'} Accounts
-                            </button>
+                            {#if bank.error === 'ITEM_LOGIN_REQUIRED'}
+                                <div class='error' role='alert'>{bank.error}</div>
+                                <button id={`${bank.name}-login-button`}>
+<!--                                        on:click={handler.open()} disabled={!link_token || isLoading}>-->
+                                    Authenticate Bank
+                                </button>
+                            {:else}
+                                <button id={`${bank.name}-button`} on:click={() => toggleVisibility(bank.name)}>
+                                    {visibility[bank.name] ? 'Hide' : 'Show'} Accounts
+                                </button>
+                            {/if}
                             <ul>
                                 {#if visibility[bank.name]}
                                     {#each bank.accounts as account}

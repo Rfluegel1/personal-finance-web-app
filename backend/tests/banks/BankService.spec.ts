@@ -24,9 +24,9 @@ jest.mock('../../src/logger', () => ({
     getLogger: jest.fn(() => {
         return {
             info: jest.fn()
-        };
+        }
     })
-}));
+}))
 
 describe('Bank service', () => {
     let service: BankService = new BankService()
@@ -62,26 +62,38 @@ describe('Bank service', () => {
         expect(result.owner).toEqual('the owner')
         expect(result.id).toEqual(id)
     })
-
-    it('updateBank works when access token is falsy', async () => {
+    it('update bank saves encrypted accessToken when accessToken argument is undefined', async () => {
         //given
+        let encrypted = randomUUID();
+        (CipherUtility.encrypt as jest.Mock).mockReturnValue(encrypted);
+        (CipherUtility.decrypt as jest.Mock).mockReturnValue('unencrypted')
         const id: string = uuidv4();
         (service.bankRepository.getBank as jest.Mock).mockImplementation(jest.fn(() => {
             let bank = new Bank()
             bank.id = id
             return bank
         }))
+
         // when
         let result: Bank = await service.updateBank(id, undefined, undefined, undefined)
+
         // then
-        expect(result).toBeTruthy()
+        expect(service.bankRepository.saveBank).toHaveBeenCalledWith(expect.objectContaining({accessToken: encrypted}))
     })
     it.each`
     accessToken          | owner          | itemId          | expected
-    ${undefined}         | ${undefined}   | ${undefined}   | ${{accessToken: 'old accessToken', owner: 'old owner', itemId: 'old itemId'}}
-    ${'new accessToken'} | ${'new owner'} | ${'new itemId'} | ${{accessToken: randomUUID(), owner: 'new owner', itemId: 'new itemId'}}
+    ${undefined}         | ${undefined}   | ${undefined}   | ${{
+        accessToken: 'old accessToken',
+        owner: 'old owner',
+        itemId: 'old itemId'
+    }}
+    ${'new accessToken'} | ${'new owner'} | ${'new itemId'} | ${{
+        accessToken: randomUUID(),
+        owner: 'new owner',
+        itemId: 'new itemId'
+    }}
     `('updateBank only sets defined fields on updated Bank',
-        async ({accessToken, owner, itemId,  expected}) => {
+        async ({accessToken, owner, itemId, expected}) => {
             //given
             (CipherUtility.encrypt as jest.Mock).mockReturnValue(expected.accessToken);
             (CipherUtility.decrypt as jest.Mock).mockReturnValue('old accessToken')
