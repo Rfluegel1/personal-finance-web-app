@@ -283,6 +283,7 @@ test('MOCKED: should show when item login is required', async ({page, context}) 
             await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
             await expect(page.locator('button[id="Mocked Bank-button"]')).not.toBeVisible();
             await expect(page.locator('text="ITEM_LOGIN_REQUIRED"')).toBeVisible();
+            await expect(page.locator('button[id="Mocked Bank-login-button"]')).toBeVisible();
         } finally {
             // cleanup
             await authenticateAsAdmin(client);
