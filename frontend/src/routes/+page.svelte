@@ -96,17 +96,17 @@
                 // } finally {
                 //     isLoading = false;
                 // }
-                // try {
-                //     isLoading = true;
-                //     await axios.get('/api/overview').then(response => {
-                //         banks = response.data.banks
-                //         netWorths = response.data.netWorths
-                //     })
-                // } catch (e) {
-                //     error = 'Failed to get overview'
-                // } finally {
-                //     isLoading = false;
-                // }
+                try {
+                    isLoading = true;
+                    await axios.get('/api/overview').then(response => {
+                        banks = response.data.banks
+                        netWorths = response.data.netWorths
+                    })
+                } catch (e) {
+                    error = 'Failed to get overview'
+                } finally {
+                    isLoading = false;
+                }
             },
             onExit: (err, metadata) => {
                 if (err) {
