@@ -56,6 +56,8 @@
         }
     });
 
+    $: banks, processBanks(banks);
+
     $: netWorths, drawChart(netWorths);
 
     function initializePlaid() {
