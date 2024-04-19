@@ -38,7 +38,9 @@
 
     function createUpdateLinksForErrorBanks(banks) {
         banks.forEach(bank => {
+            console.log(bank)
             if (bank.error === 'ITEM_LOGIN_REQUIRED') {
+                console.log('creating update link token for bank, ', bank)
                 createUpdateLinkToken(bank);
             }
         });
@@ -138,10 +140,10 @@
         console.log('creating update link token')
         try {
             let response = await axios.post('/api/create_update_link_token', {itemId: bank.itemId})
-            console.log(response.data.linkToken)
+            console.log('link token:', response.data.linkToken)
             existingBankHandlers[bank.name] = {linkToken: response.data.linkToken, handler: null}
+            console.log('bank handler:', existingBankHandlers)
             initializeUpdatePlaid(bank.name)
-            console.log(existingBankHandlers)
         } catch (e) {
             error = 'Failed to create update link token'
         }
