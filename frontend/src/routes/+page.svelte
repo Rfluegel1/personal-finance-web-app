@@ -35,14 +35,14 @@
         }
     });
 
-    async function processBanks(banks) {
-        for (const bank of banks) {
-            console.log(bank)
+
+    function createUpdateLinksForErrorBanks(banks) {
+        banks.forEach(bank => {
             if (bank.error === 'ITEM_LOGIN_REQUIRED') {
-                console.log('creating update link token');
-                await createUpdateLinkToken(bank);
+                createUpdateLinkToken(bank);
             }
-        }
+        });
+
     }
 
     onMount(async () => {
@@ -50,14 +50,15 @@
             const linkTokenResponse = await axios.post('/api/create_link_token')
             link_token = linkTokenResponse.data.link_token
             initializePlaid();
-            await processBanks(banks)
+            createUpdateLinksForErrorBanks(banks)
         } catch (e) {
             console.log(e)
             error = 'Failed to create link token'
         }
     });
 
-    $: banks, processBanks(banks);
+
+    $: banks, createUpdateLinksForErrorBanks(banks);
 
     $: netWorths, drawChart(netWorths);
 
@@ -186,9 +187,8 @@
                             <h2>{bank.name}</h2>
                             {#if bank.error === 'ITEM_LOGIN_REQUIRED'}
                                 <div class='error' role='alert'>{bank.error}</div>
-                                <button id={`${bank.name}-login-button`}
-                                        on:click={existingBankHandlers[bank.name]?.handler.open()}
-                                        disabled={!existingBankHandlers[bank.name]?.linkToken || isLoading}>
+
+                                <button id={`${bank.name}-login-button`} on:click={existingBankHandlers[bank.name]?.handler.open()} disabled={!existingBankHandlers[bank.name]?.linkToken || isLoading || !existingBankHandlers[bank.name]?.handler}>
                                     Authenticate Bank
                                 </button>
                             {:else}
