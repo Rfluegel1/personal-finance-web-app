@@ -52,6 +52,7 @@
             initializePlaid();
             await processBanks(banks)
         } catch (e) {
+            console.log(e)
             error = 'Failed to create link token'
         }
     });
