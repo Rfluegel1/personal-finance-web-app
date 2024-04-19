@@ -98,7 +98,7 @@
 
     function initializeUpdatePlaid(bankName) {
         existingBankHandlers[bankName].handler = Plaid.create({
-            token: existingBankHandlers[bankName].linkToken,
+            token: existingBankHandlers[bankName].link_token,
             onSuccess: async (public_token, metadata) => {
                 // try {
                 //     isLoading = true;
@@ -140,8 +140,8 @@
         console.log('creating update link token')
         try {
             let response = await axios.post('/api/create_update_link_token', {itemId: bank.itemId})
-            console.log('link token:', response.data.linkToken)
-            existingBankHandlers[bank.name] = {linkToken: response.data.linkToken, handler: null}
+            console.log('link token:', response.data.link_token)
+            existingBankHandlers[bank.name] = {link_token: response.data.link_token, handler: null}
             console.log('bank handler:', existingBankHandlers)
             initializeUpdatePlaid(bank.name)
         } catch (e) {
@@ -190,7 +190,7 @@
                             {#if bank.error === 'ITEM_LOGIN_REQUIRED'}
                                 <div class='error' role='alert'>{bank.error}</div>
 
-                                <button id={`${bank.name}-login-button`} on:click={existingBankHandlers[bank.name]?.handler.open()} disabled={!existingBankHandlers[bank.name]?.linkToken || isLoading || !existingBankHandlers[bank.name]?.handler}>
+                                <button id={`${bank.name}-login-button`} on:click={existingBankHandlers[bank.name]?.handler.open()} disabled={!existingBankHandlers[bank.name]?.link_token || isLoading || !existingBankHandlers[bank.name]?.handler}>
                                     Authenticate Bank
                                 </button>
                             {:else}

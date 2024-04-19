@@ -319,7 +319,7 @@ test('MOCKED: should show when item login is required', async ({page, context}) 
                 status: 200,
                 contentType: 'application/json',
                 body: JSON.stringify({
-                    linkToken: linkToken
+                    link_token: linkToken
                 })
             })
         });
