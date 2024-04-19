@@ -42,7 +42,7 @@
             initializePlaid();
             banks.forEach(bank => {
                 if (bank.error === 'ITEM_LOGIN_REQUIRED') {
-                    createUpdateLinkToken(bank);
+                    await createUpdateLinkToken(bank);
                 }
             });
         } catch (e) {
@@ -124,8 +124,9 @@
         }
     }
 
-    function createUpdateLinkToken(bank) {
-        axios.post('/api/create_update_link_token', {itemId: bank.itemId}).then(response => {
+    async function createUpdateLinkToken(bank) {
+        console.log('creating update link token')
+        await axios.post('/api/create_update_link_token', {itemId: bank.itemId}).then(response => {
             console.log(response.data.linkToken)
             existingBankHandlers[bank.name] = {linkToken: response.data.linkToken, handler: null}
             initializeUpdatePlaid(bank.name)
