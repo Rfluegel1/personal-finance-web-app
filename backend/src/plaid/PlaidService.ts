@@ -79,6 +79,7 @@ export default class PlaidService {
                     overview.banks.push({
                         name: institutionName,
                         itemId: bank.itemId,
+                        id: bank.id,
                         accounts: [],
                         error: 'ITEM_LOGIN_REQUIRED'
                     })
@@ -99,6 +100,7 @@ export default class PlaidService {
             const accountsToTransactions = this.matchAccountToTransactions(accounts, transactions, investmentTransactions)
             overview.banks.push({
                 name: institutionName,
+                id: bank.id,
                 itemId: bank.itemId,
                 accounts: accounts.map((account) => {
                     return {
