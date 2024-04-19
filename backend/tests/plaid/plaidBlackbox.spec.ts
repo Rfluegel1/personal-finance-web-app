@@ -67,6 +67,8 @@ describe('Plaid resource', () => {
                 // then
                 expect(response.status).toBe(StatusCodes.CREATED)
                 expect(response.data.link_token).toBeTruthy()
+            } catch (e) {
+                console.error(e)
             } finally {
                 // cleanup
                 const huntingtonDeleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
