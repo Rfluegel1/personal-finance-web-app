@@ -37,6 +37,7 @@
 
     async function processBanks(banks) {
         for (const bank of banks) {
+            console.log(bank)
             if (bank.error === 'ITEM_LOGIN_REQUIRED') {
                 console.log('creating update link token');
                 await createUpdateLinkToken(bank);
