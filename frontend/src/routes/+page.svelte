@@ -35,16 +35,21 @@
         }
     });
 
+    async function processBanks(banks) {
+        for (const bank of banks) {
+            if (bank.error === 'ITEM_LOGIN_REQUIRED') {
+                console.log('creating update link token');
+                await createUpdateLinkToken(bank);
+            }
+        }
+    }
+
     onMount(async () => {
         try {
             const linkTokenResponse = await axios.post('/api/create_link_token')
             link_token = linkTokenResponse.data.link_token
             initializePlaid();
-            banks.forEach(bank => {
-                if (bank.error === 'ITEM_LOGIN_REQUIRED') {
-                    await createUpdateLinkToken(bank);
-                }
-            });
+            await processBanks(banks)
         } catch (e) {
             error = 'Failed to create link token'
         }
@@ -126,14 +131,15 @@
 
     async function createUpdateLinkToken(bank) {
         console.log('creating update link token')
-        await axios.post('/api/create_update_link_token', {itemId: bank.itemId}).then(response => {
+        try {
+            let response = await axios.post('/api/create_update_link_token', {itemId: bank.itemId})
             console.log(response.data.linkToken)
             existingBankHandlers[bank.name] = {linkToken: response.data.linkToken, handler: null}
             initializeUpdatePlaid(bank.name)
             console.log(existingBankHandlers)
-        }).catch(e => {
+        } catch (e) {
             error = 'Failed to create update link token'
-        })
+        }
     }
 </script>
 
@@ -176,7 +182,9 @@
                             <h2>{bank.name}</h2>
                             {#if bank.error === 'ITEM_LOGIN_REQUIRED'}
                                 <div class='error' role='alert'>{bank.error}</div>
-                                <button id={`${bank.name}-login-button`} on:click={existingBankHandlers[bank.name]?.handler.open()} disabled={!existingBankHandlers[bank.name]?.linkToken || isLoading}>
+                                <button id={`${bank.name}-login-button`}
+                                        on:click={existingBankHandlers[bank.name]?.handler.open()}
+                                        disabled={!existingBankHandlers[bank.name]?.linkToken || isLoading}>
                                     Authenticate Bank
                                 </button>
                             {:else}

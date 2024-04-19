@@ -257,7 +257,7 @@ test.skip('MOCKED: should fetch bank and accounts and transactions', async ({pag
     }
 })
 
-test.only('MOCKED: should show when item login is required', async ({page, context}) => {
+test('MOCKED: should show when item login is required', async ({page, context}) => {
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
         // given
