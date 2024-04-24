@@ -280,14 +280,14 @@ describe('Plaid resource', () => {
             const userId = await logInTestUser(client)
             await authenticateAsAdmin(admin)
 
-            let huntingtonBankAccessToken = 'access-sandbox-0201a6f0-be45-4f47-bc69-c30f6b1e248a'
+            let nockedHuntingtonBankAccessToken = 'access-sandbox-0201a6f0-be45-4f47-bc69-c30f6b1e248a'
             let huntingtonBankId: string = ''
             try {
 
 
                 // expect
                 const bankPostResponse = await admin.post(`${process.env.BASE_URL}/api/banks`, {
-                    accessToken: huntingtonBankAccessToken,
+                    accessToken: nockedHuntingtonBankAccessToken,
                     itemId: 'item-sandbox-0201a6f0-be45-4f47-bc69-c30f6b1e248a',
                 })
 
