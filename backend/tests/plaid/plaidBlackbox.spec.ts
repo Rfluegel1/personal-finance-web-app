@@ -1,6 +1,6 @@
 import {StatusCodes} from 'http-status-codes'
 import axios from 'axios'
-import {authenticateAsAdmin, logInTestUser, logOutUser, onlyRunIfDevelopment} from '../helpers'
+import {authenticateAsAdmin, logInTestUser, logOutUser} from '../helpers'
 import {CookieJar} from 'tough-cookie'
 import {wrapper} from 'axios-cookiejar-support'
 import {plaidClient} from '../../src/plaid/PlaidConfiguration'
@@ -32,8 +32,9 @@ describe('Plaid resource', () => {
 
     test('should create a update link token', async () => {
         // given
-        onlyRunIfDevelopment()
-
+        if (process.env.NODE_ENV !== 'development'){
+            return
+        }
         await authenticateAsAdmin(admin)
         await logInTestUser(client)
         let huntingtonBank = 'ins_21'

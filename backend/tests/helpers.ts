@@ -1,8 +1,8 @@
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, {AxiosError, AxiosInstance} from 'axios'
 import {StatusCodes} from 'http-status-codes'
-import { CookieJar } from 'tough-cookie';
-import { wrapper } from 'axios-cookiejar-support';
-import { v4 } from 'uuid';
+import {CookieJar} from 'tough-cookie'
+import {wrapper} from 'axios-cookiejar-support'
+import {v4} from 'uuid'
 
 async function ensureTestUser(client: AxiosInstance, email: string, password: string) {
     try {
@@ -62,8 +62,3 @@ export function generateTemporaryUserEmail() {
     return `test${v4()}@expresswebapptemplate.com`
 }
 
-export function onlyRunIfDevelopment() {
-    if (process.env.NODE_ENV !== 'development') {
-        return test.skip
-    }
-}
