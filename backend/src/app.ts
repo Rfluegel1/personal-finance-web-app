@@ -17,6 +17,8 @@ import swaggerUi from 'swagger-ui-express';
 import plaidRoutes from './plaid/plaidRoutes'
 import bankRoutes from './banks/bankRoutes'
 
+import nock from 'nock'
+
 const app: Express = express();
 
 const passportService = new PassportService();
@@ -99,4 +101,12 @@ app.use((request, response, next) => {
 
 app.use(determineAndSendError());
 
+if (process.env.NODE_ENV === 'development') {
+const plaidBaseUrl = 'https://sandbox.plaid.com'
+nock(plaidBaseUrl, {allowUnmocked: true})
+	.post('/transactions/get', (body: any) => {
+		return body.access_token === 'access-sandbox-0201a6f0-be45-4f47-bc69-c30f6b1e248a'
+	})
+	.reply(400, {error_code: 'ITEM_LOGIN_REQUIRED'})
+}
 export default app;

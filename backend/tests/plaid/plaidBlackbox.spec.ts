@@ -4,8 +4,9 @@ import {authenticateAsAdmin, logInTestUser, logOutUser} from '../helpers'
 import {CookieJar} from 'tough-cookie'
 import {wrapper} from 'axios-cookiejar-support'
 import {plaidClient} from '../../src/plaid/PlaidConfiguration'
-import {Products, SandboxPublicTokenCreateRequest} from 'plaid'
+import {Products, SandboxPublicTokenCreateRequest, TransactionsGetRequest} from 'plaid'
 import Bank from '../../src/banks/Bank'
+import {getTodaysDateInYYYYMMDD, getTwoYearsPreviousTodaysDateInYYYYMMDD} from '../../src/utils'
 
 jest.setTimeout(30000 * 100)
 
@@ -270,6 +271,48 @@ describe('Plaid resource', () => {
                 await logOutUser(client)
                 await logOutUser(admin)
             }
+        }
+    })
+
+    test('should see error when ITEM_LOGIN_REQUIRED is returned from plaid', async () => {
+        // given
+        const userId = await logInTestUser(client)
+        await authenticateAsAdmin(admin)
+
+        let huntingtonBankAccessToken = 'access-sandbox-0201a6f0-be45-4f47-bc69-c30f6b1e248a'
+        let huntingtonBankId: string = ''
+        try {
+
+
+            // expect
+            const bankPostResponse = await admin.post(`${process.env.BASE_URL}/api/banks`, {
+                accessToken: huntingtonBankAccessToken,
+                itemId: 'item-sandbox-0201a6f0-be45-4f47-bc69-c30f6b1e248a',
+            })
+
+            expect(bankPostResponse.status).toBe(StatusCodes.CREATED)
+            huntingtonBankId = bankPostResponse.data.id
+            expect(huntingtonBankId).toBeTruthy()
+
+            const updateBankResponse = await admin.put(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`, {
+                owner: userId,
+            })
+            expect(updateBankResponse.status).toBe(StatusCodes.OK)
+
+            // when
+            const response = await client.get(`${process.env.BASE_URL}/api/overview`)
+
+            // then
+            expect(response.status).toBe(StatusCodes.OK)
+            expect(response.data.banks.length).toBe(1)
+            expect(response.data.banks[0].name).toBe('Huntington Bank')
+            expect(response.data.banks[0].error).toBe('ITEM_LOGIN_REQUIRED')
+        } finally {
+            // cleanup
+            const huntingtonDeleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
+            expect(huntingtonDeleteResponse.status).toBe(StatusCodes.NO_CONTENT)
+            await logOutUser(client)
+            await logOutUser(admin)
         }
     })
 })
