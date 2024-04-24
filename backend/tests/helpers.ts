@@ -61,3 +61,9 @@ export async function authenticateAsAdmin(client: AxiosInstance) {
 export function generateTemporaryUserEmail() {
     return `test${v4()}@expresswebapptemplate.com`
 }
+
+export function onlyRunIfDevelopment() {
+    if (process.env.NODE_ENV !== 'development') {
+        return test.skip
+    }
+}
