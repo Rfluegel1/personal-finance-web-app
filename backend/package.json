@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/supertest": "^6.0.2",
     "axios": "^1.4.0",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
@@ -35,6 +36,8 @@
     "pg": "^8.11.3",
     "plaid": "^22.0.0",
     "sanitize-html": "^2.12.1",
+    "supertest": "^6.3.4",
+    "supertest-session": "^5.0.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "ts-node": "^10.9.1",
