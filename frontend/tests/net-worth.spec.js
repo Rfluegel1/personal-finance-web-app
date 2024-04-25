@@ -352,6 +352,68 @@ test('MOCKED: should show when item login is required', async ({page, context}) 
     }
 })
 
+test('MOCKED: should show error when overview return error', async ({page, context}) => {
+    if (process.env.NODE_ENV === 'development') {
+        test.setTimeout(30000);
+        // given
+        await logInTestUserWithClient(client)
+        const linkTokenResponse = await client.post(`${process.env.BASE_URL}/api/create_link_token`)
+        const linkToken = linkTokenResponse.data.link_token;
+
+        let overviewCount = 0
+        await context.route('**/api/overview', (route) => {
+            overviewCount++
+            if (overviewCount === 1) {
+                route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify({
+                        banks: [{
+                            name: 'Mocked Bank',
+                            accounts: [],
+                            error: 'ITEM_LOGIN_REQUIRED'
+                        }],
+                        netWorths: []
+                    })
+                })
+            } else if (overviewCount === 2) {
+                route.fulfill({status: 500});
+            }
+        });
+        await context.route('**/api/create_update_link_token', (route) => {
+            route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    link_token: linkToken
+                })
+            })
+        });
+
+        await logInTestUser(page);
+
+        try {
+            await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
+            await expect(page.locator('button[id="Mocked Bank-button"]')).not.toBeVisible();
+            await expect(page.locator('text="ITEM_LOGIN_REQUIRED"')).toBeVisible();
+            await page.locator('button[id="Mocked Bank-login-button"]').click();
+            await page.frameLocator('#plaid-link-iframe-2').getByRole('button', {name: 'Continue'}).click();
+            await page.frameLocator('#plaid-link-iframe-2').getByLabel('Search for 11,000+').fill('huntington');
+            await page.frameLocator('#plaid-link-iframe-2').getByLabel('Huntington Bank').click()
+            await page.frameLocator('#plaid-link-iframe-2').getByPlaceholder('Username').fill('user_good');
+            await page.frameLocator('#plaid-link-iframe-2').getByPlaceholder('Password').fill('pass_good');
+            await page.frameLocator('#plaid-link-iframe-2').getByRole('button', {name: 'Submit'}).click();
+            await page.frameLocator('#plaid-link-iframe-2').getByRole('button', {name: 'Continue'}).click();
+            await page.frameLocator('#plaid-link-iframe-2').getByRole('button', {name: 'Continue'}).click();
+
+            await expect(page.locator('text="Failed to get overview"')).toBeVisible();
+        } finally {
+            // cleanup
+            await logOutUserWithClient(client);
+        }
+    }
+})
+
 test('should display error when is verified errors out', async ({page, context}) => {
     // given
     await context.route('**/api/users/is-verified', (route) => {

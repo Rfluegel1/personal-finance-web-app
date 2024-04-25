@@ -104,7 +104,7 @@
                         netWorths = response.data.netWorths
                     })
                 } catch (e) {
-                    // error = 'Failed to get overview'
+                    error = 'Failed to get overview'
                 } finally {
                     isLoading = false;
                 }
