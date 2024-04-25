@@ -108,11 +108,7 @@
     }
 
     function toggleVisibility(name) {
-        if (visibility[name]) {
-            visibility[name] = false;
-        } else {
-            visibility[name] = true;
-        }
+        visibility[name] = !visibility[name]
     }
 
     async function createUpdateLinkToken(bank) {
@@ -166,7 +162,7 @@
                             {#if bank.error === 'ITEM_LOGIN_REQUIRED'}
                                 <div class='error' role='alert'>{bank.error}</div>
 
-                                <button id={`${bank.name}-login-button`} on:click={bankHandlers[bank.name]?.handler.open()} disabled={!bankHandlers[bank.name]?.link_token || isLoading || !bankHandlers[bank.name]?.handler}>
+                                <button id={`${bank.name}-login-button`} on:click={bankHandlers[bank.name]?.handler.open()} disabled={!bankHandlers[bank.name]?.handler}>
                                     Authenticate Bank
                                 </button>
                             {:else}

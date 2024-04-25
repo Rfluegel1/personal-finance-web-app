@@ -238,7 +238,7 @@ test('should show error when update on success overview return error', async ({p
     }
 })
 
-test('should show error when update link token return error', async ({page, context}) => {
+test('should show error when update link token return error and disable link for bank', async ({page, context}) => {
     if (isNotDevelopment) {
         return
     }
@@ -264,6 +264,7 @@ test('should show error when update link token return error', async ({page, cont
     await logInTestUser(page);
 
     await expect(page.locator('text="Failed to create update link token"')).toBeVisible();
+    await expect(page.locator('button[id="Mocked Bank-login-button"]')).toBeDisabled();
 })
 
 test('should display error when is verified errors out', async ({page, context}) => {
@@ -331,39 +332,14 @@ test('should display error when create access token on success errors out', asyn
     await expect(page.locator('text="Failed to save bank"')).toBeVisible();
 })
 
-test('should display loading while waiting for overview', async ({page, context}) => {
+test('should display loading while waiting for overview and disable add bank button', async ({page, context}) => {
     // given
     await context.route('**/api/overview', (route) => {
         setTimeout(() => {
             route.fulfill({
                 status: 200,
                 contentType: 'application/json',
-                body: JSON.stringify({
-                    banks: [{
-                        name: 'Mocked Bank',
-                        accounts: [{
-                            name: 'Mocked Checking',
-                            balances: {current: 320.76},
-                            transactions: [{
-                                date: '2021-01-01',
-                                amount: 100
-                            }]
-                        }, {
-                            name: 'Mocked Savings',
-                            balances: {current: 1000.76},
-                            transactions: []
-                        }]
-                    }],
-                    netWorths: [{
-                        date: '2021-01-01',
-                        value: 100,
-                        epochTimestamp: 1609459200
-                    }, {
-                        date: '2021-01-01',
-                        value: 200,
-                        epochTimestamp: 1709459200
-                    }]
-                })
+                body: okBody
             });
         }, 1000);
     });
