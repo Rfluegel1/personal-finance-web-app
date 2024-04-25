@@ -282,7 +282,7 @@ test('MOCKED: should show when item login is required', async ({page, context}) 
                     })
                 })
             } else if (overviewCount === 2) {
-                route.fulfill({
+                setTimeout(() => route.fulfill({
                     status: 200,
                     contentType: 'application/json',
                     body: JSON.stringify({
@@ -311,7 +311,7 @@ test('MOCKED: should show when item login is required', async ({page, context}) 
                             epochTimestamp: 1709459200
                         }]
                     })
-                })
+                }), 500)
             }
         });
         await context.route('**/api/create_update_link_token', (route) => {
@@ -341,6 +341,8 @@ test('MOCKED: should show when item login is required', async ({page, context}) 
             await page.frameLocator('#plaid-link-iframe-2').getByRole('button', {name: 'Continue'}).click();
             await page.frameLocator('#plaid-link-iframe-2').getByRole('button', {name: 'Continue'}).click();
 
+            await expect(page.locator('text="Loading..."')).toBeVisible();
+            await expect(page.locator('text="Loading..."')).not.toBeVisible();
             await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
             await expect(page.locator('button[id="Mocked Bank-button"]')).toBeVisible();
         } finally {

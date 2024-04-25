@@ -11,7 +11,7 @@
     let netWorths = [];
     let visibility = {}
     let isLoading = false;
-    let existingBankHandlers = {}
+    let bankHandlers = {}
 
     onMount(async () => {
         try {
@@ -38,9 +38,7 @@
 
     function createUpdateLinksForErrorBanks(banks) {
         banks.forEach(bank => {
-            console.log(bank)
             if (bank.error === 'ITEM_LOGIN_REQUIRED') {
-                console.log('creating update link token for bank, ', bank)
                 createUpdateLinkToken(bank);
             }
         });
@@ -54,7 +52,6 @@
             initializePlaid();
             createUpdateLinksForErrorBanks(banks)
         } catch (e) {
-            console.log(e)
             error = 'Failed to create link token'
         }
     });
@@ -97,17 +94,9 @@
     }
 
     function initializeUpdatePlaid(bankName) {
-        existingBankHandlers[bankName].handler = Plaid.create({
-            token: existingBankHandlers[bankName].link_token,
+        bankHandlers[bankName].handler = Plaid.create({
+            token: bankHandlers[bankName].link_token,
             onSuccess: async (public_token, metadata) => {
-                // try {
-                //     isLoading = true;
-                //     await axios.post('/api/exchange_token_and_save_bank', {public_token})
-                // } catch (e) {
-                //     error = 'Failed to save bank'
-                // } finally {
-                //     isLoading = false;
-                // }
                 try {
                     isLoading = true;
                     await axios.get('/api/overview').then(response => {
@@ -115,14 +104,14 @@
                         netWorths = response.data.netWorths
                     })
                 } catch (e) {
-                    error = 'Failed to get overview'
+                    // error = 'Failed to get overview'
                 } finally {
                     isLoading = false;
                 }
             },
             onExit: (err, metadata) => {
                 if (err) {
-                    error = 'Plaid link error'
+                    // error = 'Plaid link error'
                 }
             }
         });
@@ -137,12 +126,9 @@
     }
 
     async function createUpdateLinkToken(bank) {
-        console.log('creating update link token')
         try {
             let response = await axios.post('/api/create_update_link_token', {itemId: bank.itemId})
-            console.log('link token:', response.data.link_token)
-            existingBankHandlers[bank.name] = {link_token: response.data.link_token, handler: null}
-            console.log('bank handler:', existingBankHandlers)
+            bankHandlers[bank.name] = {link_token: response.data.link_token, handler: null}
             initializeUpdatePlaid(bank.name)
         } catch (e) {
             error = 'Failed to create update link token'
@@ -190,7 +176,7 @@
                             {#if bank.error === 'ITEM_LOGIN_REQUIRED'}
                                 <div class='error' role='alert'>{bank.error}</div>
 
-                                <button id={`${bank.name}-login-button`} on:click={existingBankHandlers[bank.name]?.handler.open()} disabled={!existingBankHandlers[bank.name]?.link_token || isLoading || !existingBankHandlers[bank.name]?.handler}>
+                                <button id={`${bank.name}-login-button`} on:click={bankHandlers[bank.name]?.handler.open()} disabled={!bankHandlers[bank.name]?.link_token || isLoading || !bankHandlers[bank.name]?.handler}>
                                     Authenticate Bank
                                 </button>
                             {:else}
