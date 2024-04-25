@@ -352,7 +352,7 @@ test('MOCKED: should show when item login is required', async ({page, context}) 
     }
 })
 
-test('MOCKED: should show error when overview return error', async ({page, context}) => {
+test('MOCKED: should show error when update on success overview return error', async ({page, context}) => {
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
         // given
@@ -407,6 +407,43 @@ test('MOCKED: should show error when overview return error', async ({page, conte
             await page.frameLocator('#plaid-link-iframe-2').getByRole('button', {name: 'Continue'}).click();
 
             await expect(page.locator('text="Failed to get overview"')).toBeVisible();
+        } finally {
+            // cleanup
+            await logOutUserWithClient(client);
+        }
+    }
+})
+
+test('MOCKED: should show error when update link token return error', async ({page, context}) => {
+    if (process.env.NODE_ENV === 'development') {
+        test.setTimeout(30000);
+        // given
+        await logInTestUserWithClient(client)
+
+        await context.route('**/api/overview', (route) => {
+            route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    banks: [{
+                        name: 'Mocked Bank',
+                        accounts: [],
+                        error: 'ITEM_LOGIN_REQUIRED'
+                    }],
+                    netWorths: []
+                })
+            })
+        });
+        await context.route('**/api/create_update_link_token', (route) => {
+            route.fulfill({
+                status: 500,
+            })
+        });
+
+        await logInTestUser(page);
+
+        try {
+            await expect(page.locator('text="Failed to create update link token"')).toBeVisible();
         } finally {
             // cleanup
             await logOutUserWithClient(client);

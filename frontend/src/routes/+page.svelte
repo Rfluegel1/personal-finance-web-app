@@ -87,7 +87,7 @@
             },
             onExit: (err, metadata) => {
                 if (err) {
-                    error = 'Plaid link error'
+                    // error = 'Plaid link error'
                 }
             }
         });
