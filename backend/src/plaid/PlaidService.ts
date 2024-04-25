@@ -57,23 +57,33 @@ export default class PlaidService {
 
     async getOverview(userId: string): Promise<any> {
         let overview: { banks: any[], netWorths: any[] } = {banks: [], netWorths: []}
-        await this.getBanks(userId, overview)
+        await this.getBanksAndBuildOverview(userId, overview)
         if (overview.banks.length > 0 && overview.banks.every(bank => bank.error !== 'ITEM_LOGIN_REQUIRED')) {
             this.getNetWorths(overview)
         }
         return overview
     }
 
-    private async getBanks(userId: string, overview: { banks: any[]; netWorths: any[] }) {
+    private async getBanksAndBuildOverview(userId: string, overview: { banks: any[]; netWorths: any[] }) {
         const banks = await this.bankService.getBanksByOwner(userId)
         for (let bank of banks) {
             const {institutionName, institutionProducts} = await this.getInstitutionNameAndProducts(bank.accessToken)
             let transactions = []
             let accounts = []
             try {
-                const response = await this.getTransactionsAndAccountsAndInstitutionId(bank)
+                const response = await this.getTransactionsAndAccounts(bank)
                 transactions = response.transactions
                 accounts = response.accounts
+                let investmentTransactions: any[] = []
+                if (institutionProducts.includes(Products.Investments)) {
+                    const investmentTransactionsResponse = await plaidClient.investmentsTransactionsGet({
+                        access_token: bank.accessToken,
+                        start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
+                        end_date: getTodaysDateInYYYYMMDD()
+                    })
+                    investmentTransactions = investmentTransactionsResponse.data.investment_transactions
+                }
+                transactions = transactions.concat(investmentTransactions)
             } catch (error: any) {
                 if (error.message === 'ITEM_LOGIN_REQUIRED') {
                     overview.banks.push({
@@ -88,30 +98,28 @@ export default class PlaidService {
                     throw error
                 }
             }
-            let investmentTransactions: any[] = []
-            if (institutionProducts.includes(Products.Investments)) {
-                const investmentTransactionsResponse = await plaidClient.investmentsTransactionsGet({
-                    access_token: bank.accessToken,
-                    start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
-                    end_date: getTodaysDateInYYYYMMDD()
-                })
-                investmentTransactions = investmentTransactions.concat(investmentTransactionsResponse.data.investment_transactions)
-            }
-            const accountsToTransactions = this.matchAccountToTransactions(accounts, transactions, investmentTransactions)
-            overview.banks.push({
-                name: institutionName,
-                id: bank.id,
-                itemId: bank.itemId,
-                accounts: accounts.map((account) => {
-                    return {
-                        name: account.name,
-                        type: account.type,
-                        balances: {current: account.balances.current},
-                        transactions: accountsToTransactions.get(account.account_id)
-                    }
-                })
-            })
+            const accountsToTransactions = this.matchAccountToTransactions(accounts, transactions)
+            this.buildOverview(overview, institutionName, bank, accounts, accountsToTransactions)
         }
+    }
+
+    private buildOverview(overview: {
+        banks: any[];
+        netWorths: any[]
+    }, institutionName: string, bank: any, accounts: any[], accountsToTransactions: Map<any, any>) {
+        overview.banks.push({
+            name: institutionName,
+            id: bank.id,
+            itemId: bank.itemId,
+            accounts: accounts.map((account) => {
+                return {
+                    name: account.name,
+                    type: account.type,
+                    balances: {current: account.balances.current},
+                    transactions: accountsToTransactions.get(account.account_id)
+                }
+            })
+        })
     }
 
     private getNetWorths(overview: { banks: any[]; netWorths: any[] }) {
@@ -171,12 +179,12 @@ export default class PlaidService {
         return todaysNetWorth
     }
 
-    private matchAccountToTransactions(accounts: any[], transactions: any[], investmentTransactions: any[]) {
+    private matchAccountToTransactions(accounts: any[], transactions: any[]) {
         let accountsMap = new Map<string, any>
         for (let account of accounts) {
             accountsMap.set(account.account_id, [])
         }
-        for (let transaction of transactions.concat(investmentTransactions)) {
+        for (let transaction of transactions) {
             accountsMap.get(transaction.account_id).push({
                 amount: transaction.amount,
                 date: transaction.date
@@ -200,32 +208,22 @@ export default class PlaidService {
         }
     }
 
-    private async getTransactionsAndAccountsAndInstitutionId(bank: any) {
+    private async getTransactionsAndAccounts(bank: any) {
         let transactions: any[] = []
         let accounts: any[]
-        let institutionId
         const transactionsResponse = await this.getTransactionsResponseWithRetry(bank)
-        institutionId = transactionsResponse.data.item.institution_id
         accounts = transactionsResponse.data.accounts
         transactions = transactions.concat(transactionsResponse.data.transactions)
         while (transactions.length < transactionsResponse.data.total_transactions) {
             const paginatedTransactionsResponse = await this.getTransactionsResponseWithRetry(bank, transactions.length)
             transactions = transactions.concat(paginatedTransactionsResponse.data.transactions)
         }
-        return {transactions, accounts, institutionId}
+        return {transactions, accounts}
     }
 
     async getTransactionsResponseWithRetry(bank: any, offset = 0): Promise<any> {
         try {
-            const transactionResponse = await plaidClient.transactionsGet({
-                access_token: bank.accessToken,
-                start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
-                end_date: getTodaysDateInYYYYMMDD(),
-                options: {
-                    offset: offset
-                }
-            } as TransactionsGetRequest)
-            return transactionResponse
+            return await this.getTransactions(bank, offset)
         } catch (error: any) {
             if (error.response?.data?.error_code === 'PRODUCT_NOT_READY') {
                 await new Promise(resolve => setTimeout(resolve, 100))
@@ -236,6 +234,17 @@ export default class PlaidService {
                 throw error
             }
         }
+    }
+
+    private async getTransactions(bank: any, offset: number) {
+        return await plaidClient.transactionsGet({
+            access_token: bank.accessToken,
+            start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
+            end_date: getTodaysDateInYYYYMMDD(),
+            options: {
+                offset: offset
+            }
+        } as TransactionsGetRequest)
     }
 
     private async getInstitutionsGetById(institutionId: string) {
