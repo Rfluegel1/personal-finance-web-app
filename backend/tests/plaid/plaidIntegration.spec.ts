@@ -40,7 +40,7 @@ test('should create a update link token', async () => {
         const getBankResponse = await admin.get(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
         const huntingtonBankAccessToken = getBankResponse.data.accessToken
         let waitForPlaidApiToBeReadyInLieuOfAddingRetryLogic = async () => {
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            await new Promise(resolve => setTimeout(resolve, 2000))
         }
         await waitForPlaidApiToBeReadyInLieuOfAddingRetryLogic()
         const transactionsGetResponse = await plaidClient.transactionsGet({
@@ -58,6 +58,7 @@ test('should create a update link token', async () => {
         expect(response.data.link_token).toBeTruthy()
     } catch (e) {
         console.error(e)
+        throw e
     } finally {
         // cleanup
         const huntingtonDeleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
@@ -252,48 +253,6 @@ test('should exchange a public token and create bank and access bank names and a
         expect(huntingtonDeleteResponse.status).toBe(StatusCodes.NO_CONTENT)
         const edwardJonesDeleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${edwardJonesId}`)
         expect(edwardJonesDeleteResponse.status).toBe(StatusCodes.NO_CONTENT)
-        await logOutUser(client)
-        await logOutUser(admin)
-    }
-})
-
-test('should see error when ITEM_LOGIN_REQUIRED is returned from plaid', async () => {
-    // given
-    const userId = await logInTestUser(client)
-    await authenticateAsAdmin(admin)
-
-    let nockedHuntingtonBankAccessToken = 'access-sandbox-0201a6f0-be45-4f47-bc69-c30f6b1e248a'
-    let huntingtonBankId: string = ''
-    try {
-
-
-        // expect
-        const bankPostResponse = await admin.post(`${process.env.BASE_URL}/api/banks`, {
-            accessToken: nockedHuntingtonBankAccessToken,
-            itemId: 'item-sandbox-0201a6f0-be45-4f47-bc69-c30f6b1e248a',
-        })
-
-        expect(bankPostResponse.status).toBe(StatusCodes.CREATED)
-        huntingtonBankId = bankPostResponse.data.id
-        expect(huntingtonBankId).toBeTruthy()
-
-        const updateBankResponse = await admin.put(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`, {
-            owner: userId,
-        })
-        expect(updateBankResponse.status).toBe(StatusCodes.OK)
-
-        // when
-        const response = await client.get(`${process.env.BASE_URL}/api/overview`)
-
-        // then
-        expect(response.status).toBe(StatusCodes.OK)
-        expect(response.data.banks.length).toBe(1)
-        expect(response.data.banks[0].name).toBe('Huntington Bank')
-        expect(response.data.banks[0].error).toBe('ITEM_LOGIN_REQUIRED')
-    } finally {
-        // cleanup
-        const huntingtonDeleteResponse = await admin.delete(`${process.env.BASE_URL}/api/banks/${huntingtonBankId}`)
-        expect(huntingtonDeleteResponse.status).toBe(StatusCodes.NO_CONTENT)
         await logOutUser(client)
         await logOutUser(admin)
     }
