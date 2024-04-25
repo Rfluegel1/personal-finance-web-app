@@ -95,6 +95,7 @@ test('should fetch bank and accounts and transactions', async ({page, context}) 
         return
     }
     test.setTimeout(30000);
+
     // given
     await context.route('**/api/overview', (route) => {
         route.fulfill({
@@ -103,8 +104,8 @@ test('should fetch bank and accounts and transactions', async ({page, context}) 
             body: okBody
         })
     })
-
     await logInTestUser(page);
+
     // expect
     await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
     await page.locator('button[id="Mocked Bank-button"]').click()
@@ -114,7 +115,7 @@ test('should fetch bank and accounts and transactions', async ({page, context}) 
 
     for (let account of accountsWithTransactions) {
         await expect(page.locator(`text="${account}"`)).toBeVisible();
-        await page.locator(`button[id="${account}-button"]`).click();
+        await page.click(`button[id="${account}-button"]`)
         await expect(page.locator(`table[id="${account}-transactions"]`)).toBeVisible();
     }
 
@@ -139,6 +140,7 @@ test('should show when item login is required', async ({page, context}) => {
         return
     }
     test.setTimeout(30000);
+
     // given
     await logInTestUserWithClient(client)
     const linkTokenResponse = await client.post(`${process.env.BASE_URL}/api/create_link_token`)
@@ -195,6 +197,7 @@ test('should show error when update on success overview return error', async ({p
         return
     }
     test.setTimeout(30000);
+
     // given
     await logInTestUserWithClient(client)
     const linkTokenResponse = await client.post(`${process.env.BASE_URL}/api/create_link_token`)
@@ -222,15 +225,18 @@ test('should show error when update on success overview return error', async ({p
             })
         })
     });
-
     await logInTestUser(page);
 
+    // expect
+    await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
+    await expect(page.locator('button[id="Mocked Bank-button"]')).not.toBeVisible();
+    await expect(page.locator('text="ITEM_LOGIN_REQUIRED"')).toBeVisible();
+
     try {
-        await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
-        await expect(page.locator('button[id="Mocked Bank-button"]')).not.toBeVisible();
-        await expect(page.locator('text="ITEM_LOGIN_REQUIRED"')).toBeVisible();
+        // when
         await updateBank(page)
 
+        // then
         await expect(page.locator('text="Failed to get overview"')).toBeVisible();
     } finally {
         // cleanup
@@ -243,26 +249,21 @@ test('should show error when update link token return error and disable link for
         return
     }
     test.setTimeout(30000);
-    // given
 
+    // given
     await context.route('**/api/overview', (route) => {
         route.fulfill({
             status: 200,
             contentType: 'application/json',
-            body: JSON.stringify({
-                banks: [{
-                    name: 'Mocked Bank',
-                    accounts: [],
-                    error: 'ITEM_LOGIN_REQUIRED'
-                }],
-                netWorths: []
-            })
+            body: itemLoginRequiredBody
         })
     });
     await mockInternalServerError(context, '**/api/create_update_link_token')
 
+    // when
     await logInTestUser(page);
 
+    // then
     await expect(page.locator('text="Failed to create update link token"')).toBeVisible();
     await expect(page.locator('button[id="Mocked Bank-login-button"]')).toBeDisabled();
 })
@@ -301,11 +302,12 @@ test('should display error when create link token errors out', async ({page, con
 })
 
 test('should display error when get overview on success errors out', async ({page, context}) => {
-    // given
     if (isNotDevelopment) {
         return
     }
     test.setTimeout(30000);
+
+    // given
     await mockInternalServerError(context, '**/api/overview');
     await logInTestUser(page);
 
@@ -317,11 +319,12 @@ test('should display error when get overview on success errors out', async ({pag
 })
 
 test('should display error when create access token on success errors out', async ({page, context}) => {
-    // given
     if (isNotDevelopment) {
         return
     }
     test.setTimeout(30000);
+
+    // given
     await mockInternalServerError(context, '**/api/exchange_token_and_save_bank')
     await logInTestUser(page);
 

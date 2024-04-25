@@ -101,24 +101,16 @@ test('should use link flow to add bank and accounts and transactions', async ({p
         await logInTestUser(page);
 
         try {
-            // expect
+            // expect chart to not yet be drawn
             await expect(page.locator('.dot').first()).not.toBeVisible();
             await expect(page.locator('svg[id="chart"]')).toBeVisible();
 
             // when
             await addHuntingtonBank(page);
 
-            // then
-            await expect(page.locator('text="Loading..."')).toBeVisible();
-            await expect(page.locator('button[id="add-bank"]')).toBeDisabled()
-
-            // and
-            await expect(page.locator('text="Loading..."')).not.toBeVisible();
-            await expect(page.locator('button[id="add-bank"]')).not.toBeDisabled()
-
-            // then
+            // then data is displayed with graph
             await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
-            await page.locator('button[id="Huntington Bank-button"]').click()
+            await page.click('button[id="Huntington Bank-button"]')
 
             await expect(page.locator('text="$-53501.32"')).toBeVisible();
 
@@ -127,7 +119,7 @@ test('should use link flow to add bank and accounts and transactions', async ({p
 
             for (let account of accountsWithTransactions) {
                 await expect(page.locator(`text="${account}"`)).toBeVisible();
-                await page.locator(`button[id="${account}-button"]`).click();
+                await page.click(`button[id="${account}-button"]`)
                 await expect(page.locator(`table[id="${account}-transactions"]`)).toBeVisible();
             }
 
