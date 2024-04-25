@@ -84,11 +84,6 @@
                 } finally {
                     isLoading = false;
                 }
-            },
-            onExit: (err, metadata) => {
-                if (err) {
-                    // error = 'Plaid link error'
-                }
             }
         });
     }
@@ -109,11 +104,6 @@
                     isLoading = false;
                 }
             },
-            onExit: (err, metadata) => {
-                if (err) {
-                    // error = 'Plaid link error'
-                }
-            }
         });
     }
 
