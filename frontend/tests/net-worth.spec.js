@@ -9,6 +9,12 @@ import {registerTemporaryUser} from './helpers/registerTemporaryUser.js';
 const jar = new CookieJar();
 const client = wrapper(axios.create({jar, withCredentials: true}));
 
+async function mockInternalServerError(context, url) {
+    await context.route(url, (route) => {
+        route.fulfill({status: 500});
+    });
+}
+
 test('should redirect when user is not logged in', async ({page}) => {
     // given
     await page.goto('/logout');
@@ -78,13 +84,9 @@ test('should have link to Password Reset Request', async ({page}) => {
     await expect(page.locator('h1')).toHaveText('Password Reset Request');
 });
 
-test('should disable add bank button when link token is not set', async ({page, context}) => {
+test('MOCKED: should disable add bank button when link token is not set', async ({page, context}) => {
     // given
-    await context.route('**/create_link_token', (route) => {
-        route.fulfill({
-            status: 500
-        });
-    });
+    await mockInternalServerError(context, '**/create_link_token')
 
     // when
     await logInTestUser(page);
@@ -176,7 +178,7 @@ test('should use link flow to add bank and accounts and transactions', async ({p
     }
 })
 
-test.skip('MOCKED: should fetch bank and accounts and transactions', async ({page, context}) => {
+test('MOCKED: should fetch bank and accounts and transactions', async ({page, context}) => {
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
         // given
@@ -214,46 +216,34 @@ test.skip('MOCKED: should fetch bank and accounts and transactions', async ({pag
         })
 
         await logInTestUser(page);
+        // expect
+        await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
+        await page.locator('button[id="Mocked Bank-button"]').click()
 
-        try {
-            // expect
-            await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
-            await page.locator('button[id="Mocked Bank-button"]').click()
+        let accountsWithTransactions = ['Mocked Checking']
+        let accountsWithoutTransactions = ['Mocked Savings']
 
-            let accountsWithTransactions = ['Mocked Checking']
-            let accountsWithoutTransactions = ['Mocked Savings']
-
-            for (let account of accountsWithTransactions) {
-                await expect(page.locator(`text="${account}"`)).toBeVisible();
-                await page.locator(`button[id="${account}-button"]`).click();
-                await expect(page.locator(`table[id="${account}-transactions"]`)).toBeVisible();
-            }
-
-            for (let account of accountsWithoutTransactions) {
-                await expect(page.locator(`text="${account}"`)).toBeVisible();
-                await expect(page.locator(`button[id="${account}-button"]`)).not.toBeVisible()
-                await expect(page.locator(`table[id="${account}-transactions"]`)).not.toBeVisible();
-            }
-
-            await expect(page.locator('svg[id="chart"]')).toBeVisible();
-
-            // when
-            await page.reload()
-
-            // then
-            await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
-            await expect(page.locator('svg[id="chart"]')).toBeVisible();
-        } finally {
-            // cleanup
-            await authenticateAsAdmin(client);
-            const userResponse = await client.get(`${process.env.BASE_URL}/api/users?email=cypressdefault@gmail.com`);
-            const userId = userResponse.data.id;
-            const bankResponse = await client.get(`${process.env.BASE_URL}/api/banks?owner=${userId}`);
-            for (const bank of bankResponse.data.banks) {
-                await client.delete(`${process.env.BASE_URL}/api/banks/${bank.id}`);
-            }
-            await logOutUserWithClient(client);
+        for (let account of accountsWithTransactions) {
+            await expect(page.locator(`text="${account}"`)).toBeVisible();
+            await page.locator(`button[id="${account}-button"]`).click();
+            await expect(page.locator(`table[id="${account}-transactions"]`)).toBeVisible();
         }
+
+        for (let account of accountsWithoutTransactions) {
+            await expect(page.locator(`text="${account}"`)).toBeVisible();
+            await expect(page.locator(`button[id="${account}-button"]`)).not.toBeVisible()
+            await expect(page.locator(`table[id="${account}-transactions"]`)).not.toBeVisible();
+        }
+
+        await expect(page.locator('svg[id="chart"]')).toBeVisible();
+
+        // when
+        await page.reload()
+
+        // then
+        await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
+        await expect(page.locator('svg[id="chart"]')).toBeVisible();
+
     }
 })
 
@@ -418,7 +408,6 @@ test('MOCKED: should show error when update link token return error', async ({pa
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
         // given
-        await logInTestUserWithClient(client)
 
         await context.route('**/api/overview', (route) => {
             route.fulfill({
@@ -434,28 +423,17 @@ test('MOCKED: should show error when update link token return error', async ({pa
                 })
             })
         });
-        await context.route('**/api/create_update_link_token', (route) => {
-            route.fulfill({
-                status: 500,
-            })
-        });
+        await mockInternalServerError(context, '**/api/create_update_link_token')
 
         await logInTestUser(page);
 
-        try {
-            await expect(page.locator('text="Failed to create update link token"')).toBeVisible();
-        } finally {
-            // cleanup
-            await logOutUserWithClient(client);
-        }
+        await expect(page.locator('text="Failed to create update link token"')).toBeVisible();
     }
 })
 
-test('should display error when is verified errors out', async ({page, context}) => {
+test('MOCKED: should display error when is verified errors out', async ({page, context}) => {
     // given
-    await context.route('**/api/users/is-verified', (route) => {
-        route.fulfill({status: 500});
-    });
+    await mockInternalServerError(context, '**/api/users/is-verified')
 
     // when
     await logInTestUser(page);
@@ -464,11 +442,9 @@ test('should display error when is verified errors out', async ({page, context})
     await expect(page.locator('text="Failed to verify user"')).toBeVisible();
 })
 
-test('should display error when overview errors out', async ({page, context}) => {
+test('MOCKED: should display error when overview errors out', async ({page, context}) => {
     // given
-    await context.route('**/api/overview', (route) => {
-        route.fulfill({status: 500});
-    });
+    await mockInternalServerError(context, '**/api/overview')
 
     // when
     await logInTestUser(page);
@@ -477,11 +453,9 @@ test('should display error when overview errors out', async ({page, context}) =>
     await expect(page.locator('text="Failed to get overview"')).toBeVisible();
 })
 
-test('should display error when create link token errors out', async ({page, context}) => {
+test('MOCKED: should display error when create link token errors out', async ({page, context}) => {
     // given
-    await context.route('**/api/create_link_token', (route) => {
-        route.fulfill({status: 500});
-    });
+    await mockInternalServerError(context, '**/api/create_link_token')
 
     // when
     await logInTestUser(page);
@@ -490,13 +464,11 @@ test('should display error when create link token errors out', async ({page, con
     await expect(page.locator('text="Failed to create link token"')).toBeVisible();
 })
 
-test('should display error when get overview on success errors out', async ({page, context}) => {
+test('MOCKED: should display error when get overview on success errors out', async ({page, context}) => {
     // given
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
-        await context.route('**/api/overview', (route) => {
-            route.fulfill({status: 500});
-        });
+        await mockInternalServerError(context, '**/api/overview');
         await logInTestUser(page);
 
         // when
@@ -507,13 +479,11 @@ test('should display error when get overview on success errors out', async ({pag
     }
 })
 
-test('should display error when create access token on success errors out', async ({page, context}) => {
+test('MOCKED: should display error when create access token on success errors out', async ({page, context}) => {
     // given
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
-        await context.route('**/api/exchange_token_and_save_bank', (route) => {
-            route.fulfill({status: 500});
-        });
+        await mockInternalServerError(context, '**/api/exchange_token_and_save_bank')
         await logInTestUser(page);
 
         // when
@@ -524,7 +494,7 @@ test('should display error when create access token on success errors out', asyn
     }
 })
 
-test('should display loading while waiting for overview', async ({page, context}) => {
+test('MOCKED: should display loading while waiting for overview', async ({page, context}) => {
     // given
     await context.route('**/api/overview', (route) => {
         setTimeout(() => {
