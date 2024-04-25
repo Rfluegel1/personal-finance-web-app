@@ -65,7 +65,6 @@ describe('Plaid service', () => {
             })
             expect(result).toEqual({link_token: mockedLinkToken})
         })
-
         test('should call to plaid and return update link token', async () => {
             // given
             let mockedLinkToken = randomUUID();
@@ -95,7 +94,6 @@ describe('Plaid service', () => {
             })
             expect(result).toEqual({link_token: mockedLinkToken})
         })
-
         test('should call to plaid to exchange public token for access token and to bank', async () => {
             // given
             let mockedAccessToken = randomUUID()
@@ -151,7 +149,7 @@ describe('Plaid service', () => {
             let firstMockedBank = new Bank('access_token1', userId, '1234')
             firstMockedBank.id = firstBankId
             const secondBankId = randomUUID()
-            let secondMockedBank = new Bank('access_token2', userId, '5678');
+            let secondMockedBank = new Bank('access_token2', userId, '5678')
             secondMockedBank.id = secondBankId;
             (plaidService.bankService.getBanksByOwner as jest.Mock).mockImplementation((owner) => {
                 if (owner === userId) {
@@ -345,52 +343,6 @@ describe('Plaid service', () => {
             // then
             expect(plaidClient.transactionsGet).toHaveBeenCalledTimes(2)
         })
-
-        test('should return notice that item login required was experienced', async () => {
-            // given
-            let userId = 'user'
-            let firstMockedBank = new Bank('access_token1', userId, '1234');
-            (plaidService.bankService.getBanksByOwner as jest.Mock).mockImplementation((owner) => {
-                if (owner === userId) {
-                    return [firstMockedBank]
-                }
-            });
-            (plaidClient.itemGet as jest.Mock).mockImplementation((params: any) => {
-                if (params.access_token === firstMockedBank.accessToken) {
-                    return {
-                        data: {
-                            item: {institution_id: 'bankId1'}
-                        }
-                    }
-                }
-            });
-            (plaidClient.institutionsGetById as jest.Mock).mockImplementation((params: any) => {
-                if (params.institution_id === 'bankId1' && params.country_codes[0] === 'US') {
-                    return {
-                        data: {
-                            institution: {name: 'bankName1', products: ['transactions']}
-                        }
-                    }
-                }
-            });
-            (plaidClient.transactionsGet as jest.Mock).mockRejectedValueOnce({response: {data: {error_code: 'ITEM_LOGIN_REQUIRED'}}})
-
-            // when
-            const response = await plaidService.getOverview(userId)
-
-            // then
-            expect(response).toEqual({
-                banks: [{
-                    name: 'bankName1',
-                    itemId: '1234',
-                    id: firstMockedBank.id,
-                    accounts: [],
-                    error: 'ITEM_LOGIN_REQUIRED'
-                }],
-                netWorths: []
-            })
-        })
-
         test('should throw error when bad request message is not PRODUCT_NOT_READY', async () => {
             // given
             let firstMockedBank = new Bank('access_token1');
@@ -404,7 +356,6 @@ describe('Plaid service', () => {
                 expect(error.response).toEqual('SOME_OTHER_ERROR')
             }
         })
-
         test('should paginate transactions when transactions length is less than total transactions', async () => {
             // given
             let firstMockedBank = new Bank('access_token1');
@@ -442,6 +393,129 @@ describe('Plaid service', () => {
             // then
             expect(plaidClient.transactionsGet).toHaveBeenCalledTimes(2)
             expect(result.banks[0].accounts[0].transactions).toEqual([{amount: 1}, {amount: 2}])
+        })
+
+        test('should call investment transactions get more than once when bad request message is PRODUCT_NOT_READY', async () => {
+            // given
+            let firstMockedBank = new Bank('access_token1');
+            (plaidClient.investmentsTransactionsGet as jest.Mock).mockRejectedValueOnce({response: {data: {error_code: 'PRODUCT_NOT_READY'}}});
+            (plaidClient.investmentsTransactionsGet as jest.Mock).mockResolvedValueOnce({data: {transactions: [{amount: 1}]}})
+
+            // when
+            await plaidService.getInvestmentTransactionsResponseWithRetry(firstMockedBank)
+
+            // then
+            expect(plaidClient.investmentsTransactionsGet).toHaveBeenCalledTimes(2)
+        })
+        test('should throw error when bad request message is not PRODUCT_NOT_READY', async () => {
+            // given
+            let firstMockedBank = new Bank('access_token1');
+            (plaidClient.investmentsTransactionsGet as jest.Mock).mockRejectedValue({response: 'SOME_OTHER_ERROR'})
+
+            try {
+                // when
+                await plaidService.getInvestmentTransactionsResponseWithRetry(firstMockedBank)
+            } catch (error: any) {
+                // then
+                expect(error.response).toEqual('SOME_OTHER_ERROR')
+            }
+        })
+        test('should paginate transactions when investment transactions length is less than total investment transactions', async () => {
+            // given
+            let firstMockedBank = new Bank('access_token1');
+            (plaidService.bankService.getBanksByOwner as jest.Mock).mockResolvedValue([firstMockedBank]);
+            (plaidClient.investmentsTransactionsGet as jest.Mock).mockImplementation((params) => {
+                if (params.options.offset === 1) {
+                    return {
+                        data: {
+                            investment_transactions: [{amount: 2}],
+                            total_investment_transactions: 2
+                        },
+                    }
+                }
+            });
+            (plaidClient.investmentsTransactionsGet as jest.Mock).mockResolvedValueOnce({
+                data: {
+                    investment_transactions: [{amount: 1}],
+                    total_investment_transactions: 2,
+                    item: {institution_id: 'bankId1'},
+                },
+            });
+            (plaidClient.transactionsGet as jest.Mock).mockResolvedValue({
+                data: {
+                    transactions: [{amount: 1}],
+                    total_transactions: 1,
+                    item: {institution_id: 'bankId1'},
+                    accounts: [{name: 'bank1AccountName1', balances: {current: 1}}]
+                }
+            });
+            (plaidClient.itemGet as jest.Mock).mockResolvedValue({
+                data: {
+                    item: {
+                        institution_id: 'ins_1'
+                    }
+                }
+            });
+            (plaidClient.institutionsGetById as jest.Mock).mockResolvedValue({
+                data: {
+                    institution: {
+                        name: 'bankName1',
+                        products: ['investments']
+                    }
+                }
+            })
+
+            // when
+            const result = await plaidService.getOverview('userId')
+
+            // then
+            expect(plaidClient.investmentsTransactionsGet).toHaveBeenCalledTimes(2)
+            expect(result.banks[0].accounts[0].transactions).toEqual([{amount: 1}, {amount: 1}, {amount: 2}])
+        })
+
+        test('should return notice that item login required was experienced', async () => {
+            // given
+            let userId = 'user'
+            let firstMockedBank = new Bank('access_token1', userId, '1234');
+            (plaidService.bankService.getBanksByOwner as jest.Mock).mockImplementation((owner) => {
+                if (owner === userId) {
+                    return [firstMockedBank]
+                }
+            });
+            (plaidClient.itemGet as jest.Mock).mockImplementation((params: any) => {
+                if (params.access_token === firstMockedBank.accessToken) {
+                    return {
+                        data: {
+                            item: {institution_id: 'bankId1'}
+                        }
+                    }
+                }
+            });
+            (plaidClient.institutionsGetById as jest.Mock).mockImplementation((params: any) => {
+                if (params.institution_id === 'bankId1' && params.country_codes[0] === 'US') {
+                    return {
+                        data: {
+                            institution: {name: 'bankName1', products: ['investments']}
+                        }
+                    }
+                }
+            });
+            (plaidClient.transactionsGet as jest.Mock).mockRejectedValueOnce({response: {data: {error_code: 'ITEM_LOGIN_REQUIRED'}}})
+
+            // when
+            const response = await plaidService.getOverview(userId)
+
+            // then
+            expect(response).toEqual({
+                banks: [{
+                    name: 'bankName1',
+                    itemId: '1234',
+                    id: firstMockedBank.id,
+                    accounts: [],
+                    error: 'ITEM_LOGIN_REQUIRED'
+                }],
+                netWorths: []
+            })
         })
 
         test('should return no net worths when there are no banks', async () => {

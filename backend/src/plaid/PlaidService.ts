@@ -76,12 +76,12 @@ export default class PlaidService {
                 accounts = response.accounts
                 let investmentTransactions: any[] = []
                 if (institutionProducts.includes(Products.Investments)) {
-                    const investmentTransactionsResponse = await plaidClient.investmentsTransactionsGet({
-                        access_token: bank.accessToken,
-                        start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
-                        end_date: getTodaysDateInYYYYMMDD()
-                    })
+                    const investmentTransactionsResponse = await this.getInvestmentTransactionsResponseWithRetry(bank)
                     investmentTransactions = investmentTransactionsResponse.data.investment_transactions
+                    while (investmentTransactions.length < investmentTransactionsResponse.data.total_investment_transactions) {
+                        const investmentTransactionsResponse = await this.getInvestmentTransactionsResponseWithRetry(bank, investmentTransactions.length)
+                        investmentTransactions = investmentTransactions.concat(investmentTransactionsResponse.data.investment_transactions)
+                    }
                 }
                 transactions = transactions.concat(investmentTransactions)
             } catch (error: any) {
@@ -234,6 +234,32 @@ export default class PlaidService {
                 throw error
             }
         }
+    }
+
+    async getInvestmentTransactionsResponseWithRetry(bank: any, offset = 0): Promise<any> {
+        try {
+            return await this.getInvestmentTransactions(bank, offset)
+        } catch (error: any) {
+            if (error.response?.data?.error_code === 'PRODUCT_NOT_READY') {
+                await new Promise(resolve => setTimeout(resolve, 100))
+                return await this.getInvestmentTransactionsResponseWithRetry(bank)
+            } else if (error.response?.data?.error_code === 'ITEM_LOGIN_REQUIRED') {
+                throw new Error('ITEM_LOGIN_REQUIRED')
+            } else {
+                throw error
+            }
+        }
+    }
+
+    private async getInvestmentTransactions(bank: any, offset: number) {
+        return await plaidClient.investmentsTransactionsGet({
+            access_token: bank.accessToken,
+            start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
+            end_date: getTodaysDateInYYYYMMDD(),
+            options: {
+                offset: offset
+            }
+        })
     }
 
     private async getTransactions(bank: any, offset: number) {
