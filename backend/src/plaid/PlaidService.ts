@@ -2,6 +2,7 @@ import {plaidClient} from './PlaidConfiguration'
 import {CountryCode, InstitutionsGetByIdRequest, LinkTokenCreateRequest, Products, TransactionsGetRequest} from 'plaid'
 import BankService from '../banks/BankService'
 import {getTodaysDateInYYYYMMDD, getTwoYearsPreviousTodaysDateInYYYYMMDD} from '../utils'
+import {AxiosResponse} from 'axios'
 
 export default class PlaidService {
     bankService = new BankService()
@@ -222,12 +223,18 @@ export default class PlaidService {
     }
 
     async getTransactionsResponseWithRetry(bank: any, offset = 0): Promise<any> {
+        let apiCall = () => this.getTransactions(bank, offset)
+        let recursiveCall = () => this.getTransactionsResponseWithRetry(bank)
+        return await this.callWithRetry(apiCall, recursiveCall)
+    }
+
+    private async callWithRetry(apiCall: () => Promise<AxiosResponse<any, any>>, recursiveCall: () => Promise<any>) {
         try {
-            return await this.getTransactions(bank, offset)
+            return await apiCall()
         } catch (error: any) {
             if (error.response?.data?.error_code === 'PRODUCT_NOT_READY') {
                 await new Promise(resolve => setTimeout(resolve, 100))
-                return await this.getTransactionsResponseWithRetry(bank)
+                return await recursiveCall()
             } else if (error.response?.data?.error_code === 'ITEM_LOGIN_REQUIRED') {
                 throw new Error('ITEM_LOGIN_REQUIRED')
             } else {
@@ -237,18 +244,9 @@ export default class PlaidService {
     }
 
     async getInvestmentTransactionsResponseWithRetry(bank: any, offset = 0): Promise<any> {
-        try {
-            return await this.getInvestmentTransactions(bank, offset)
-        } catch (error: any) {
-            if (error.response?.data?.error_code === 'PRODUCT_NOT_READY') {
-                await new Promise(resolve => setTimeout(resolve, 100))
-                return await this.getInvestmentTransactionsResponseWithRetry(bank)
-            } else if (error.response?.data?.error_code === 'ITEM_LOGIN_REQUIRED') {
-                throw new Error('ITEM_LOGIN_REQUIRED')
-            } else {
-                throw error
-            }
-        }
+        const apiCall = () => this.getInvestmentTransactions(bank, offset)
+        const recursiveCall = () => this.getInvestmentTransactionsResponseWithRetry(bank)
+        return await this.callWithRetry(apiCall, recursiveCall)
     }
 
     private async getInvestmentTransactions(bank: any, offset: number) {
