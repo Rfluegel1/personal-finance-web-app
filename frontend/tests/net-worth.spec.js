@@ -13,7 +13,7 @@ async function addHuntingtonBank(page) {
     if (process.env.NODE_ENV === 'development') {
         await page.click('button[id="add-bank"]');
         await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
-        await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Search for 11,000+').fill('huntington');
+        await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Search for 12,000+').fill('huntington');
         await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Huntington Bank').click()
         await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Username').fill('user_good');
         await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Password').fill('pass_good');

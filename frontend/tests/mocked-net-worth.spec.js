@@ -56,7 +56,7 @@ async function addHuntingtonBank(page) {
     if (process.env.NODE_ENV === 'development') {
         await page.click('button[id="add-bank"]');
         await page.frameLocator('iframe[title="Plaid Link"]').getByRole('button', {name: 'Continue'}).click();
-        await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Search for 11,000+').fill('huntington');
+        await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Search for 12,000+').fill('huntington');
         await page.frameLocator('iframe[title="Plaid Link"]').getByLabel('Huntington Bank').click()
         await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Username').fill('user_good');
         await page.frameLocator('iframe[title="Plaid Link"]').getByPlaceholder('Password').fill('pass_good');
@@ -71,7 +71,7 @@ async function addHuntingtonBank(page) {
 async function updateBank(page) {
     await page.locator('button[id="Mocked Bank-login-button"]').click();
     await page.frameLocator('#plaid-link-iframe-2').getByRole('button', {name: 'Continue'}).click();
-    await page.frameLocator('#plaid-link-iframe-2').getByLabel('Search for 11,000+').fill('huntington');
+    await page.frameLocator('#plaid-link-iframe-2').getByLabel('Search for 12,000+').fill('huntington');
     await page.frameLocator('#plaid-link-iframe-2').getByLabel('Huntington Bank').click()
     await page.frameLocator('#plaid-link-iframe-2').getByPlaceholder('Username').fill('user_good');
     await page.frameLocator('#plaid-link-iframe-2').getByPlaceholder('Password').fill('pass_good');
