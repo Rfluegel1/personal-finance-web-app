@@ -105,7 +105,7 @@ test('should use link flow to add bank and accounts and transactions', async ({p
 
         try {
             // expect chart to not yet be drawn
-            await expect(page.locator('.dot').first()).not.toBeVisible();
+            await expect(page.locator('rect')).not.toBeVisible();
             await expect(page.locator('svg[id="chart"]')).toBeVisible();
 
             // when
@@ -132,7 +132,7 @@ test('should use link flow to add bank and accounts and transactions', async ({p
                 await expect(page.locator(`table[id="${account}-transactions"]`)).not.toBeVisible();
             }
 
-            await expect(page.locator('.dot').first()).toBeVisible();
+            await expect(page.locator('rect')).toBeVisible();
             await expect(page.locator('svg[id="chart"]')).toBeVisible();
 
             // when
@@ -140,7 +140,7 @@ test('should use link flow to add bank and accounts and transactions', async ({p
 
             // then
             await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
-            await expect(page.locator('.dot').first()).toBeVisible();
+            await expect(page.locator('rect')).toBeVisible();
             await expect(page.locator('svg[id="chart"]')).toBeVisible();
         } finally {
             // cleanup

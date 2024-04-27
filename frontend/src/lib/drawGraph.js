@@ -1,5 +1,12 @@
 import * as d3 from "d3";
 
+function formatCurrency(value) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    }).format(value);
+}
+
 export default function drawChart(rawData) {
     if (rawData.length === 0) {
         return;
@@ -58,7 +65,7 @@ export default function drawChart(rawData) {
         .attr("d", line)
         .style("fill", "none")
         .style("stroke", "green")
-        .style("stroke-width", "2px");
+        .style("stroke-width", "6px");
 
     // Add the X Axis
     svg.append('g')
@@ -74,7 +81,20 @@ export default function drawChart(rawData) {
         .attr('text-anchor', 'middle') // Center the text
         .text('Date (YYYY-MM-DD)');
 
-    // Dot and tooltip setup
+    // Single dot for hover
+    const focus = svg.append("circle")
+        .style("fill", "green")
+        .attr("stroke", "green")
+        .attr("r", 10)
+        .style("opacity", 0); // Initially hidden
+
+     const focusLayer = svg.append("circle")
+        .style("fill", "white")
+        .attr("stroke", "white")
+        .attr("r", 4)
+        .style("opacity", 0); // Initially hidden
+
+    // Tooltip for displaying information
     const tooltip = d3.select('body').append('div')
         .attr('class', 'tooltip')
         .style('position', 'absolute')
@@ -85,24 +105,36 @@ export default function drawChart(rawData) {
         .style('opacity', 0)
         .style('pointer-events', 'none');
 
-    svg.selectAll(".dot")
-        .data(data)
-        .enter().append("circle")
-        .attr("class", "dot")
-        .attr("cx", d => x(d.date))
-        .attr("cy", d => y(d.value))
-        .attr("r", 3)
-        .on("mouseover", (event, d) => {
-            tooltip.transition()
-                .duration(200)
-                .style('opacity', .9);
-            tooltip.html(`Date: ${d3.timeFormat('%Y-%m-%d')(d.date)}<br/>Net Worth: $${d.value.toFixed(2)}`)
-                .style('left', `${event.pageX + 10}px`)
-                .style('top', `${event.pageY - 10}px`);
+    svg.append("rect")
+        .attr("class", "overlay")
+        .attr("width", width)
+        .attr("height", height)
+        .style("opacity", 0)
+        .on("mouseover", function () {
+            focus.style("opacity", 1);
+            focusLayer.style("opacity", 1);
+            tooltip.style("opacity", 1);
         })
-        .on("mouseout", () => {
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        });
+        .on("mouseout", function () {
+            focus.style("opacity", 0);
+            focusLayer.style("opacity", 0);
+            tooltip.style("opacity", 0);
+        })
+        .on("mousemove", mousemove);
+
+    function mousemove(event) {
+        const x0 = x.invert(d3.pointer(event, this)[0]),
+            i = d3.bisector(d => d.date).left(data, x0, 1),
+            d0 = data[i - 1],
+            d1 = data[i],
+            d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+        focus.attr("cx", x(d.date))
+            .attr("cy", y(d.value));
+        focusLayer.attr("cx", x(d.date))
+            .attr("cy", y(d.value));
+        tooltip.html(`${d3.timeFormat('%Y-%m-%d')(d.date)}<br/>${formatCurrency(d.value)}`)
+            .style('left', `${event.pageX + 10}px`)
+            .style('top', `${event.pageY - 10}px`)
+            .style('opacity', 1)
+    }
 }
