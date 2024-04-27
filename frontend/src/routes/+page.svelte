@@ -2,6 +2,7 @@
     import {onMount} from 'svelte';
     import axios from 'axios';
     import drawChart from "$lib/drawGraph.js";
+    import HamburgerMenu from "$lib/HamburgerMenu.svelte";
 
     let isEmailVerified = false;
     let error = '';
@@ -12,11 +13,11 @@
     let visibility = {}
     let isLoading = false;
     let bankHandlers = {}
-    let showMenu = false;
-
-    function toggleMenu() {
-        showMenu = !showMenu;
-    }
+    let links = [
+        { url: '/logout', label: 'Logout' },
+        { url: '/email-change', label: 'Change Email' },
+        { url: '/password-reset-request', label: 'Change Password' }
+    ];
 
     onMount(async () => {
         try {
@@ -139,14 +140,7 @@
         <div class='error' role='alert'>{error}</div>
     {/if}
     {#if isEmailVerified}
-        <div class="hamburger-menu">
-            <button class="hamburger-button" on:click={toggleMenu}>☰</button>
-            <div class="menu-items" style:display="{showMenu ? 'block' : 'none'}">
-                <a href="/logout">Logout</a>
-                <a href="/email-change">Change Email</a>
-                <a href="/password-reset-request">Change Password</a>
-            </div>
-        </div>
+        <HamburgerMenu {links}/>
         <button id='add-bank' on:click={handler.open()} disabled={!link_token || isLoading}>Add Bank</button>
         {#if netWorths.length > 0}
             <h2>${netWorths[netWorths.length - 1].value.toFixed(2)}</h2>
@@ -230,37 +224,4 @@
     .bank-list ul ul { /* Targeting nested ul for accounts specifically */
         padding-left: 1em; /* You can adjust this value to control the indentation */
     }
-
-    .hamburger-menu {
-        position: relative;
-        display: inline-block;
-    }
-
-    .hamburger-button {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-    }
-
-    .menu-items {
-        display: none; /* Hide menu initially */
-        position: absolute;
-        background-color: #f9f9f9;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-        z-index: 1;
-    }
-
-    .menu-items a {
-        color: black;
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
-    }
-
-    .menu-items a:hover {
-        background-color: #f1f1f1;
-    }
-
 </style>
