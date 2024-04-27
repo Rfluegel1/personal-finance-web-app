@@ -126,6 +126,13 @@
             error = 'Failed to create update link token'
         }
     }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+        }).format(value);
+    }
 </script>
 
 <svelte:head>
@@ -134,16 +141,18 @@
     ></script>
 </svelte:head>
 
+<header class="top-header">
+    <HamburgerMenu {links}/>
+</header>
+
 <main>
-    <h1>Net Worth</h1>
+    <h1 style="font-size: 1.0625rem;">Net Worth</h1>
     {#if error}
         <div class='error' role='alert'>{error}</div>
     {/if}
     {#if isEmailVerified}
-        <HamburgerMenu {links}/>
-        <button id='add-bank' on:click={handler.open()} disabled={!link_token || isLoading}>Add Bank</button>
         {#if netWorths.length > 0}
-            <h2 style="font-weight: 700; font-size: 3.1875rem;">${netWorths[netWorths.length - 1].value.toFixed(2)}</h2>
+            <h2 style="font-weight: 700; font-size: 3.1875rem;">{formatCurrency(netWorths[netWorths.length - 1].value)}</h2>
         {/if}
         <div id="chart-container">
             <svg id="chart"></svg>
@@ -151,6 +160,7 @@
         {#if isLoading}
             <div>Loading...</div>
         {/if}
+        <button id='add-bank' on:click={handler.open()} disabled={!link_token || isLoading}>Add Bank</button>
         <div class='bank-list'>
             <ul>
                 {#each banks as bank}
@@ -212,6 +222,33 @@
 </main>
 
 <style>
+    h1 {
+        margin-top: 110px;
+        margin-bottom: .5rem;
+    }
+
+    h2 {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .top-header {
+        position: fixed; /* Changed from sticky to fixed */
+        top: 0;
+        left: 0; /* Ensures the header starts from the very left */
+        right: 0; /* Ensures the header stretches to the right edge */
+        background-color: white; /* Or any color fitting your design */
+        z-index: 1000; /* Keeps the header above other content */
+        padding: 25px 20px; /* Adjust the padding as needed */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional shadow for visual separation */
+    }
+
+    main {
+        margin-top: 60px; /* Adjust based on your header's height */
+        margin-left: 100px; /* Margin on the left */
+        margin-right: 100px; /* Margin on the right */
+    }
+
     .error {
         color: red;
     }

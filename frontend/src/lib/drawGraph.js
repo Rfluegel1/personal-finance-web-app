@@ -74,19 +74,6 @@ export default function drawChart(rawData) {
         .attr('text-anchor', 'middle') // Center the text
         .text('Date (YYYY-MM-DD)');
 
-    // Add the Y Axis
-    svg.append("g")
-        .call(d3.axisLeft(y))
-        .append('text')
-        .attr('class', 'axis-label')
-        .attr('transform', 'rotate(-90)') // Rotate the text for a vertical label
-        .attr('y', 0 - margin.left) // Position to the left of the y-axis line
-        .attr('x', 0 - (height / 2)) // Center the label vertically
-        .attr('dy', '1em') // Nudge the label down a bit
-        .attr('fill', '#000') // Text color
-        .attr('text-anchor', 'middle') // Center the text
-        .text('Net Worth in USD');
-
     // Dot and tooltip setup
     const tooltip = d3.select('body').append('div')
         .attr('class', 'tooltip')

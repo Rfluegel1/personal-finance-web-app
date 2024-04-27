@@ -27,7 +27,7 @@
     .hamburger-button {
         background: none;
         border: none;
-        font-size: 24px;
+        font-size: 36px;
         cursor: pointer;
     }
 
