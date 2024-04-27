@@ -18,8 +18,10 @@
 
 <style>
     .hamburger-menu {
-        position: relative;
-        display: inline-block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10; /* Ensures the menu floats above other content */
     }
 
     .hamburger-button {
@@ -33,6 +35,7 @@
         display: none; /* Initially hidden, display controlled by Svelte */
         position: absolute;
         background-color: #f9f9f9;
+        right: 0;
         min-width: 160px;
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
         z-index: 1;
