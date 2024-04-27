@@ -66,6 +66,7 @@ test('should have link that logs user out', async ({page}) => {
     await logInTestUser(page);
 
     // when
+    await page.getByRole('button', { name: '☰' }).click()
     await page.click('a[href="/logout"]');
 
     // then
@@ -77,6 +78,7 @@ test('should have link to email change', async ({page}) => {
     await logInTestUser(page);
 
     // when
+    await page.getByRole('button', { name: '☰' }).click()
     await page.click('a[href="/email-change"]');
 
     // then
@@ -88,6 +90,7 @@ test('should have link to Password Reset Request', async ({page}) => {
     await logInTestUser(page);
 
     // when
+    await page.getByRole('button', { name: '☰' }).click()
     await page.click('a[href="/password-reset-request"]');
 
     // then
