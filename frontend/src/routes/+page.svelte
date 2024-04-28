@@ -3,8 +3,9 @@
     import axios from 'axios';
     import drawChart from "$lib/drawGraph.js";
     import HamburgerMenu from "$lib/HamburgerMenu.svelte";
+    import data from '$lib/overviewResponse.json'
 
-    let isEmailVerified = false;
+    let isEmailVerified = true;
     let error = '';
     let banks = [];
     let link_token = '';
@@ -28,16 +29,20 @@
         if (isEmailVerified) {
             try {
                 isLoading = true;
-                await axios.get('/api/overview').then(response => {
-                    banks = response.data.banks
-                    netWorths = response.data.netWorths
-                })
+                // await axios.get('/api/overview').then(response => {
+                //     banks = response.data.banks
+                //     netWorths = response.data.netWorths
+                // })
+                banks = data.banks
+                netWorths = data.netWorths
             } catch (e) {
                 error = 'Failed to get overview'
             } finally {
                 isLoading = false;
             }
-            drawChart(netWorths);
+            setTimeout(() => {
+                drawChart(netWorths);
+            }, 1000)
         }
     });
 
