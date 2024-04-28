@@ -4,42 +4,18 @@ import axios from 'axios';
 import {wrapper} from 'axios-cookiejar-support';
 import {CookieJar} from 'tough-cookie';
 import {logInTestUserWithClient, logOutUserWithClient} from './helpers/api.js';
+import data from '../tests/overviewResponse.json' assert { type: 'json' };
 
 const jar = new CookieJar();
 const client = wrapper(axios.create({jar, withCredentials: true}));
 
 const isNotDevelopment = process.env.NODE_ENV !== 'development';
 
-const okBody = JSON.stringify({
-    banks: [{
-        name: 'Mocked Bank',
-        accounts: [{
-            name: 'Mocked Checking',
-            balances: {current: 320.76},
-            transactions: [{
-                date: '2021-01-01',
-                amount: 100
-            }]
-        }, {
-            name: 'Mocked Savings',
-            balances: {current: 1000.76},
-            transactions: []
-        }]
-    }],
-    netWorths: [{
-        date: '2021-01-01',
-        value: 100,
-        epochTimestamp: 1609459200
-    }, {
-        date: '2021-01-01',
-        value: 200,
-        epochTimestamp: 1709459200
-    }]
-});
+const okBody = JSON.stringify(data)
 
 const itemLoginRequiredBody = JSON.stringify({
     banks: [{
-        name: 'Mocked Bank',
+        name: 'Huntington Bank',
         accounts: [],
         error: 'ITEM_LOGIN_REQUIRED'
     }],
@@ -69,7 +45,7 @@ async function addHuntingtonBank(page) {
 }
 
 async function updateBank(page) {
-    await page.locator('button[id="Mocked Bank-login-button"]').click();
+    await page.locator('button[id="Huntington Bank-login-button"]').click();
     await page.frameLocator('#plaid-link-iframe-2').getByRole('button', {name: 'Continue'}).click();
     await page.frameLocator('#plaid-link-iframe-2').getByLabel('Search for 12,000+').fill('huntington');
     await page.frameLocator('#plaid-link-iframe-2').getByLabel('Huntington Bank').click()
@@ -107,11 +83,11 @@ test('should fetch bank and accounts and transactions', async ({page, context}) 
     await logInTestUser(page);
 
     // expect
-    await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
-    await page.locator('button[id="Mocked Bank-button"]').click()
+    await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
+    await page.click('button[id="Huntington Bank-button"]')
 
-    let accountsWithTransactions = ['Mocked Checking']
-    let accountsWithoutTransactions = ['Mocked Savings']
+    let accountsWithTransactions = ['Plaid Checking', 'Plaid Saving', 'Plaid CD', 'Plaid Credit Card', 'Plaid Money Market']
+    let accountsWithoutTransactions = ['Plaid IRA', 'Plaid 401k', 'Plaid Student Loan', 'Plaid Mortgage']
 
     for (let account of accountsWithTransactions) {
         await expect(page.locator(`text="${account}"`)).toBeVisible();
@@ -131,7 +107,7 @@ test('should fetch bank and accounts and transactions', async ({page, context}) 
     await page.reload()
 
     // then
-    await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
+    await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
     await expect(page.locator('svg[id="chart"]')).toBeVisible();
 })
 
@@ -177,15 +153,15 @@ test('should show when item login is required', async ({page, context}) => {
 
     try {
         // expect
-        await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
-        await expect(page.locator('button[id="Mocked Bank-button"]')).not.toBeVisible();
+        await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
+        await expect(page.locator('button[id="Huntington Bank-button"]')).not.toBeVisible();
         await expect(page.locator('text="ITEM_LOGIN_REQUIRED"')).toBeVisible();
         await updateBank(page);
 
         await expect(page.locator('text="Loading..."')).toBeVisible();
         await expect(page.locator('text="Loading..."')).not.toBeVisible();
-        await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
-        await expect(page.locator('button[id="Mocked Bank-button"]')).toBeVisible();
+        await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
+        await expect(page.locator('button[id="Huntington Bank-button"]')).toBeVisible();
     } finally {
         // cleanup
         await logOutUserWithClient(client);
@@ -228,8 +204,8 @@ test('should show error when update on success overview return error', async ({p
     await logInTestUser(page);
 
     // expect
-    await expect(page.locator('text="Mocked Bank"')).toBeVisible({timeout: 10000});
-    await expect(page.locator('button[id="Mocked Bank-button"]')).not.toBeVisible();
+    await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
+    await expect(page.locator('button[id="Huntington Bank-button"]')).not.toBeVisible();
     await expect(page.locator('text="ITEM_LOGIN_REQUIRED"')).toBeVisible();
 
     try {
@@ -265,7 +241,7 @@ test('should show error when update link token return error and disable link for
 
     // then
     await expect(page.locator('text="Failed to create update link token"')).toBeVisible();
-    await expect(page.locator('button[id="Mocked Bank-login-button"]')).toBeDisabled();
+    await expect(page.locator('button[id="Huntington Bank-login-button"]')).toBeDisabled();
 })
 
 test('should display error when is verified errors out', async ({page, context}) => {
