@@ -18,10 +18,9 @@ export default function drawChart(rawData) {
     const oldestDate = data[0].date;
     const newestDate = data[data.length - 1].date;
     const range = rawData[rawData.length - 1].epochTimestamp - rawData[0].epochTimestamp;
-    const twoTenthDate = new Date(rawData[0].epochTimestamp + range * 0.2);
-    const fourTenthDate = new Date(rawData[0].epochTimestamp + range * 0.4);
-    const sixTenthDate = new Date(rawData[0].epochTimestamp + range * 0.6);
-    const eightTenthDate = new Date(rawData[0].epochTimestamp + range * 0.8);
+    const oneFourthDate = new Date(rawData[0].epochTimestamp + range * 0.25);
+    const halfDate = new Date(rawData[0].epochTimestamp + range * 0.5);
+    const threeFourtDate = new Date(rawData[0].epochTimestamp + range * 0.75);
 
     const margin = {top: 100, right: 100, bottom: 100, left: 100},
         width = 600 - margin.left - margin.right,
@@ -68,18 +67,20 @@ export default function drawChart(rawData) {
         .style("stroke-width", "6px");
 
     // Add the X Axis
-    svg.append('g')
+    const xAxis = svg.append('g')
         .attr('transform', `translate(0,${height})`)
+        .style("stroke-opacity", 0)
         .call(d3.axisBottom(x)
-            .tickValues([oldestDate, twoTenthDate, fourTenthDate, sixTenthDate, eightTenthDate, newestDate])
-            .tickFormat(d3.timeFormat('%Y-%m-%d')))
-        .append('text')
-        .attr('class', 'axis-label')
-        .attr('x', width / 2) // Center the label
-        .attr('y', margin.bottom - 20) // Position below the x-axis line
-        .attr('fill', '#000') // Text color
-        .attr('text-anchor', 'middle') // Center the text
-        .text('Date (YYYY-MM-DD)');
+            .tickValues([oldestDate, oneFourthDate, halfDate, threeFourtDate, newestDate])
+            .tickFormat(d3.timeFormat('%b %Y')))
+
+    xAxis.selectAll("text")  // Select all text elements in the X axis group
+        .style("font-size", "12px")
+        .style('stroke', 'transparent')
+        .style('fill', 'rgb(88, 94, 95)')
+
+    xAxis.selectAll("line")  // Select all line elements in the X axis group
+        .style("stroke-opacity", 0);
 
     // Single dot for hover
     const focus = svg.append("circle")
@@ -88,7 +89,7 @@ export default function drawChart(rawData) {
         .attr("r", 10)
         .style("opacity", 0); // Initially hidden
 
-     const focusLayer = svg.append("circle")
+    const focusLayer = svg.append("circle")
         .style("fill", "white")
         .attr("stroke", "white")
         .attr("r", 4)
