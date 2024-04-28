@@ -153,9 +153,23 @@ export default function drawChart(rawData) {
             .attr("cy", y(d.value));
         focusLayer.attr("cx", x(d.date))
             .attr("cy", y(d.value));
+
+        const rect = document.querySelector('#chart > g > rect').getBoundingClientRect();
+        const chartTop = rect.top;
+
         tooltip.html(`<b>${d3.timeFormat('%b %d, %Y')(d.date)}</b><br/>${focusSVG} ${formatCurrency(d.value)}`)
-            .style('left', `${event.pageX + 10}px`)
-            .style('top', `${event.pageY - 10}px`)
+            .style('opacity', 0) // Temporarily hide tooltip to calculate height without showing it
+            .style('visibility', 'hidden'); // Ensure it does not affect layout while invisible
+
+        // Force layout calculation to update dimensions
+        tooltip.node().offsetHeight;
+
+        const tooltipHeight = tooltip.node().offsetHeight;
+        const tooltipWidth = tooltip.node().offsetWidth;
+
+        tooltip.style('left', `${event.pageX - (tooltipWidth/2)}px`)
+            .style('top', `${chartTop - tooltipHeight}px`) // Position above the rect by the height of the tooltip
             .style('opacity', 1)
+            .style('visibility', 'visible'); // Make it visible again
     }
 }
