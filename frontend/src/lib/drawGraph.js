@@ -53,8 +53,9 @@ export default function drawChart(rawData) {
             .attr("y1", y(0))
             .attr("y2", y(0))
             .attr("stroke-width", 2)
-            .attr("stroke", "black")
-            .style("stroke-dasharray", ("3, 3"));
+            .attr("stroke", "gray")
+            .style("opacity", 0.25)
+            .style("stroke-dasharray", ("3, 3"))
     }
 
     // Draw line
