@@ -4,7 +4,7 @@ import axios from 'axios';
 import {wrapper} from 'axios-cookiejar-support';
 import {CookieJar} from 'tough-cookie';
 import {logInTestUserWithClient, logOutUserWithClient} from './helpers/api.js';
-import data from '../tests/overviewResponse.json' assert { type: 'json' };
+import data from '../tests/overviewResponse.json' assert {type: 'json'};
 
 const jar = new CookieJar();
 const client = wrapper(axios.create({jar, withCredentials: true}));
@@ -333,4 +333,38 @@ test('should display loading while waiting for overview and disable add bank but
     // and
     await expect(page.locator('text="Loading..."')).not.toBeVisible();
     await expect(page.locator('button[id="add-bank"]')).not.toBeDisabled()
+})
+
+test('should change graph range when buttons are selected', async ({page, context}) => {
+    // given
+    await context.route('**/api/overview', (route) => {
+        route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: okBody
+        });
+    });
+    await logInTestUser(page);
+
+    let previousChart = await page.waitForSelector('#chart', {state: 'visible'});
+    let previousSvgHtml = await previousChart.innerHTML();
+
+    let chart
+    let svgHtml
+
+    let rangeIds = ['1M', '3M', '6M', 'YTD', '1Y', '2Y']
+
+    for (let rangeId of rangeIds) {
+        // when
+        await page.click(`button[id="${rangeId}"]`);
+
+        // then
+        chart = await page.locator('#chart');
+        svgHtml = await chart.innerHTML();
+
+        expect(previousSvgHtml).not.toEqual(svgHtml);
+
+        previousChart = chart;
+        previousSvgHtml = svgHtml;
+    }
 })

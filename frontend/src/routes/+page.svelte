@@ -134,6 +134,37 @@
             maximumFractionDigits: 0,   // No decimal places,
         }).format(value);
     }
+
+    function filterData(range) {
+        const now = new Date();
+        let filteredData;
+
+        switch (range) {
+            case '1M':
+                let date = new Date(now.setMonth(now.getMonth() - 1));
+                filteredData = netWorths.filter(d => new Date(d.date) >= date);
+                break;
+            case '3M':
+                let date1 = new Date(now.setMonth(now.getMonth() - 3));
+                filteredData = netWorths.filter(d => new Date(d.date) >= date1);
+                break;
+            case '6M':
+                let date2 = new Date(now.setMonth(now.getMonth() - 6));
+                filteredData = netWorths.filter(d => new Date(d.date) >= date2);
+                break;
+            case 'YTD':
+                filteredData = netWorths.filter(d => new Date(d.date) >= new Date(now.getFullYear(), 0, 1));
+                break;
+            case '1Y':
+                let date3 = new Date(now.setFullYear(now.getFullYear() - 1));
+                filteredData = netWorths.filter(d => new Date(d.date) >= date3);
+                break;
+            case '2Y':
+                filteredData = netWorths
+                break;
+        }
+        drawChart(filteredData);
+    }
 </script>
 
 <svelte:head>
@@ -157,6 +188,12 @@
         {/if}
         <div id="chart-container">
             <svg id="chart"></svg>
+            <button id="1M" on:click={() => filterData('1M')}>1M</button>
+            <button id="3M" on:click={() => filterData('3M')}>3M</button>
+            <button id="6M" on:click={() => filterData('6M')}>6M</button>
+            <button id="YTD" on:click={() => filterData('YTD')}>YTD</button>
+            <button id="1Y" on:click={() => filterData('1Y')}>1Y</button>
+            <button id="2Y" on:click={() => filterData('2Y')}>2Y</button>
         </div>
         {#if isLoading}
             <div>Loading...</div>
