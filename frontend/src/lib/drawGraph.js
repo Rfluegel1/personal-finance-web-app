@@ -4,6 +4,7 @@ function formatCurrency(value) {
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
+        maximumFractionDigits: 0,   // No decimal places,
     }).format(value);
 }
 
@@ -22,7 +23,7 @@ export default function drawChart(rawData) {
     const halfDate = new Date(rawData[0].epochTimestamp + range * 0.5);
     const threeFourtDate = new Date(rawData[0].epochTimestamp + range * 0.75);
 
-    const margin = {top: 100, right: 100, bottom: 100, left: 100},
+    const margin = {top: 100, right: 25, bottom: 100, left: 25},
         width = 600 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
@@ -136,6 +137,11 @@ export default function drawChart(rawData) {
         .on("mousemove", mousemove);
 
     function mousemove(event) {
+        const focusSVG = `<span style="position: relative; display: inline-block; vertical-align: middle;"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="8" fill="green" stroke="green"/> <!-- Larger Circle -->
+    <circle cx="12" cy="12" r="3" fill="white" stroke="white"/> <!-- Smaller Circle on top -->
+</svg></span>`;
+
         const x0 = x.invert(d3.pointer(event, this)[0]),
             i = d3.bisector(d => d.date).left(data, x0, 1),
             d0 = data[i - 1],
@@ -147,7 +153,7 @@ export default function drawChart(rawData) {
             .attr("cy", y(d.value));
         focusLayer.attr("cx", x(d.date))
             .attr("cy", y(d.value));
-        tooltip.html(`${d3.timeFormat('%Y-%m-%d')(d.date)}<br/>${formatCurrency(d.value)}`)
+        tooltip.html(`<b>${d3.timeFormat('%b %d, %Y')(d.date)}</b><br/>${focusSVG} ${formatCurrency(d.value)}`)
             .style('left', `${event.pageX + 10}px`)
             .style('top', `${event.pageY - 10}px`)
             .style('opacity', 1)

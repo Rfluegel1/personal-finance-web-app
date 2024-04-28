@@ -131,6 +131,7 @@
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
+            maximumFractionDigits: 0,   // No decimal places,
         }).format(value);
     }
 </script>
@@ -146,7 +147,7 @@
 </header>
 
 <main>
-    <h1 style="font-size: 1.0625rem;">Net Worth</h1>
+    <h1>Net Worth</h1>
     {#if error}
         <div class='error' role='alert'>{error}</div>
     {/if}
@@ -225,6 +226,7 @@
     h1 {
         margin-top: 110px;
         margin-bottom: .5rem;
+        font-size: 1.0625rem;
     }
 
     h2 {
@@ -247,6 +249,7 @@
         margin-top: 60px; /* Adjust based on your header's height */
         margin-left: 100px; /* Margin on the left */
         margin-right: 100px; /* Margin on the right */
+        font-family: National2, -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, ubuntu, roboto, noto, segoe ui, arial, sans-serif;
     }
 
     .error {
