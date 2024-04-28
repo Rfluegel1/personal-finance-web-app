@@ -82,6 +82,15 @@ export default function drawChart(rawData) {
     xAxis.selectAll("line")  // Select all line elements in the X axis group
         .style("stroke-opacity", 0);
 
+    const focusBar = svg.append("line")
+        .attr("class", "focus-bar")
+        .attr("y1", 0)
+        .attr("y2", height)
+        .attr("stroke-width", 2)
+        .attr("stroke", "black")
+        .style("stroke-dasharray", ("3, 3"))
+        .style("opacity", 0); // Initially hidden
+
     // Single dot for hover
     const focus = svg.append("circle")
         .style("fill", "green")
@@ -112,11 +121,13 @@ export default function drawChart(rawData) {
         .attr("height", height)
         .style("opacity", 0)
         .on("mouseover", function () {
+            focusBar.style("opacity", 1);
             focus.style("opacity", 1);
             focusLayer.style("opacity", 1);
             tooltip.style("opacity", 1);
         })
         .on("mouseout", function () {
+            focusBar.style("opacity", 0);
             focus.style("opacity", 0);
             focusLayer.style("opacity", 0);
             tooltip.style("opacity", 0);
@@ -129,6 +140,8 @@ export default function drawChart(rawData) {
             d0 = data[i - 1],
             d1 = data[i],
             d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+        focusBar.attr("x1", x(d.date))
+            .attr("x2", x(d.date))
         focus.attr("cx", x(d.date))
             .attr("cy", y(d.value));
         focusLayer.attr("cx", x(d.date))
