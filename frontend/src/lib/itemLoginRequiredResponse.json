@@ -1,0 +1,8 @@
+{
+  "banks": [{
+    "name": "Huntington Bank",
+    "accounts": [],
+    "error": "ITEM_LOGIN_REQUIRED"
+  }],
+  "netWorths": []
+}
