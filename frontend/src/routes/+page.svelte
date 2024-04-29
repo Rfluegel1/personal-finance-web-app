@@ -15,9 +15,9 @@
     let isLoading = false;
     let bankHandlers = {}
     let links = [
-        { url: '/logout', label: 'Logout' },
-        { url: '/email-change', label: 'Change Email' },
-        { url: '/password-reset-request', label: 'Change Password' }
+        {url: '/logout', label: 'Logout'},
+        {url: '/email-change', label: 'Change Email'},
+        {url: '/password-reset-request', label: 'Change Password'}
     ];
 
     onMount(async () => {
@@ -193,13 +193,16 @@
         {/if}
         <div id="chart-container">
             <svg id="chart"></svg>
-            <button id="1M" on:click={() => filterData('1M')}>1M</button>
-            <button id="3M" on:click={() => filterData('3M')}>3M</button>
-            <button id="6M" on:click={() => filterData('6M')}>6M</button>
-            <button id="YTD" on:click={() => filterData('YTD')}>YTD</button>
-            <button id="1Y" on:click={() => filterData('1Y')}>1Y</button>
-            <button id="2Y" on:click={() => filterData('2Y')}>2Y</button>
+            <div class="button-container">
+                <button class="range-button" id="1M" on:click={() => filterData('1M')}>1M</button>
+                <button class="range-button" id="3M" on:click={() => filterData('3M')}>3M</button>
+                <button class="range-button" id="6M" on:click={() => filterData('6M')}>6M</button>
+                <button class="range-button" id="YTD" on:click={() => filterData('YTD')}>YTD</button>
+                <button class="range-button" id="1Y" on:click={() => filterData('1Y')}>1Y</button>
+                <button class="range-button" id="2Y" on:click={() => filterData('2Y')}>2Y</button>
+            </div>
         </div>
+        <div class="grey-bar"></div>
         {#if isLoading}
             <div>Loading...</div>
         {/if}
@@ -284,7 +287,7 @@
         background-color: white; /* Or any color fitting your design */
         z-index: 1000; /* Keeps the header above other content */
         padding: 25px 20px; /* Adjust the padding as needed */
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional shadow for visual separation */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow for visual separation */
     }
 
     main {
@@ -305,5 +308,37 @@
 
     .bank-list ul ul { /* Targeting nested ul for accounts specifically */
         padding-left: 1em; /* You can adjust this value to control the indentation */
+    }
+
+    .button-container {
+        display: flex;           /* Enables Flexbox */
+        justify-content: center; /* Center align items horizontally */
+        align-items: center;     /* Center align items vertically */
+        flex-wrap: wrap;         /* Allows buttons to wrap onto the next line if needed */
+    }
+
+    .range-button {
+        margin: 5px; /* Optional: adds some space between the buttons */
+        font-size: .9375rem;
+        background-color: transparent; /* Makes background transparent */
+        border: none;                  /* Removes the border */
+        color: inherit;                /* Inherits the text color from the parent */
+        padding: 5px 10px;             /* Adds some padding */
+        cursor: pointer;               /* Changes the cursor to indicate it's clickable */
+        outline: none;                 /* Removes the outline */
+        transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
+    }
+
+    .range-button:hover, .range-button:focus {
+        background-color: #f0f0f0; /* Light background on hover */
+        color: #333;               /* Darker text color on hover */
+        border-radius: 10px;       /* Optional: adds rounded corners */
+    }
+
+    .grey-bar {
+        height: 8px;        /* Sets the height of the bar */
+        background-color: #edf1f3;; /* Sets the color of the bar to a light grey */
+        width: 100%;         /* Makes the bar extend full width of its container */
+        margin: 20px 0;      /* Adds some vertical space before and after the bar */
     }
 </style>
