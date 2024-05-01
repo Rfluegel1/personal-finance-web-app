@@ -1,12 +1,6 @@
 import * as d3 from "d3";
+import { formatCurrency } from '$lib/formatters';
 
-function formatCurrency(value) {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        maximumFractionDigits: 0,   // No decimal places,
-    }).format(value);
-}
 
 export default function drawChart(rawData) {
     if (rawData.length === 0) {

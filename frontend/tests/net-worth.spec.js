@@ -112,23 +112,30 @@ test('should use link flow to add bank and accounts and transactions', async ({p
             await addHuntingtonBank(page);
 
             // then data is displayed with graph
-            await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
-            await page.click('button[id="Huntington Bank-button"]')
-
+            await expect(page.getByRole('heading', { name: 'Assets' })).toBeVisible({timeout: 10000});
             await expect(page.locator('text="-$53,501"')).toBeVisible();
-
-            let accountsWithTransactions = ['Plaid Checking', 'Plaid Saving', 'Plaid CD', 'Plaid Credit Card', 'Plaid Money Market']
-            let accountsWithoutTransactions = ['Plaid IRA', 'Plaid 401k', 'Plaid Student Loan', 'Plaid Mortgage']
-
-            for (let account of accountsWithTransactions) {
-                await expect(page.locator(`text="${account}"`)).toBeVisible();
-                await page.click(`button[id="${account}-button"]`)
+            await page.getByRole('button', { name: 'Cash 4 Accounts $' }).click()
+            let cashAccouts = ['Plaid Checking', 'Plaid Saving', 'Plaid CD', 'Plaid Money Market']
+            for (let account of cashAccouts) {
+                await page.getByRole('button', { name: `${account} $` }).click()
                 await expect(page.locator(`table[id="${account}-transactions"]`)).toBeVisible();
             }
 
-            for (let account of accountsWithoutTransactions) {
-                await expect(page.locator(`text="${account}"`)).toBeVisible();
-                await expect(page.locator(`button[id="${account}-button"]`)).not.toBeVisible()
+            await page.getByRole('button', { name: 'Investment 2 Accounts $' }).click()
+            let investmentAccounts = ['Plaid IRA', 'Plaid 401k']
+            for (let account of investmentAccounts) {
+                await page.getByRole('button', { name: `${account} $` }).click()
+                await expect(page.locator(`table[id="${account}-transactions"]`)).not.toBeVisible();
+            }
+
+            await page.getByRole('button', { name: 'Credit 1 Accounts $' }).click()
+            await page.getByRole('button', { name: `Plaid Credit Card $` }).click()
+            await expect(page.locator(`table[id="Plaid Credit Card-transactions"]`)).toBeVisible();
+
+            await page.getByRole('button', { name: 'Loan 2 Accounts $' }).click()
+            let loanAccounts = ['Plaid Student Loan', 'Plaid Mortgage']
+            for (let account of loanAccounts) {
+                await page.getByRole('button', { name: `${account} $` }).click()
                 await expect(page.locator(`table[id="${account}-transactions"]`)).not.toBeVisible();
             }
 
@@ -139,8 +146,7 @@ test('should use link flow to add bank and accounts and transactions', async ({p
             await page.reload()
 
             // then
-            await expect(page.locator('text="Huntington Bank"')).toBeVisible({timeout: 10000});
-            await expect(page.locator('rect')).toBeVisible();
+            await expect(page.getByRole('heading', { name: 'Assets' })).toBeVisible({timeout: 10000});
             await expect(page.locator('svg[id="chart"]')).toBeVisible();
         } finally {
             // cleanup

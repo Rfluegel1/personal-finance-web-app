@@ -3,6 +3,9 @@
     import axios from 'axios';
     import drawChart from "$lib/drawGraph.js";
     import HamburgerMenu from "$lib/HamburgerMenu.svelte";
+    import CategorySummary from "$lib/CategorySummary.svelte";
+    import AccountDetails from "$lib/AccountDetails.svelte";
+    import { formatCurrency } from '$lib/formatters';
     import data from '$lib/overviewResponse.json'
 
     let isEmailVerified = true;
@@ -19,6 +22,10 @@
         {url: '/email-change', label: 'Change Email'},
         {url: '/password-reset-request', label: 'Change Password'}
     ];
+    let cashAccounts = []
+    let investmentAccounts = []
+    let creditAccounts = []
+    let loanAccounts = []
 
     onMount(async () => {
         try {
@@ -67,6 +74,31 @@
         }
     });
 
+    onMount(() => {
+        separateAssetsAndLiabilities();
+    });
+
+    function separateAssetsAndLiabilities() {
+        banks.forEach(bank => {
+            bank.accounts.forEach(account => {
+                if (['depository'].includes(account.type)) {
+                    cashAccounts.push(account)
+                } else if (['investment'].includes(account.type)) {
+                    investmentAccounts.push(account)
+                } else if (['credit'].includes(account.type)) {
+                    creditAccounts.push(account)
+                } else if (['loan'].includes(account.type)) {
+                    loanAccounts.push(account)
+                }
+            })
+        })
+        creditAccounts = creditAccounts
+        loanAccounts = loanAccounts
+        cashAccounts = cashAccounts
+        investmentAccounts = investmentAccounts
+    }
+
+    $: banks, separateAssetsAndLiabilities(banks);
 
     $: banks, createUpdateLinksForErrorBanks(banks);
 
@@ -130,14 +162,6 @@
         } catch (e) {
             error = 'Failed to create update link token'
         }
-    }
-
-    function formatCurrency(value) {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            maximumFractionDigits: 0,   // No decimal places,
-        }).format(value);
     }
 
     function filterData(range) {
@@ -206,62 +230,89 @@
         {#if isLoading}
             <div>Loading...</div>
         {/if}
-        <button id='add-bank' on:click={handler.open()} disabled={!link_token || isLoading}>Add Bank</button>
-        <div class='bank-list'>
-            <ul>
-                {#each banks as bank}
-                    <div class='bank-item'>
-                        <li>
-                            <h2>{bank.name}</h2>
-                            {#if bank.error === 'ITEM_LOGIN_REQUIRED'}
-                                <div class='error' role='alert'>{bank.error}</div>
 
-                                <button id={`${bank.name}-login-button`}
-                                        on:click={bankHandlers[bank.name]?.handler.open()}
-                                        disabled={!bankHandlers[bank.name]?.handler}>
-                                    Authenticate Bank
-                                </button>
-                            {:else}
-                                <button id={`${bank.name}-button`} on:click={() => toggleVisibility(bank.name)}>
-                                    {visibility[bank.name] ? 'Hide' : 'Show'} Accounts
-                                </button>
-                            {/if}
-                            <ul>
-                                {#if visibility[bank.name]}
-                                    {#each bank.accounts as account}
-                                        <li><h3>{account.name}</h3></li>
-                                        {#if account.transactions.length > 0}
-                                            <button id={`${account.name}-button`}
-                                                    on:click={() => toggleVisibility(account.name)}>
-                                                {visibility[account.name] ? 'Hide' : 'Show'} Transactions
-                                            </button>
-                                        {/if}
-                                        {#if visibility[account.name]}
-                                            <table id={`${account.name}-transactions`}>
-                                                <thead>
-                                                <tr>
-                                                    <th>Transaction Value</th>
-                                                    <th>Transaction Date</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {#each account.transactions as transaction}
-                                                    <tr>
-                                                        <td>${transaction.amount.toFixed(2)}</td>
-                                                        <td>{transaction.date}</td>
-                                                    </tr>
-                                                {/each}
-                                                </tbody>
-                                            </table>
-                                        {/if}
-                                    {/each}
-                                {/if}
-                            </ul>
-                        </li>
-                    </div>
-                {/each}
-            </ul>
-        </div>
+        {#if banks.some(bank => bank.error === 'ITEM_LOGIN_REQUIRED')}
+            {#each banks as bank}
+                {#if bank.error === 'ITEM_LOGIN_REQUIRED'}
+                    <h2>{bank.name}</h2>
+                    <div class='error' role='alert'>{bank.error}</div>
+                    <button id={`${bank.name}-login-button`}
+                            on:click={bankHandlers[bank.name]?.handler.open()}
+                            disabled={!bankHandlers[bank.name]?.handler}>
+                        Authenticate Bank
+                    </button>
+                {/if}
+            {/each}
+        {:else}
+            <button id='add-bank' on:click={handler.open()} disabled={!link_token || isLoading}>Add Bank</button>
+            <div class="asset-list">
+                <h2>Assets</h2>
+                <p>{formatCurrency(cashAccounts.concat(investmentAccounts).reduce((accumulator, asset) => accumulator + asset.balances.current, 0))}</p>
+                <CategorySummary
+                        title="Cash"
+                        accountCount={cashAccounts.length}
+                        totalBalance={formatCurrency(cashAccounts.reduce((total, account) => total + account.balances.current, 0))}
+                        onClick={() => toggleVisibility('cash')}
+                />
+                {#if visibility['cash']}
+                    <ul>
+                        {#each cashAccounts as account}
+                            <AccountDetails {account} toggleVisibility={toggleVisibility} isVisible={visibility[account.name]}/>
+                        {/each}
+                    </ul>
+                {/if}
+                <div class="tiny-grey-bar"></div>
+                <CategorySummary
+                        title="Investment"
+                        accountCount={investmentAccounts.length}
+                        totalBalance={formatCurrency(investmentAccounts.reduce((total, account) => total + account.balances.current, 0))}
+                        onClick={() => toggleVisibility('investment')}
+                />
+                {#if visibility['investment']}
+                    <ul>
+                        {#each investmentAccounts as account}
+                            <AccountDetails {account} toggleVisibility={toggleVisibility} isVisible={visibility[account.name]}/>
+                        {/each}
+                    </ul>
+                {/if}
+            </div>
+
+            <div class="grey-bar"></div>
+
+            <div class="asset-list">
+                <h2>Liabilities</h2>
+                <p>{formatCurrency(creditAccounts.concat(loanAccounts).reduce((accumulator, asset) => accumulator + asset.balances.current, 0))}</p>
+                <CategorySummary
+                        title="Credit"
+                        accountCount={creditAccounts.length}
+                        totalBalance={formatCurrency(creditAccounts.reduce((total, account) => total + account.balances.current, 0))}
+                        onClick={() => toggleVisibility('credit')}
+                />
+                {#if visibility['credit']}
+                    <ul>
+                        {#each creditAccounts as account}
+                            <AccountDetails {account} toggleVisibility={toggleVisibility} isVisible={visibility[account.name]}/>
+                        {/each}
+                    </ul>
+                {/if}
+
+                <div class="tiny-grey-bar"></div>
+
+                <CategorySummary
+                        title="Loan"
+                        accountCount={loanAccounts.length}
+                        totalBalance={formatCurrency(loanAccounts.reduce((total, account) => total + account.balances.current, 0))}
+                        onClick={() => toggleVisibility('loan')}
+                />
+                {#if visibility['loan']}
+                    <ul>
+                        {#each loanAccounts as account}
+                            <AccountDetails {account} toggleVisibility={toggleVisibility} isVisible={visibility[account.name]}/>
+                        {/each}
+                    </ul>
+                {/if}
+            </div>
+        {/if}
     {:else}
         <div class='error' role='alert'>Please verify your email address</div>
     {/if}
@@ -301,44 +352,47 @@
         color: red;
     }
 
-    .bank-list ul {
+    ul {
         list-style-type: none; /* Removes bullet points */
         padding-left: 1em; /* Retains indentation */
     }
 
-    .bank-list ul ul { /* Targeting nested ul for accounts specifically */
-        padding-left: 1em; /* You can adjust this value to control the indentation */
-    }
-
     .button-container {
-        display: flex;           /* Enables Flexbox */
+        display: flex; /* Enables Flexbox */
         justify-content: center; /* Center align items horizontally */
-        align-items: center;     /* Center align items vertically */
-        flex-wrap: wrap;         /* Allows buttons to wrap onto the next line if needed */
+        align-items: center; /* Center align items vertically */
+        flex-wrap: wrap; /* Allows buttons to wrap onto the next line if needed */
     }
 
     .range-button {
         margin: 5px; /* Optional: adds some space between the buttons */
         font-size: .9375rem;
         background-color: transparent; /* Makes background transparent */
-        border: none;                  /* Removes the border */
-        color: inherit;                /* Inherits the text color from the parent */
-        padding: 5px 10px;             /* Adds some padding */
-        cursor: pointer;               /* Changes the cursor to indicate it's clickable */
-        outline: none;                 /* Removes the outline */
+        border: none; /* Removes the border */
+        color: inherit; /* Inherits the text color from the parent */
+        padding: 5px 10px; /* Adds some padding */
+        cursor: pointer; /* Changes the cursor to indicate it's clickable */
+        outline: none; /* Removes the outline */
         transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
     }
 
     .range-button:hover, .range-button:focus {
         background-color: #f0f0f0; /* Light background on hover */
-        color: #333;               /* Darker text color on hover */
-        border-radius: 10px;       /* Optional: adds rounded corners */
+        color: #333; /* Darker text color on hover */
+        border-radius: 10px; /* Optional: adds rounded corners */
     }
 
     .grey-bar {
-        height: 8px;        /* Sets the height of the bar */
+        height: 8px; /* Sets the height of the bar */
         background-color: #edf1f3;; /* Sets the color of the bar to a light grey */
-        width: 100%;         /* Makes the bar extend full width of its container */
-        margin: 20px 0;      /* Adds some vertical space before and after the bar */
+        width: 100%; /* Makes the bar extend full width of its container */
+        margin: 20px 0; /* Adds some vertical space before and after the bar */
+    }
+
+    .tiny-grey-bar {
+        height: 1px; /* Sets the height of the bar */
+        background-color: #edf1f3;; /* Sets the color of the bar to a light grey */
+        width: 100%; /* Makes the bar extend full width of its container */
+        margin: 20px 0; /* Adds some vertical space before and after the bar */
     }
 </style>

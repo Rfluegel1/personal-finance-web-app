@@ -1,9 +1,9 @@
 import {Configuration, PlaidApi, PlaidEnvironments} from 'plaid'
 
-const plaidEnvironment = process.env.NODE_ENV === 'development' ? 'sandbox' : 'development'
+// const plaidEnvironment = process.env.NODE_ENV === 'development' ? 'sandbox' : 'development'
 
 const plaidConfiguration = new Configuration({
-    basePath: PlaidEnvironments[plaidEnvironment],
+    basePath: PlaidEnvironments['sandbox'],
     baseOptions: {
         headers: {
             'PLAID-CLIENT-ID': '64fbc6e226a0f70017bcd313',
