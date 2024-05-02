@@ -255,7 +255,8 @@ export default class PlaidService {
             start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
             end_date: getTodaysDateInYYYYMMDD(),
             options: {
-                offset: offset
+                offset: offset,
+                count: 500
             }
         })
     }
@@ -266,7 +267,8 @@ export default class PlaidService {
             start_date: getTwoYearsPreviousTodaysDateInYYYYMMDD(),
             end_date: getTodaysDateInYYYYMMDD(),
             options: {
-                offset: offset
+                offset: offset,
+                count: 500
             }
         } as TransactionsGetRequest)
     }

@@ -149,7 +149,7 @@ export default function drawChart(rawData) {
             .attr("cy", y(d.value));
 
         const rect = document.querySelector('#chart > g > rect').getBoundingClientRect();
-        const chartTop = rect.top;
+        const chartTop = rect.top + window.pageYOffset;
 
         tooltip.html(`<b>${d3.timeFormat('%b %d, %Y')(d.date)}</b><br/>${focusSVG} ${formatCurrency(d.value)}`)
             .style('opacity', 0) // Temporarily hide tooltip to calculate height without showing it
