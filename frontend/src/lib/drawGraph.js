@@ -161,16 +161,7 @@ export default function drawChart(rawData) {
         const tooltipHeight = tooltip.node().offsetHeight;
         const tooltipWidth = tooltip.node().offsetWidth;
 
-        const datePixel = x(d.date);  // Pixel position of the data point within the graph
-        const relativePosition = datePixel / width;  // Fractional position along the width of the graph
-        const adjustment = (relativePosition - 0.5) * tooltipWidth;
-
-        let svgElement = document.querySelector('svg');
-        let svgRect = svgElement.getBoundingClientRect();
-        let absoluteX = svgRect.left + margin.left + datePixel;  // Add the SVG's left position and the margin
-
-
-        tooltip.style('left', `${absoluteX + adjustment}px`)
+        tooltip.style('left', `${event.pageX - (tooltipWidth/2)}px`)
             .style('top', `${chartTop - tooltipHeight}px`) // Position above the rect by the height of the tooltip
             .style('opacity', 1)
             .style('visibility', 'visible'); // Make it visible again
