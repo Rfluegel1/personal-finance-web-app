@@ -2,7 +2,7 @@
 
 ## Description
 
-This project is a clone of the Credit Karma net worth page. It has user management, automated testing, CI/CD, and the net worth view.
+This project is a clone of the Credit Karma net worth page. It has user management, automated testing, CI/CD, and the net worth view integrated with Plaid.
 
 See it live here https://personal-finance-web-app.fly.dev/
 
@@ -13,6 +13,7 @@ See it live here https://personal-finance-web-app.fly.dev/
 - Express
 - Passport
 - TypeORM
+- Plaid
 - Svelte Kit
 - Jest
 - Playwright
