@@ -1,8 +1,10 @@
-# Express Web App Template
+# Personal Finance Web App (Credit Karma Clone)
 
 ## Description
 
-This project is designed to be a starting point for a TypeScript web application with comprehensive testing, including unit, integration, blackbox, e2e, and performance tests. The backend features user management and todo objects, while the frontend includes login, account updates, and a todo list. Additionally, this template includes GitHub action files for continuous integration and deployment, along with dependency updates.
+This project is a clone of the Credit Karma net worth page. It has user management, automated testing, CI/CD, and the net worth view.
+
+See it live here https://personal-finance-web-app.fly.dev/
 
 ## Technology Stack
 
