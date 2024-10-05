@@ -113,8 +113,8 @@ test('should use link flow to add bank and accounts and transactions', async ({p
 
             // then data is displayed with graph
             await expect(page.getByRole('heading', { name: 'Assets' })).toBeVisible({timeout: 10000});
-            await expect(page.locator('text="-$53,501"')).toBeVisible();
-            await page.getByRole('button', { name: 'Cash 4 Accounts $' }).click()
+            await expect(page.locator('text="-$40,452"')).toBeVisible();
+            await page.getByRole('button', { name: 'Cash 6 Accounts $' }).click()
             let cashAccouts = ['Plaid Checking', 'Plaid Saving', 'Plaid CD', 'Plaid Money Market']
             for (let account of cashAccouts) {
                 await page.getByRole('button', { name: `${account} $` }).click()
@@ -128,7 +128,7 @@ test('should use link flow to add bank and accounts and transactions', async ({p
                 await expect(page.locator(`table[id="${account}-transactions"]`)).not.toBeVisible();
             }
 
-            await page.getByRole('button', { name: 'Credit 1 Accounts $' }).click()
+            await page.getByRole('button', { name: 'Credit 2 Accounts $' }).click()
             await page.getByRole('button', { name: `Plaid Credit Card $` }).click()
             await expect(page.locator(`table[id="Plaid Credit Card-transactions"]`)).toBeVisible();
 

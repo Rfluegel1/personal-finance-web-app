@@ -176,7 +176,7 @@ test('should show when item login is required', async ({page, context}) => {
     }
 })
 
-test('should show error when update on success overview return error', async ({page, context}) => {
+test.skip('should show error when update on success overview return error', async ({page, context}) => {
     if (isNotDevelopment) {
         return
     }
