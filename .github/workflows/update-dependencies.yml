@@ -1,9 +1,9 @@
 name: Update NPM Dependencies and Test
 
 on:
-    schedule:
-      - cron: '0 3 * * *' # Run daily at 3 AM
-    workflow_dispatch: # Manual trigger
+  schedule:
+    - cron: '0 3 * * *' # Run daily at 3 AM
+  workflow_dispatch: # Manual trigger
 
 jobs:
   update-and-test:
@@ -39,7 +39,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18.16.0
+          node-version: '18.16.0'
 
       - name: Update frontend NPM packages
         working-directory: './frontend'
@@ -61,7 +61,7 @@ jobs:
         working-directory: './backend'
         run: npm run test
 
-      - name: Install playwright
+      - name: Install Playwright
         working-directory: './frontend'
         run: npx playwright install
 
