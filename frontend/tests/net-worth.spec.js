@@ -36,7 +36,7 @@ test('should redirect when user is not logged in', async ({page}) => {
     await expect(page.locator('h1')).toHaveText('Login');
 });
 
-test.skip('user without email verification cannot add banks, and is asked to verify', async ({
+test('user without email verification cannot add banks, and is asked to verify', async ({
                                                                                             page
                                                                                         }) => {
     // given
@@ -51,9 +51,7 @@ test.skip('user without email verification cannot add banks, and is asked to ver
 
         // then
         await expect(page.locator('button[id="add-bank"]')).not.toBeVisible();
-        await expect(page.locator('div[role="alert"]')).toHaveText(
-            'Please verify your email address'
-        );
+        await expect(page.locator('div[role="alert"]', { hasText: 'Please verify your email address' })).toBeVisible();
     } finally {
         // cleanup
         const userId = await logInTestUserWithClient(client, email, 'password12');
