@@ -4,14 +4,22 @@ import axios from 'axios';
 import {wrapper} from 'axios-cookiejar-support';
 import {CookieJar} from 'tough-cookie';
 import {logInTestUserWithClient, logOutUserWithClient} from './helpers/api.js';
-import data from '../tests/overviewResponse.json' assert {type: 'json'};
+import fs from 'fs/promises';
+
+let okBody;
+
+test.beforeAll(async () => {
+    // Dynamically read the JSON file and parse it
+    const jsonData = await fs.readFile('./tests/overviewResponse.json', 'utf8');
+    const data = JSON.parse(jsonData);
+    okBody = JSON.stringify(data);
+});
 
 const jar = new CookieJar();
 const client = wrapper(axios.create({jar, withCredentials: true}));
 
 const isNotDevelopment = process.env.NODE_ENV !== 'development';
 
-const okBody = JSON.stringify(data)
 
 const itemLoginRequiredBody = JSON.stringify({
     banks: [{
