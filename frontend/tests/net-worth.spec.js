@@ -95,7 +95,7 @@ test('should have link to Password Reset Request', async ({page}) => {
     await expect(page.locator('h1')).toHaveText('Password Reset Request');
 });
 
-test.skip('should use link flow to add bank and accounts and transactions', async ({page}) => {
+test('should use link flow to add bank and accounts and transactions', async ({page}) => {
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
         // given
