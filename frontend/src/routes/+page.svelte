@@ -48,22 +48,11 @@
         }
     });
 
-
-    function createUpdateLinksForErrorBanks(banks) {
-        banks.forEach(bank => {
-            if (bank.error === 'ITEM_LOGIN_REQUIRED') {
-                createUpdateLinkToken(bank);
-            }
-        });
-
-    }
-
     onMount(async () => {
         try {
             const linkTokenResponse = await axios.post('/api/create_link_token')
             link_token = linkTokenResponse.data.link_token
             initializePlaid();
-            createUpdateLinksForErrorBanks(banks)
         } catch (e) {
             error = 'Failed to create link token'
         }
@@ -95,8 +84,6 @@
 
     $: banks, separateAssetsAndLiabilities(banks);
 
-    $: banks, createUpdateLinksForErrorBanks(banks);
-
     $: netWorths, drawChart(netWorths);
 
     function initializePlaid() {
@@ -126,37 +113,8 @@
         });
     }
 
-    function initializeUpdatePlaid(bankName) {
-        bankHandlers[bankName].handler = Plaid.create({
-            token: bankHandlers[bankName].link_token,
-            onSuccess: async (public_token, metadata) => {
-                try {
-                    isLoading = true;
-                    await axios.get('/api/overview').then(response => {
-                        banks = response.data.banks
-                        netWorths = response.data.netWorths
-                    })
-                } catch (e) {
-                    error = 'Failed to get overview'
-                } finally {
-                    isLoading = false;
-                }
-            },
-        });
-    }
-
     function toggleVisibility(name) {
         visibility[name] = !visibility[name]
-    }
-
-    async function createUpdateLinkToken(bank) {
-        try {
-            let response = await axios.post('/api/create_update_link_token', {itemId: bank.itemId})
-            bankHandlers[bank.name] = {link_token: response.data.link_token, handler: null}
-            initializeUpdatePlaid(bank.name)
-        } catch (e) {
-            error = 'Failed to create update link token'
-        }
     }
 
     function filterData(range) {
@@ -225,20 +183,6 @@
         {#if isLoading}
             <div>Loading...</div>
         {/if}
-
-        {#if banks.some(bank => bank.error === 'ITEM_LOGIN_REQUIRED')}
-            {#each banks as bank}
-                {#if bank.error === 'ITEM_LOGIN_REQUIRED'}
-                    <h2>{bank.name}</h2>
-                    <div class='error' role='alert'>{bank.error}</div>
-                    <button id={`${bank.name}-login-button`}
-                            on:click={bankHandlers[bank.name]?.handler.open()}
-                            disabled={!bankHandlers[bank.name]?.handler}>
-                        Authenticate Bank
-                    </button>
-                {/if}
-            {/each}
-        {:else}
             <button id='add-bank' on:click={handler.open()} disabled={!link_token || isLoading}>Add Bank</button>
             <div class="asset-list">
                 <h2>Assets</h2>
@@ -307,7 +251,6 @@
                     </ul>
                 {/if}
             </div>
-        {/if}
     {:else}
         <div class='error' role='alert'>Please verify your email address</div>
     {/if}
