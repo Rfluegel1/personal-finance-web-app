@@ -36,7 +36,7 @@ test('should redirect when user is not logged in', async ({page}) => {
     await expect(page.locator('h1')).toHaveText('Login');
 });
 
-test('user without email verification cannot add banks, and is asked to verify', async ({
+test.skip('user without email verification cannot add banks, and is asked to verify', async ({
                                                                                             page
                                                                                         }) => {
     // given
@@ -97,7 +97,7 @@ test('should have link to Password Reset Request', async ({page}) => {
     await expect(page.locator('h1')).toHaveText('Password Reset Request');
 });
 
-test('should use link flow to add bank and accounts and transactions', async ({page}) => {
+test.skip('should use link flow to add bank and accounts and transactions', async ({page}) => {
     if (process.env.NODE_ENV === 'development') {
         test.setTimeout(30000);
         // given

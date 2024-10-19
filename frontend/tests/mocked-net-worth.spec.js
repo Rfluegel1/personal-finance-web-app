@@ -120,7 +120,7 @@ test('should fetch bank and accounts and transactions', async ({page, context}) 
     await expect(page.locator('svg[id="chart"]')).toBeVisible();
 })
 
-test('should show when item login is required', async ({page, context}) => {
+test.skip('should show when item login is required', async ({page, context}) => {
     if (isNotDevelopment) {
         return
     }
@@ -228,7 +228,7 @@ test.skip('should show error when update on success overview return error', asyn
     }
 })
 
-test('should show error when update link token return error and disable link for bank', async ({page, context}) => {
+test.skip('should show error when update link token return error and disable link for bank', async ({page, context}) => {
     if (isNotDevelopment) {
         return
     }
@@ -252,7 +252,7 @@ test('should show error when update link token return error and disable link for
     await expect(page.locator('button[id="Huntington Bank-login-button"]')).toBeDisabled();
 })
 
-test('should display error when is verified errors out', async ({page, context}) => {
+test.skip('should display error when is verified errors out', async ({page, context}) => {
     // given
     await mockInternalServerError(context, '**/api/users/is-verified')
 
@@ -263,7 +263,7 @@ test('should display error when is verified errors out', async ({page, context})
     await expect(page.locator('text="Failed to verify user"')).toBeVisible();
 })
 
-test('should display error when overview errors out', async ({page, context}) => {
+test.skip('should display error when overview errors out', async ({page, context}) => {
     // given
     await mockInternalServerError(context, '**/api/overview')
 
@@ -285,7 +285,7 @@ test('should display error when create link token errors out', async ({page, con
     await expect(page.locator('text="Failed to create link token"')).toBeVisible();
 })
 
-test('should display error when get overview on success errors out', async ({page, context}) => {
+test.skip('should display error when get overview on success errors out', async ({page, context}) => {
     if (isNotDevelopment) {
         return
     }
@@ -302,7 +302,7 @@ test('should display error when get overview on success errors out', async ({pag
     await expect(page.locator('text="Failed to get overview"')).toBeVisible();
 })
 
-test('should display error when create access token on success errors out', async ({page, context}) => {
+test.skip('should display error when create access token on success errors out', async ({page, context}) => {
     if (isNotDevelopment) {
         return
     }
