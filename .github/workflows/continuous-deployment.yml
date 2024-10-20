@@ -93,6 +93,10 @@ jobs:
           flyctl auth token $FLY_API_TOKEN
           flyctl deploy -a $APP_NAME
 
+      - name: Run Heartbeat Test (Staging)
+        working-directory: './backend'
+        run: npm run test:staging:heartbeat
+
       - name: Run Blackbox Tests (Staging)
         working-directory: './backend'
         run: npm run test:staging

@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc && node replace-migration-pattern.js",
     "test:staging": "NODE_ENV=staging jest blackbox --runInBand --detectOpenHandles",
+    "test:staging:heartbeat": "NODE_ENV=staging jest heartbeatBlackbox --runInBand --detectOpenHandles --testTimeout=30000",
     "test": "NODE_ENV=development jest --runInBand",
     "dev": "nodemon src/server.ts",
     "start": "node dist/server.js",
