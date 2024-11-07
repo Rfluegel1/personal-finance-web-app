@@ -1,10 +1,9 @@
 name: Update NPM Dependencies and Test
 
 on:
-  schedule:
-    - cron: '0 3 * * *' # Run daily at 3 AM
+#  schedule:
+#    - cron: '0 3 * * *' # Run daily at 3 AM
   workflow_dispatch: # Manual trigger
-
 jobs:
   update-and-test:
     runs-on: ubuntu-latest
