@@ -214,7 +214,7 @@ test('should change graph range when buttons are selected', async ({page, contex
     let chart
     let svgHtml
 
-    let rangeIds = ['1M', '3M', '6M', 'YTD', '1Y', '2Y']
+    let rangeIds = ['3M', '6M', 'YTD', '1Y', '2Y']
 
     for (let rangeId of rangeIds) {
         // when

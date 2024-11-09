@@ -207,4 +207,4 @@ Only manual triggers will run this job. This will deploy main code to staging.
  3. Connect to db 
 ```psql -h your-db-host.fly.dev -p your-db-port -U your-db-user -d your-db-name```
 
-ex. ```psql -h personal-finance-web-app-db.internal -p 5432 -U personal_finance_web_app -d personal_finance_web_app```
+ex. ```psql -h personal-finance-web-app-db-restored.internal -p 5432 -U postgres -d personal_finance_web_app```
